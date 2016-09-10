@@ -1,0 +1,11 @@
+{
+  "name": "shproject",
+  "version": "1.0.0",
+  "description": "Interactive learning environment for programming novices",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Mark Provan <mrp4@st-andrews.ac.uk>",
+  "license": "ISC"
+}
