@@ -4,4 +4,4 @@ function greeter(person: string) {
 
 var user = "Jane User";
 
-console.log(greeter(user))
+console.log(greeter(user));
