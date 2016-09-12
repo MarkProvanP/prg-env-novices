@@ -1,0 +1,20 @@
+#inputDiv {
+  border: 1px solid black;
+  height: 500px;
+  width: 600px;
+}
+
+@keyframes blinker {
+  50% { opacity: 0.0; }
+}
+
+#cursorDiv {
+  width: 2px;
+  height: 10px;
+  background-color: black;
+  display: inline-block;
+}
+
+#cursorDiv.blinking {
+  animation: blinker 1s linear infinite;
+}
