@@ -1,0 +1,35 @@
+$line-height: 30px;
+
+#inputDiv {
+  border: 1px solid black;
+  height: 500px;
+  width: 600px;
+  display: flex;
+  line-height: $line-height;
+}
+
+@keyframes blinker {
+  50% { opacity: 0.0; }
+}
+
+#cursorDiv {
+  width: 2px;
+  height: $line-height;
+  background-color: black;
+  display: inline-block;
+}
+
+#cursorDiv.blinking {
+  animation: blinker 1s linear infinite;
+}
+
+.textDiv {
+  display: inline-block;
+}
+
+.wordDiv {
+  margin-left: 2px;
+  margin-right: 2px;
+  display: inline-block;
+  height: $line-height;
+}
