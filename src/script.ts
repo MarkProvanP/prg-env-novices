@@ -1,27 +1,33 @@
-var inputDiv = document.getElementById("inputDiv");
+let inputDiv : HTMLElement = document.getElementById("inputDiv");
+
+let text : string = "";
+let cursorPosition : number = 0;
+
+let isCursorActive : boolean = false;
+var cursorDiv = document.getElementById("cursorDiv");
 
 inputDiv.onclick = function() {
   toggleCursorActive();
-}
+};
 
-window.onkeyup = function(event) {
+window.onkeyup = function(event : KeyboardEvent) {
   if (isCursorActive) {
-    if (event.key.length == 1) {
+    if (event.key.length === 1) {
       insertText(event.key, cursorPosition);
     } else {
-      if (event.key == 'ArrowLeft') {
+      if (event.key === "ArrowLeft") {
         cursorLeft();
-      } else if (event.key == 'ArrowRight') {
+      } else if (event.key === "ArrowRight") {
         cursorRight();
-      } else if (event.key == 'Backspace') {
+      } else if (event.key === "Backspace") {
         deleteText(cursorPosition - 1, cursorPosition);
       } else {
-        console.log(event.key)
+        console.log(event.key);
       }
     }
     renderText();
   }
-}
+};
 
 function cursorLeft() {
   if (cursorPosition > 0) {
@@ -35,63 +41,52 @@ function cursorRight() {
   }
 }
 
-var text = "";
-var cursorPosition = 0;
-
-var isCursorActive = false;
-var cursorDiv = document.getElementById("cursorDiv");
-
-function insertText(content, position) {
-  beforeCursorString = text.substring(0, cursorPosition);
-  afterCursorString = text.substring(cursorPosition, text.length);
+function insertText(content: string, position : number) {
+  let beforeCursorString : string = text.substring(0, cursorPosition);
+  let afterCursorString : string = text.substring(cursorPosition, text.length);
   text = beforeCursorString + content + afterCursorString;
   cursorPosition++;
 }
 
-function deleteText(from, to) {
+function deleteText(from: number, to: number) {
   if (from < 0) {
     from = 0;
   }
   if (to > text.length) {
     to = text.length;
   }
-  beforeString = text.substring(0, from);
-  afterString = text.substring(to, text.length);
+  let beforeString : string = text.substring(0, from);
+  let afterString : string = text.substring(to, text.length);
   text = beforeString + afterString;
   cursorPosition = from;
 }
 
 function renderText() {
-  console.log('renderText()');
-  console.log('child nodes originally:', inputDiv.childNodes);
-  inputDiv.innerHTML = '';
-  console.log('child nodes now', inputDiv.childNodes)
+  inputDiv.innerHTML = "";
   var beforeCursorString = text.substring(0, cursorPosition);
   var afterCursorString = text.substring(cursorPosition, text.length);
-  
   var beforeCursorNodes = stringToDom(beforeCursorString);
   var afterCursorNodes = stringToDom(afterCursorString);
-  
-  beforeCursorNodes.forEach(function(node) {
-    inputDiv.appendChild(node); 
+  beforeCursorNodes.forEach(function(node: HTMLElement) {
+    inputDiv.appendChild(node);
   });
 
   inputDiv.appendChild(cursorDiv);
 
-  afterCursorNodes.forEach(function(node) {
+  afterCursorNodes.forEach(function(node: HTMLElement) {
     inputDiv.appendChild(node);
   });
 }
 
-function stringToDom(s) {
-  var split = s.split(' ');
-  function wordToNode(word) {
-    var node = document.createElement('div');
+function stringToDom(s: string) {
+  var split = s.split(" ");
+  function wordToNode(word : string) {
+    var node = document.createElement("div");
     node.textContent = word;
-    node.classList.add('wordDiv');
+    node.classList.add("wordDiv");
     return node;
   }
-  return split.map(wordToNode)
+  return split.map(wordToNode);
 }
 
 function toggleCursorActive() {
