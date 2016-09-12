@@ -40,8 +40,6 @@ var cursorPosition = 0;
 
 var isCursorActive = false;
 var cursorDiv = document.getElementById("cursorDiv");
-var textBeforeCursor = document.getElementById("textBeforeCursor");
-var textAfterCursor = document.getElementById("textAfterCursor");
 
 function insertText(content, position) {
   beforeCursorString = text.substring(0, cursorPosition);
@@ -64,23 +62,36 @@ function deleteText(from, to) {
 }
 
 function renderText() {
-  beforeCursorString = text.substring(0, cursorPosition);
-  afterCursorString = text.substring(cursorPosition, text.length);
-  textBeforeCursor.innerHTML = escapeString(beforeCursorString);
-  textAfterCursor.innerHTML = escapeString(afterCursorString);
+  console.log('renderText()');
+  console.log('child nodes originally:', inputDiv.childNodes);
+  inputDiv.innerHTML = '';
+  console.log('child nodes now', inputDiv.childNodes)
+  var beforeCursorString = text.substring(0, cursorPosition);
+  var afterCursorString = text.substring(cursorPosition, text.length);
+  
+  var beforeCursorNodes = stringToDom(beforeCursorString);
+  var afterCursorNodes = stringToDom(afterCursorString);
+  
+  beforeCursorNodes.forEach(function(node) {
+    inputDiv.appendChild(node); 
+  });
+
+  inputDiv.appendChild(cursorDiv);
+
+  afterCursorNodes.forEach(function(node) {
+    inputDiv.appendChild(node);
+  });
 }
 
-function escapeString(s) {
-  var escaped = "";
-  for (var i = 0; i < s.length; i++) {
-    var c = s[i];
-    if (c == ' ') {
-      escaped += '&nbsp;'
-    } else {
-      escaped += c;
-    }
+function stringToDom(s) {
+  var split = s.split(' ');
+  function wordToNode(word) {
+    var node = document.createElement('div');
+    node.textContent = word;
+    node.classList.add('wordDiv');
+    return node;
   }
-  return escaped;
+  return split.map(wordToNode)
 }
 
 function toggleCursorActive() {

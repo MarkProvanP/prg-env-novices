@@ -24,3 +24,10 @@
 .textDiv {
   display: inline-block;
 }
+
+.wordDiv {
+  margin-left: 2px;
+  margin-right: 2px;
+  display: inline-block;
+  height: 20px;
+}
