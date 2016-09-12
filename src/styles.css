@@ -2,6 +2,8 @@
   border: 1px solid black;
   height: 500px;
   width: 600px;
+  display: flex;
+  line-height: 20px;
 }
 
 @keyframes blinker {
@@ -10,11 +12,15 @@
 
 #cursorDiv {
   width: 2px;
-  height: 10px;
+  height: 20px;
   background-color: black;
   display: inline-block;
 }
 
 #cursorDiv.blinking {
   animation: blinker 1s linear infinite;
+}
+
+.textDiv {
+  display: inline-block;
 }
