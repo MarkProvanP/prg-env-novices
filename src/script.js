@@ -15,6 +15,8 @@ window.onkeyup = function(event) {
         cursorRight();
       } else if (event.key == 'Backspace') {
         deleteText(cursorPosition - 1, cursorPosition);
+      } else {
+        console.log(event.key)
       }
     }
     renderText();
@@ -64,8 +66,21 @@ function deleteText(from, to) {
 function renderText() {
   beforeCursorString = text.substring(0, cursorPosition);
   afterCursorString = text.substring(cursorPosition, text.length);
-  textBeforeCursor.textContent = beforeCursorString;
-  textAfterCursor.textContent = afterCursorString;
+  textBeforeCursor.innerHTML = escapeString(beforeCursorString);
+  textAfterCursor.innerHTML = escapeString(afterCursorString);
+}
+
+function escapeString(s) {
+  var escaped = "";
+  for (var i = 0; i < s.length; i++) {
+    var c = s[i];
+    if (c == ' ') {
+      escaped += '&nbsp;'
+    } else {
+      escaped += c;
+    }
+  }
+  return escaped;
 }
 
 function toggleCursorActive() {
