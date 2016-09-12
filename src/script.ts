@@ -1,3 +1,5 @@
+import {Parser, lex} from "./lang";
+
 let inputDiv : HTMLElement = document.getElementById("inputDiv");
 
 let text : string = "";
@@ -9,6 +11,10 @@ var cursorDiv = document.getElementById("cursorDiv");
 inputDiv.onclick = function() {
   toggleCursorActive();
 };
+
+function lexText() {
+  console.log(lex(text));
+}
 
 window.onkeyup = function(event : KeyboardEvent) {
   if (isCursorActive) {
