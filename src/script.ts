@@ -63,30 +63,28 @@ function deleteText(from: number, to: number) {
 
 function renderText() {
   inputDiv.innerHTML = "";
-  var beforeCursorString = text.substring(0, cursorPosition);
-  var afterCursorString = text.substring(cursorPosition, text.length);
-  var beforeCursorNodes = stringToDom(beforeCursorString);
-  var afterCursorNodes = stringToDom(afterCursorString);
-  beforeCursorNodes.forEach(function(node: HTMLElement) {
+  let beforeCursorString : string = text.substring(0, cursorPosition);
+  let afterCursorString : string = text.substring(cursorPosition, text.length);
+  let beforeCursorNodes : Node[] = stringToDom(beforeCursorString);
+  let afterCursorNodes : Node[] = stringToDom(afterCursorString);
+  beforeCursorNodes.forEach((node: Node) => {
     inputDiv.appendChild(node);
   });
 
   inputDiv.appendChild(cursorDiv);
 
-  afterCursorNodes.forEach(function(node: HTMLElement) {
+  afterCursorNodes.forEach((node: Node) => {
     inputDiv.appendChild(node);
   });
 }
 
-function stringToDom(s: string) {
-  var split = s.split(" ");
-  function wordToNode(word : string) {
+function stringToDom(s: string) : Node[] {
+  return s.split(" ").map((word : string) => {
     var node = document.createElement("div");
     node.textContent = word;
     node.classList.add("wordDiv");
     return node;
-  }
-  return split.map(wordToNode);
+  });
 }
 
 function toggleCursorActive() {
