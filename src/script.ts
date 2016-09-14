@@ -1,5 +1,6 @@
-import {Parser, lex} from "./lang";
+import * as lang from "./lang";
 
+let lexedDiv : HTMLElement = document.getElementById("lexedDiv");
 let inputDiv : HTMLElement = document.getElementById("inputDiv");
 
 let text : string = "";
@@ -12,8 +13,8 @@ inputDiv.onclick = function() {
   toggleCursorActive();
 };
 
-function lexText() {
-  console.log(lex(text));
+export function lexText() {
+  console.log(lang.lex(text));
 }
 
 window.onkeyup = function(event : KeyboardEvent) {
@@ -67,7 +68,7 @@ function deleteText(from: number, to: number) {
   cursorPosition = from;
 }
 
-function renderText() {
+export function renderText() {
   inputDiv.innerHTML = "";
   let beforeCursorString : string = text.substring(0, cursorPosition);
   let afterCursorString : string = text.substring(cursorPosition, text.length);
@@ -82,6 +83,9 @@ function renderText() {
   afterCursorNodes.forEach((node: Node) => {
     inputDiv.appendChild(node);
   });
+
+  let lexed : lang.Token[] = lang.lex(text);
+  lexedDiv.textContent = lexed;
 }
 
 function stringToDom(s: string) : Node[] {

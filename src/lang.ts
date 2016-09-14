@@ -85,6 +85,10 @@ export class OperatorToken extends Token {
         return 4;
     }
   }
+
+  toString() : string {
+    return Operator[this.operator];
+  }
 }
 
 export class NumToken extends Token {
@@ -94,6 +98,10 @@ export class NumToken extends Token {
     super();
     this.value = value;
   }
+
+  toString(): string {
+    return this.value;
+  }
 }
 
 export function lex(s: string) : Token[] {
@@ -101,7 +109,7 @@ export function lex(s: string) : Token[] {
   for (let i = 0; i < s.length; i++) {
     let t : Token = null;
     let c = s[i];
-    if (parseInt(c) !== NaN) {
+    if (!isNaN(parseInt(c))) {
       t = new NumToken(parseInt(c));
     } else {
       t = new OperatorToken(charToOperator(c));
