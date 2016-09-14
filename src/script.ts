@@ -2,6 +2,7 @@ import * as lang from "./lang";
 
 let lexedDiv : HTMLElement = document.getElementById("lexedDiv");
 let inputDiv : HTMLElement = document.getElementById("inputDiv");
+let parsedDiv : HTMLElement = document.getElementById("parsedDiv");
 
 let text : string = "";
 let cursorPosition : number = 0;
@@ -85,7 +86,11 @@ export function renderText() {
   });
 
   let lexed : lang.Token[] = lang.lex(text);
-  lexedDiv.textContent = lexed;
+  lexedDiv.textContent = lexed.toString();
+
+  let parser : lang.Parser = new lang.Parser(lexed);
+  let expr : lang.Expression = lang.Expression.parse(parser);
+  parsedDiv.textContent = expr.toString();
 }
 
 function stringToDom(s: string) : Node[] {

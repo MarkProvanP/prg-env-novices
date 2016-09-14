@@ -8,14 +8,16 @@ export abstract class Expression {
     let left : Expression;
     let operator : Operator;
     let right: Expression;
-    left = Expression.parse(p);
-
-    for (i = p.getToken().getPrecedence(); i >= k; i--) {
-      while (p.getToken().getPrecedence() === i) {
-        operator = (<OperatorToken> p.getToken()).operator;
-        p.advanceToken();
-        right = Expression.fraserHanson(i + 1, p);
-        left = new BinaryExpression(left, right, operator);
+    left = PrimaryExpression.parse(p);
+   
+    if (p.hasAnotherToken()) {
+      for (i = p.getToken().getPrecedence(); i >= k; i--) {
+        while (p.hasAnotherToken() && p.getToken().getPrecedence() === i) {
+          operator = (<OperatorToken> p.getToken()).operator;
+          p.advanceToken();
+          right = Expression.fraserHanson(i + 1, p);
+          left = new BinaryExpression(left, right, operator);
+        }
       }
     }
     return left;
@@ -33,6 +35,14 @@ export class BinaryExpression extends Expression {
     this.rightExpr = rightExpr;
     this.operator = operator;
   }
+
+  toString() : string {
+    return "("
+      + this.leftExpr.toString()
+      + Operator[this.operator]
+      + this.rightExpr.toString()
+      + ")";
+  }
 }
 
 export class PrimaryExpression extends Expression {
@@ -41,6 +51,19 @@ export class PrimaryExpression extends Expression {
   constructor(value: number) {
     super();
     this.value = value;
+  }
+
+  static parse(p: Parser) : PrimaryExpression {
+    let staticPrimaryExpression : PrimaryExpression;
+    if (p.getToken() instanceof NumToken) {
+      staticPrimaryExpression = new PrimaryExpression((<NumToken> p.getToken()).value);
+      p.advanceToken();
+    }
+    return staticPrimaryExpression;
+  }
+
+  toString() : string {
+    return String(this.value);
   }
 }
 
@@ -100,7 +123,7 @@ export class NumToken extends Token {
   }
 
   toString(): string {
-    return this.value;
+    return String(this.value);
   }
 }
 
@@ -133,5 +156,9 @@ export class Parser {
 
   advanceToken() {
     this.tokenPosition++;
+  }
+
+  hasAnotherToken() {
+    return this.tokenList.length > this.tokenPosition;
   }
 }
