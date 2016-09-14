@@ -3,10 +3,11 @@ import * as lang from "./lang";
 let lexedDiv : HTMLElement = document.getElementById("lexedDiv");
 let inputDiv : HTMLElement = document.getElementById("inputDiv");
 let parsedDiv : HTMLElement = document.getElementById("parsedDiv");
+let astDiv : HTMLElement = document.getElementById("astDiv");
 
 let text : string = "";
 let cursorPosition : number = 0;
-
+let expr : lang.Expression; 
 let isCursorActive : boolean = false;
 var cursorDiv = document.getElementById("cursorDiv");
 
@@ -34,6 +35,7 @@ inputDiv.onkeyup = function(event : KeyboardEvent) {
       }
     }
     renderText();
+    renderAST();
   }
 };
 
@@ -89,8 +91,13 @@ export function renderText() {
   lexedDiv.textContent = lexed.toString();
 
   let parser : lang.Parser = new lang.Parser(lexed);
-  let expr : lang.Expression = lang.Expression.parse(parser);
+  expr = lang.Expression.parse(parser);
   parsedDiv.textContent = expr.toString();
+}
+
+export function renderAST() {
+  astDiv.innerHTML = "";
+  astDiv.appendChild(expr.toDOM());
 }
 
 function stringToDom(s: string) : Node[] {

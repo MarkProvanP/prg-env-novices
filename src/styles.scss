@@ -33,3 +33,25 @@ $line-height: 30px;
   display: inline-block;
   height: $line-height;
 }
+
+.binaryExprDiv {
+  display: flex;
+  background-color: #FFFF88;
+  padding: 5px;
+  border: 1px solid black;
+  margin: 2px;
+}
+
+.primaryExprDiv {
+  background-color: #88FFFF;
+  padding: 2px;
+  border: 1px solid black;
+  margin: 2px;
+}
+
+.operatorDiv {
+  background-color: #FF88FF;
+  padding: 3px;
+  border: 1px solid black;
+  margin: 2px;
+}

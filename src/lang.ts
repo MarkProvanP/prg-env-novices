@@ -3,6 +3,8 @@ export abstract class Expression {
     return Expression.fraserHanson(1, p);
   };
 
+  abstract toDOM() : HTMLElement;
+
   static fraserHanson(k: number, p: Parser) : Expression {
     let i : number;
     let left : Expression;
@@ -43,6 +45,24 @@ export class BinaryExpression extends Expression {
       + this.rightExpr.toString()
       + ")";
   }
+
+  toDOM() : HTMLElement {
+    let rootElement : HTMLElement = document.createElement("div");
+    rootElement.classList.add("binaryExprDiv"); 
+    
+    let leftElementDiv : HTMLElement = this.leftExpr.toDOM();
+    let rightElementDiv : HTMLElement = this.rightExpr.toDOM();
+
+    let operatorDiv : HTMLElement = document.createElement("div");
+    operatorDiv.classList.add("operatorDiv");
+    operatorDiv.textContent = operatorToChar(this.operator);
+
+    rootElement.appendChild(leftElementDiv);
+    rootElement.appendChild(operatorDiv);
+    rootElement.appendChild(rightElementDiv);
+
+    return rootElement;
+  }
 }
 
 export class PrimaryExpression extends Expression {
@@ -65,6 +85,13 @@ export class PrimaryExpression extends Expression {
   toString() : string {
     return String(this.value);
   }
+
+  toDOM() : HTMLElement {
+    let primaryExprDiv : HTMLElement = document.createElement("div");
+    primaryExprDiv.classList.add("primaryExprDiv");
+    primaryExprDiv.textContent = String(this.value);
+    return primaryExprDiv;
+  }
 }
 
 
@@ -81,6 +108,15 @@ function charToOperator(c: string) {
     case "-": return Operator.Subtract;
     case "*": return Operator.Multiply;
     case "/": return Operator.Divide;
+  }
+}
+
+function operatorToChar(o : Operator) {
+  switch (o) {
+    case Operator.Add: return "+";
+    case Operator.Subtract: return "-";
+    case Operator.Multiply: return "*";
+    case Operator.Divide: return "/";
   }
 }
 
