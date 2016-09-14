@@ -73,10 +73,13 @@ export class PrimaryExpression extends Expression {
     this.value = value;
   }
 
-  static parse(p: Parser) : PrimaryExpression {
-    let staticPrimaryExpression : PrimaryExpression;
+  static parse(p: Parser) : Expression {
+    let staticPrimaryExpression : Expression;
     if (p.getToken() instanceof NumToken) {
       staticPrimaryExpression = new PrimaryExpression((<NumToken> p.getToken()).value);
+      p.advanceToken();
+    } else {
+      staticPrimaryExpression = new EmptyExpression();
       p.advanceToken();
     }
     return staticPrimaryExpression;
@@ -94,6 +97,18 @@ export class PrimaryExpression extends Expression {
   }
 }
 
+export class EmptyExpression extends Expression {
+  toString() : string {
+    return "_";
+  }
+
+  toDOM() : HTMLElement {
+    let emptyExprDiv : HTMLElement = document.createElement("div");
+    emptyExprDiv.classList.add("emptyExprDiv");
+    emptyExprDiv.textContent = '_';
+    return emptyExprDiv;
+  }
+}
 
 export enum Operator {
   Add,
