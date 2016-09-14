@@ -18,7 +18,7 @@ export function lexText() {
   console.log(lang.lex(text));
 }
 
-window.onkeyup = function(event : KeyboardEvent) {
+inputDiv.onkeyup = function(event : KeyboardEvent) {
   if (isCursorActive) {
     if (event.key.length === 1) {
       insertText(event.key, cursorPosition);
