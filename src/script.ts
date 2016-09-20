@@ -24,10 +24,6 @@ export function lexText() {
   console.log(lang.lex(text));
 }
 
-function selectExpr(expr : lang.ASTNode) : void {
-  selectedASTNode = expr;
-}
-
 export class ASTNodeDivMap {
   private divToASTNode : WeakMap<HTMLElement, lang.ASTNode>;
   private astNodeToDiv : WeakMap<lang.ASTNode, HTMLElement>;
@@ -74,10 +70,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
       }
     } else {
       if (event.key === "Backspace") {
-        console.log('delete this');
         if (parent) {
-          console.log('parent is', parent);
-          console.log('node is', selectedASTNode);
           let newEmpty = new lang.EmptyExpression();
           parent.replaceASTNode(selectedASTNode, newEmpty);
           selectedASTNode = newEmpty;
@@ -141,17 +134,26 @@ function deleteText(from: number, to: number) {
 }
 
 function astNodeDivOnclick(event: MouseEvent) {
-  console.log(event);
-  console.log(expr);
   event.stopPropagation();
-  var existing = document.querySelector('.selectedASTNode')
-  if (existing) {
-    existing.classList.remove('selectedASTNode');
-  }
   let selectedDiv = <HTMLElement> event.target;
-  selectedASTNode = theDivASTNodeMap.getASTNode(selectedDiv);
-  selectedDiv.classList.add('selectedASTNode');
-  console.log('parent', selectedASTNode.parent);
+  let found  = theDivASTNodeMap.getASTNode(selectedDiv);
+  selectASTNode(found);
+}
+
+function selectASTNode(node : lang.ASTNode) : void {
+  if (selectedASTNode) {
+    deselectASTNode(selectedASTNode);
+  }
+  selectedASTNode = node;
+  let nodeDiv = theDivASTNodeMap.getDiv(node);
+  nodeDiv.classList.add('selectedASTNode');
+}
+
+function deselectASTNode(node: lang.ASTNode) {
+  let nodeDiv = theDivASTNodeMap.getDiv(node);
+  if (nodeDiv) {
+    nodeDiv.classList.remove('selectedASTNode');
+  }
 }
 
 export function renderText() {
