@@ -13,7 +13,7 @@ var cursorDiv = document.getElementById("cursorDiv");
 
 let selectedASTNode : lang.ASTNode;
 
-let astNodeDivMap : WeakMap<HTMLElement, lang.ASTNode>;
+let theDivASTNodeMap : ASTNodeDivMap;
 
 inputDiv.onclick = function() {
   toggleCursorActive();
@@ -25,6 +25,39 @@ export function lexText() {
 
 function selectExpr(expr : lang.ASTNode) : void {
   selectedASTNode = expr;
+}
+
+export class ASTNodeDivMap {
+  private divToASTNode : WeakMap<HTMLElement, lang.ASTNode>;
+  private astNodeToDiv : WeakMap<lang.ASTNode, HTMLElement>;
+
+  constructor() {
+    this.divToASTNode = new WeakMap<HTMLElement, lang.ASTNode>();
+    this.astNodeToDiv = new WeakMap<lang.ASTNode, HTMLElement>();
+  }
+
+  addNodeDiv(node: lang.ASTNode, div: HTMLElement) {
+    this.divToASTNode.set(div, node);
+    this.astNodeToDiv.set(node, div);
+  }
+
+  addDivNode(div: HTMLElement, node: lang.ASTNode) {
+    this.addNodeDiv(node, div);
+  }
+
+  removeASTNode(node: lang.ASTNode) {
+    let div = this.astNodeToDiv.get(node);
+    this.astNodeToDiv.delete(node);
+    this.divToASTNode.delete(div);
+  }
+
+  getDiv(node: lang.ASTNode) {
+    return this.astNodeToDiv.get(node);
+  }
+
+  getASTNode(div: HTMLElement) {
+    return this.divToASTNode.get(div); 
+  }
 }
 
 astDiv.onkeydown = function(event: KeyboardEvent) {
@@ -114,8 +147,9 @@ function astNodeDivOnclick(event: MouseEvent) {
   if (existing) {
     existing.classList.remove('selectedASTNode');
   }
-  selectedASTNode = astNodeDivMap.get(event.target);
-  event.target.classList.add('selectedASTNode');
+  let selectedDiv = <HTMLElement> event.target;
+  selectedASTNode = theDivASTNodeMap.getASTNode(selectedDiv);
+  selectedDiv.classList.add('selectedASTNode');
   console.log('parent', selectedASTNode.parent);
 }
 
@@ -145,9 +179,9 @@ export function renderText() {
 }
 
 export function renderAST() {
-  astNodeDivMap = new WeakMap<HTMLElement, lang.ASTNode>();
+  theDivASTNodeMap = new ASTNodeDivMap();
   astDiv.innerHTML = "";
-  astDiv.appendChild(expr.toDOM(astNodeDivMap));
+  astDiv.appendChild(expr.toDOM(theDivASTNodeMap));
   astDiv.onclick = astNodeDivOnclick;
 }
 

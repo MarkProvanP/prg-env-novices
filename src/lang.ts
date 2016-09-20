@@ -1,3 +1,5 @@
+import { ASTNodeDivMap } from "./script";
+
 export interface ParentASTNode {
   replaceASTNode(original: ASTNode, replacement: ASTNode) : void;
 }
@@ -7,7 +9,7 @@ export abstract class ASTNode {
 
   abstract setParent(parent: ParentASTNode);
 
-  abstract toDOM(astNodeDivMap: WeakMap<HTMLElement, ASTNode>) : HTMLElement;
+  abstract toDOM(astNodeDivMap: ASTNodeDivMap) : HTMLElement;
 }
 
 export abstract class Expression extends ASTNode {
@@ -15,7 +17,7 @@ export abstract class Expression extends ASTNode {
     return Expression.fraserHanson(1, p);
   };
 
-  abstract toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement;
+  abstract toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement;
 
   static fraserHanson(k: number, p: Parser) : Expression {
     let i : number;
@@ -74,7 +76,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
       + ")";
   }
 
-  toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement {
+  toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let rootElement : HTMLElement = document.createElement("div");
     rootElement.classList.add("binaryExprDiv"); 
     
@@ -89,7 +91,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     rootElement.appendChild(operatorDiv);
     rootElement.appendChild(rightElementDiv);
 
-    astNodeDivMap.set(rootElement, this);
+    astNodeDivMap.addDivNode(rootElement, this);
 
     return rootElement;
   }
@@ -123,12 +125,12 @@ export class PrimaryExpression extends Expression {
     return String(this.value);
   }
 
-  toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement {
+  toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let primaryExprDiv : HTMLElement = document.createElement("div");
     primaryExprDiv.classList.add("primaryExprDiv");
     primaryExprDiv.textContent = String(this.value);
 
-    astNodeDivMap.set(primaryExprDiv, this);
+    astNodeDivMap.addDivNode(primaryExprDiv, this);
     
     return primaryExprDiv;
   }
@@ -143,12 +145,12 @@ export class EmptyExpression extends Expression {
     this.parent = parent;
   }
 
-  toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement {
+  toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let emptyExprDiv : HTMLElement = document.createElement("div");
     emptyExprDiv.classList.add("emptyExprDiv");
     emptyExprDiv.textContent = '_';
 
-    astNodeDivMap.set(emptyExprDiv, this);
+    astNodeDivMap.addDivNode(emptyExprDiv, this);
 
     return emptyExprDiv;
   }
