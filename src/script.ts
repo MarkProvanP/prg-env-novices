@@ -7,6 +7,7 @@ let astDiv : HTMLElement = document.getElementById("astDiv");
 
 let text : string = "";
 let cursorPosition : number = 0;
+let rootASTNode : lang.RootASTNode;
 let expr : lang.ASTNode; 
 let isCursorActive : boolean = false;
 var cursorDiv = document.getElementById("cursorDiv");
@@ -169,19 +170,23 @@ export function renderText() {
     inputDiv.appendChild(node);
   });
 
+  lexAndParse();
+}
+
+function lexAndParse() {
   let lexed : lang.Token[] = lang.lex(text);
   lexedDiv.textContent = lexed.toString();
 
   let parser : lang.Parser = new lang.Parser(lexed);
   expr = lang.Expression.parse(parser);
-  expr.setParent(null);
+  rootASTNode = new lang.RootASTNode(expr);
   parsedDiv.textContent = expr.toString();
 }
 
 export function renderAST() {
   theDivASTNodeMap = new ASTNodeDivMap();
   astDiv.innerHTML = "";
-  astDiv.appendChild(expr.toDOM(theDivASTNodeMap));
+  astDiv.appendChild(rootASTNode.toDOM(theDivASTNodeMap));
   astDiv.onclick = astNodeDivOnclick;
 }
 

@@ -1,5 +1,27 @@
 import { ASTNodeDivMap } from "./script";
 
+export class RootASTNode implements ParentASTNode {
+  child: ASTNode;  
+
+  constructor(child: ASTNode) {
+    this.child = child;
+    this.child.setParent(this);
+  }
+
+  replaceASTNode(original: ASTNode, replacement: ASTNode) {
+    if (this.child === original) {
+      this.child = replacement;
+      this.child.setParent(this);
+    }
+  }
+
+  toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
+    let rootDiv = document.createElement("div");
+    rootDiv.appendChild(this.child.toDOM(astNodeDivMap));
+    return rootDiv;
+  }
+}
+
 export interface ParentASTNode {
   replaceASTNode(original: ASTNode, replacement: ASTNode) : void;
 }
