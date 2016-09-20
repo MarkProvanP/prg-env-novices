@@ -4,6 +4,8 @@ let lexedDiv : HTMLElement = document.getElementById("lexedDiv");
 let inputDiv : HTMLElement = document.getElementById("inputDiv");
 let parsedDiv : HTMLElement = document.getElementById("parsedDiv");
 let astDiv : HTMLElement = document.getElementById("astDiv");
+let astCursorDiv : HTMLElement = document.createElement("div");
+astCursorDiv.id = "astCursorDiv";
 
 let text : string = "";
 let cursorPosition : number = 0;
@@ -69,11 +71,19 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         parent.replaceASTNode(selectedASTNode, newExpr);
       }
     } else {
-      if (event.key === "Backspace") {
-        if (parent) {
-          let newEmpty = new lang.EmptyExpression();
-          parent.replaceASTNode(selectedASTNode, newEmpty);
-          selectedASTNode = newEmpty;
+      if (event.key.length === 1) {
+        let input = selectedASTNode.getText() + event.key;
+        let tokens = lang.lex(input);
+        let p = new lang.Parser(tokens);
+        let newExpr = lang.Expression.parse(p);
+        parent.replaceASTNode(selectedASTNode, newExpr);
+      } else {
+        if (event.key === "Backspace") {
+          if (parent) {
+            let newEmpty = new lang.EmptyExpression();
+            parent.replaceASTNode(selectedASTNode, newEmpty);
+            selectedASTNode = newEmpty;
+          }
         }
       }
     }
@@ -147,6 +157,7 @@ function selectASTNode(node : lang.ASTNode) : void {
   selectedASTNode = node;
   let nodeDiv = theDivASTNodeMap.getDiv(node);
   nodeDiv.classList.add('selectedASTNode');
+  nodeDiv.appendChild(astCursorDiv);
 }
 
 function deselectASTNode(node: lang.ASTNode) {

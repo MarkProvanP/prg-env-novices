@@ -32,6 +32,8 @@ export abstract class ASTNode {
   abstract setParent(parent: ParentASTNode);
 
   abstract toDOM(astNodeDivMap: ASTNodeDivMap) : HTMLElement;
+  
+  abstract getText(): string;
 }
 
 export abstract class Expression extends ASTNode {
@@ -98,6 +100,12 @@ export class BinaryExpression extends Expression implements ParentASTNode {
       + ")";
   }
 
+  getText() {
+    return this.leftExpr.getText()
+      + operatorToChar(this.operator)
+      + this.rightExpr.getText();
+  }
+
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let rootElement : HTMLElement = document.createElement("div");
     rootElement.classList.add("binaryExprDiv"); 
@@ -147,6 +155,10 @@ export class PrimaryExpression extends Expression {
     return String(this.value);
   }
 
+  getText() : string {
+    return String(this.value);
+  }
+
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let primaryExprDiv : HTMLElement = document.createElement("div");
     primaryExprDiv.classList.add("primaryExprDiv");
@@ -176,6 +188,8 @@ export class EmptyExpression extends Expression {
 
     return emptyExprDiv;
   }
+
+  getText() : string { return ""; }
 }
 
 export enum Operator {

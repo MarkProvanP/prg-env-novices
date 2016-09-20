@@ -29,6 +29,13 @@ $line-height: 30px;
   animation: blinker 1s linear infinite;
 }
 
+#astCursorDiv {
+  width: 2px;
+  height: 15px;
+  background-color: black;
+  animation: blinker 1s linear infinite;
+}
+
 .textDiv {
   display: inline-block;
 }
