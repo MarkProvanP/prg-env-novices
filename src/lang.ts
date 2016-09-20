@@ -20,10 +20,15 @@ export class RootASTNode implements ParentASTNode {
     rootDiv.appendChild(this.child.toDOM(astNodeDivMap));
     return rootDiv;
   }
+
+  getFirstEmpty(): EmptyExpression {
+    return this.child.getFirstEmpty();
+  }
 }
 
 export interface ParentASTNode {
   replaceASTNode(original: ASTNode, replacement: ASTNode) : void;
+  getFirstEmpty(): EmptyExpression;
 }
 
 export abstract class ASTNode {
@@ -34,6 +39,8 @@ export abstract class ASTNode {
   abstract toDOM(astNodeDivMap: ASTNodeDivMap) : HTMLElement;
   
   abstract getText(): string;
+
+  abstract getFirstEmpty(): EmptyExpression;
 }
 
 export abstract class Expression extends ASTNode {
@@ -106,6 +113,20 @@ export class BinaryExpression extends Expression implements ParentASTNode {
       + this.rightExpr.getText();
   }
 
+  getFirstEmpty(): Expression {
+    if (this.leftExpr instanceof EmptyExpression) {
+      return this.leftExpr;
+    }
+    let l = this.leftExpr.getFirstEmpty();
+    if (l) { return l; }
+    if (this.rightExpr instanceof EmptyExpression) {
+      return this.rightExpr;
+    }
+    let r = this.rightExpr.getFirstEmpty();
+    if (r) { return r; };
+    return null;
+  }
+
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let rootElement : HTMLElement = document.createElement("div");
     rootElement.classList.add("binaryExprDiv"); 
@@ -159,6 +180,8 @@ export class PrimaryExpression extends Expression {
     return String(this.value);
   }
 
+  getFirstEmpty() { return null; }
+
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let primaryExprDiv : HTMLElement = document.createElement("div");
     primaryExprDiv.classList.add("primaryExprDiv");
@@ -188,6 +211,8 @@ export class EmptyExpression extends Expression {
 
     return emptyExprDiv;
   }
+
+  getFirstEmpty() { return this; };
 
   getText() : string { return ""; }
 }

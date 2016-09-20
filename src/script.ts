@@ -77,6 +77,9 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         let p = new lang.Parser(tokens);
         let newExpr = lang.Expression.parse(p);
         parent.replaceASTNode(selectedASTNode, newExpr);
+        let firstEmptyExpr = parent.getFirstEmpty();
+        console.log(firstEmptyExpr);
+        selectASTNode(firstEmptyExpr);
       } else {
         if (event.key === "Backspace") {
           if (parent) {
