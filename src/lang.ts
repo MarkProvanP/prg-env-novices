@@ -1,38 +1,36 @@
-export abstract class ASTNode {
-  parent: ASTNode;
+export interface ParentASTNode {
+  deleteChild(child: ASTNode) : void;
+}
 
-  constructor(parent: ASTNode) {
-    this.parent = parent;
-  }
+export abstract class ASTNode {
+  parent: ParentASTNode;
+
+  abstract setParent(parent: ParentASTNode);
 
   abstract toDOM(astNodeDivMap: WeakMap<HTMLElement, ASTNode>) : HTMLElement;
 }
 
 export abstract class Expression extends ASTNode {
-  static parse(p: Parser, parent: ASTNode) : Expression {
-    return Expression.fraserHanson(1, p, parent);
+  static parse(p: Parser) : Expression {
+    return Expression.fraserHanson(1, p);
   };
-
-  constructor(parent: ASTNode) {
-    super(parent);
-  }
 
   abstract toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement;
 
-  static fraserHanson(k: number, p: Parser, parent: ASTNode) : Expression {
+  static fraserHanson(k: number, p: Parser) : Expression {
     let i : number;
     let left : Expression;
     let operator : Operator;
     let right: Expression;
-    left = PrimaryExpression.parse(p, parent);
+    left = PrimaryExpression.parse(p);
    
     if (p.hasAnotherToken()) {
       for (i = p.getToken().getPrecedence(); i >= k; i--) {
         while (p.hasAnotherToken() && p.getToken().getPrecedence() === i) {
           operator = (<OperatorToken> p.getToken()).operator;
           p.advanceToken();
-          right = Expression.fraserHanson(i + 1, p, parent);
-          left = new BinaryExpression(parent, left, right, operator);
+          right = Expression.fraserHanson(i + 1, p);
+          left = new BinaryExpression(left, right, operator);
         }
       }
     }
@@ -40,16 +38,32 @@ export abstract class Expression extends ASTNode {
   }
 }
 
-export class BinaryExpression extends Expression {
+export class BinaryExpression extends Expression implements ParentASTNode {
   leftExpr : Expression;
   rightExpr : Expression;
   operator: Operator;
 
-  constructor(parent: ASTNode, leftExpr: Expression, rightExpr: Expression, operator: Operator) {
-    super(parent);
+  constructor(leftExpr: Expression, rightExpr: Expression, operator: Operator) {
+    super();
     this.leftExpr = leftExpr;
     this.rightExpr = rightExpr;
     this.operator = operator;
+  }
+
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+    this.leftExpr.setParent(this);
+    this.rightExpr.setParent(this);
+  }
+
+  deleteChild(child: ASTNode) {
+    if (child === this.leftExpr) {
+      this.leftExpr = new EmptyExpression();
+      this.leftExpr.setParent(this);
+    } else if (child == this.rightExpr) {
+      this.rightExpr = new EmptyExpression();
+      this.rightExpr.setParent(this);
+    }
   }
 
   toString() : string {
@@ -84,18 +98,22 @@ export class BinaryExpression extends Expression {
 export class PrimaryExpression extends Expression {
   value: number;
 
-  constructor(parent: ASTNode, value: number) {
-    super(parent);
+  constructor(value: number) {
+    super();
     this.value = value;
   }
 
-  static parse(p: Parser, parent: ASTNode) : Expression {
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+  }
+
+  static parse(p: Parser) : Expression {
     let staticPrimaryExpression : Expression;
     if (p.getToken() instanceof NumToken) {
-      staticPrimaryExpression = new PrimaryExpression(parent, (<NumToken> p.getToken()).value);
+      staticPrimaryExpression = new PrimaryExpression((<NumToken> p.getToken()).value);
       p.advanceToken();
     } else {
-      staticPrimaryExpression = new EmptyExpression(parent);
+      staticPrimaryExpression = new EmptyExpression();
       p.advanceToken();
     }
     return staticPrimaryExpression;
@@ -121,8 +139,8 @@ export class EmptyExpression extends Expression {
     return "_";
   }
 
-  constructor(parent: ASTNode) {
-    super(parent);
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
   }
 
   toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement {

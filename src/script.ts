@@ -31,6 +31,14 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
   if (selectedASTNode) {
     if (event.key === "Backspace") {
       console.log('delete this');
+      let parent : lang.ParentASTNode = selectedASTNode.parent
+      if (parent) {
+        console.log('parent is', parent);
+        console.log('node is', selectedASTNode);
+        parent.deleteChild(selectedASTNode);
+        selectedASTNode = null;
+        renderAST();
+      }
     }
   }
 }
@@ -121,6 +129,7 @@ export function renderText() {
 
   let parser : lang.Parser = new lang.Parser(lexed);
   expr = lang.Expression.parse(parser);
+  expr.setParent(null);
   parsedDiv.textContent = expr.toString();
 }
 
