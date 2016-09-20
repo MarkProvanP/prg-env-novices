@@ -1,24 +1,38 @@
-export abstract class Expression {
-  static parse(p: Parser) : Expression {
-    return Expression.fraserHanson(1, p);
+export abstract class ASTNode {
+  parent: ASTNode;
+
+  constructor(parent: ASTNode) {
+    this.parent = parent;
+  }
+
+  abstract toDOM(astNodeDivMap: WeakMap<HTMLElement, ASTNode>) : HTMLElement;
+}
+
+export abstract class Expression extends ASTNode {
+  static parse(p: Parser, parent: ASTNode) : Expression {
+    return Expression.fraserHanson(1, p, parent);
   };
 
-  abstract toDOM() : HTMLElement;
+  constructor(parent: ASTNode) {
+    super(parent);
+  }
 
-  static fraserHanson(k: number, p: Parser) : Expression {
+  abstract toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement;
+
+  static fraserHanson(k: number, p: Parser, parent: ASTNode) : Expression {
     let i : number;
     let left : Expression;
     let operator : Operator;
     let right: Expression;
-    left = PrimaryExpression.parse(p);
+    left = PrimaryExpression.parse(p, parent);
    
     if (p.hasAnotherToken()) {
       for (i = p.getToken().getPrecedence(); i >= k; i--) {
         while (p.hasAnotherToken() && p.getToken().getPrecedence() === i) {
           operator = (<OperatorToken> p.getToken()).operator;
           p.advanceToken();
-          right = Expression.fraserHanson(i + 1, p);
-          left = new BinaryExpression(left, right, operator);
+          right = Expression.fraserHanson(i + 1, p, parent);
+          left = new BinaryExpression(parent, left, right, operator);
         }
       }
     }
@@ -31,8 +45,8 @@ export class BinaryExpression extends Expression {
   rightExpr : Expression;
   operator: Operator;
 
-  constructor(leftExpr: Expression, rightExpr: Expression, operator: Operator) {
-    super();
+  constructor(parent: ASTNode, leftExpr: Expression, rightExpr: Expression, operator: Operator) {
+    super(parent);
     this.leftExpr = leftExpr;
     this.rightExpr = rightExpr;
     this.operator = operator;
@@ -46,12 +60,12 @@ export class BinaryExpression extends Expression {
       + ")";
   }
 
-  toDOM() : HTMLElement {
+  toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement {
     let rootElement : HTMLElement = document.createElement("div");
     rootElement.classList.add("binaryExprDiv"); 
     
-    let leftElementDiv : HTMLElement = this.leftExpr.toDOM();
-    let rightElementDiv : HTMLElement = this.rightExpr.toDOM();
+    let leftElementDiv : HTMLElement = this.leftExpr.toDOM(astNodeDivMap);
+    let rightElementDiv : HTMLElement = this.rightExpr.toDOM(astNodeDivMap);
 
     let operatorDiv : HTMLElement = document.createElement("div");
     operatorDiv.classList.add("operatorDiv");
@@ -61,6 +75,8 @@ export class BinaryExpression extends Expression {
     rootElement.appendChild(operatorDiv);
     rootElement.appendChild(rightElementDiv);
 
+    astNodeDivMap.set(rootElement, this);
+
     return rootElement;
   }
 }
@@ -68,18 +84,18 @@ export class BinaryExpression extends Expression {
 export class PrimaryExpression extends Expression {
   value: number;
 
-  constructor(value: number) {
-    super();
+  constructor(parent: ASTNode, value: number) {
+    super(parent);
     this.value = value;
   }
 
-  static parse(p: Parser) : Expression {
+  static parse(p: Parser, parent: ASTNode) : Expression {
     let staticPrimaryExpression : Expression;
     if (p.getToken() instanceof NumToken) {
-      staticPrimaryExpression = new PrimaryExpression((<NumToken> p.getToken()).value);
+      staticPrimaryExpression = new PrimaryExpression(parent, (<NumToken> p.getToken()).value);
       p.advanceToken();
     } else {
-      staticPrimaryExpression = new EmptyExpression();
+      staticPrimaryExpression = new EmptyExpression(parent);
       p.advanceToken();
     }
     return staticPrimaryExpression;
@@ -89,10 +105,13 @@ export class PrimaryExpression extends Expression {
     return String(this.value);
   }
 
-  toDOM() : HTMLElement {
+  toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement {
     let primaryExprDiv : HTMLElement = document.createElement("div");
     primaryExprDiv.classList.add("primaryExprDiv");
     primaryExprDiv.textContent = String(this.value);
+
+    astNodeDivMap.set(primaryExprDiv, this);
+    
     return primaryExprDiv;
   }
 }
@@ -102,10 +121,17 @@ export class EmptyExpression extends Expression {
     return "_";
   }
 
-  toDOM() : HTMLElement {
+  constructor(parent: ASTNode) {
+    super(parent);
+  }
+
+  toDOM(astNodeDivMap : WeakMap<HTMLElement, ASTNode>) : HTMLElement {
     let emptyExprDiv : HTMLElement = document.createElement("div");
     emptyExprDiv.classList.add("emptyExprDiv");
     emptyExprDiv.textContent = '_';
+
+    astNodeDivMap.set(emptyExprDiv, this);
+
     return emptyExprDiv;
   }
 }

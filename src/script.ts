@@ -7,9 +7,13 @@ let astDiv : HTMLElement = document.getElementById("astDiv");
 
 let text : string = "";
 let cursorPosition : number = 0;
-let expr : lang.Expression; 
+let expr : lang.ASTNode; 
 let isCursorActive : boolean = false;
 var cursorDiv = document.getElementById("cursorDiv");
+
+let selectedASTNode : lang.ASTNode;
+
+let astNodeDivMap : WeakMap<HTMLElement, lang.ASTNode>;
 
 inputDiv.onclick = function() {
   toggleCursorActive();
@@ -17,6 +21,18 @@ inputDiv.onclick = function() {
 
 export function lexText() {
   console.log(lang.lex(text));
+}
+
+function selectExpr(expr : lang.ASTNode) : void {
+  selectedASTNode = expr;
+}
+
+astDiv.onkeydown = function(event: KeyboardEvent) {
+  if (selectedASTNode) {
+    if (event.key === "Backspace") {
+      console.log('delete this');
+    }
+  }
 }
 
 inputDiv.onkeyup = function(event : KeyboardEvent) {
@@ -71,6 +87,19 @@ function deleteText(from: number, to: number) {
   cursorPosition = from;
 }
 
+function astNodeDivOnclick(event: MouseEvent) {
+  console.log(event);
+  console.log(expr);
+  event.stopPropagation();
+  var existing = document.querySelector('.selectedASTNode')
+  if (existing) {
+    existing.classList.remove('selectedASTNode');
+  }
+  selectedASTNode = astNodeDivMap.get(event.target);
+  event.target.classList.add('selectedASTNode');
+  console.log('parent', selectedASTNode.parent);
+}
+
 export function renderText() {
   inputDiv.innerHTML = "";
   let beforeCursorString : string = text.substring(0, cursorPosition);
@@ -96,8 +125,10 @@ export function renderText() {
 }
 
 export function renderAST() {
+  astNodeDivMap = new WeakMap<HTMLElement, lang.ASTNode>();
   astDiv.innerHTML = "";
-  astDiv.appendChild(expr.toDOM());
+  astDiv.appendChild(expr.toDOM(astNodeDivMap));
+  astDiv.onclick = astNodeDivOnclick;
 }
 
 function stringToDom(s: string) : Node[] {
