@@ -29,18 +29,29 @@ function selectExpr(expr : lang.ASTNode) : void {
 
 astDiv.onkeydown = function(event: KeyboardEvent) {
   if (selectedASTNode) {
-    if (event.key === "Backspace") {
-      console.log('delete this');
-      let parent : lang.ParentASTNode = selectedASTNode.parent
-      if (parent) {
-        console.log('parent is', parent);
-        console.log('node is', selectedASTNode);
-        parent.deleteChild(selectedASTNode);
-        selectedASTNode = null;
-        renderAST();
+    let parent : lang.ParentASTNode = selectedASTNode.parent
+    if (selectedASTNode instanceof lang.EmptyExpression) {
+      if (event.key.length === 1) {
+        let input = event.key;
+        let tokens = lang.lex(input);
+        let p = new lang.Parser(tokens);
+        let newExpr = lang.Expression.parse(p);
+        parent.replaceASTNode(selectedASTNode, newExpr);
+      }
+    } else {
+      if (event.key === "Backspace") {
+        console.log('delete this');
+        if (parent) {
+          console.log('parent is', parent);
+          console.log('node is', selectedASTNode);
+          let newEmpty = new lang.EmptyExpression();
+          parent.replaceASTNode(selectedASTNode, newEmpty);
+          selectedASTNode = newEmpty;
+        }
       }
     }
   }
+  renderAST();
 }
 
 inputDiv.onkeyup = function(event : KeyboardEvent) {

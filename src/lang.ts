@@ -1,5 +1,5 @@
 export interface ParentASTNode {
-  deleteChild(child: ASTNode) : void;
+  replaceASTNode(original: ASTNode, replacement: ASTNode) : void;
 }
 
 export abstract class ASTNode {
@@ -56,12 +56,12 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     this.rightExpr.setParent(this);
   }
 
-  deleteChild(child: ASTNode) {
-    if (child === this.leftExpr) {
-      this.leftExpr = new EmptyExpression();
+  replaceASTNode(original: ASTNode, replacement: ASTNode) : void {
+    if (original === this.leftExpr) {
+      this.leftExpr = replacement;
       this.leftExpr.setParent(this);
-    } else if (child == this.rightExpr) {
-      this.rightExpr = new EmptyExpression();
+    } else if (original === this.rightExpr) {
+      this.rightExpr = replacement;
       this.rightExpr.setParent(this);
     }
   }
