@@ -79,13 +79,13 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         parent.replaceASTNode(selectedASTNode, newExpr);
         let firstEmptyExpr = parent.getFirstEmpty();
         console.log(firstEmptyExpr);
-        selectASTNode(firstEmptyExpr);
+        makeNodeSelected(firstEmptyExpr);
       } else {
         if (event.key === "Backspace") {
           if (parent) {
             let newEmpty = new lang.EmptyExpression();
             parent.replaceASTNode(selectedASTNode, newEmpty);
-            selectedASTNode = newEmpty;
+            makeNodeSelected(newEmpty);
           }
         }
       }
@@ -150,24 +150,18 @@ function astNodeDivOnclick(event: MouseEvent) {
   event.stopPropagation();
   let selectedDiv = <HTMLElement> event.target;
   let found  = theDivASTNodeMap.getASTNode(selectedDiv);
-  selectASTNode(found);
+  makeNodeSelected(found);
+  renderAST();
 }
 
-function selectASTNode(node : lang.ASTNode) : void {
-  if (selectedASTNode) {
-    deselectASTNode(selectedASTNode);
-  }
+function makeNodeSelected(node: lang.ASTNode) : void {
   selectedASTNode = node;
+}
+
+function applySelectedStylingToNode(node : lang.ASTNode) : void {
   let nodeDiv = theDivASTNodeMap.getDiv(node);
   nodeDiv.classList.add('selectedASTNode');
   nodeDiv.appendChild(astCursorDiv);
-}
-
-function deselectASTNode(node: lang.ASTNode) {
-  let nodeDiv = theDivASTNodeMap.getDiv(node);
-  if (nodeDiv) {
-    nodeDiv.classList.remove('selectedASTNode');
-  }
 }
 
 export function renderText() {
@@ -204,6 +198,9 @@ export function renderAST() {
   astDiv.innerHTML = "";
   astDiv.appendChild(rootASTNode.toDOM(theDivASTNodeMap));
   astDiv.onclick = astNodeDivOnclick;
+  if (selectedASTNode) {
+    applySelectedStylingToNode(selectedASTNode);
+  }
 }
 
 function stringToDom(s: string) : Node[] {
