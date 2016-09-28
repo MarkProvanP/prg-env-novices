@@ -75,6 +75,8 @@ export abstract class Expression extends ASTNode {
     }
     return left;
   }
+
+  abstract evaluate();
 }
 
 export class BinaryExpression extends Expression implements ParentASTNode {
@@ -97,10 +99,10 @@ export class BinaryExpression extends Expression implements ParentASTNode {
 
   replaceASTNode(original: ASTNode, replacement: ASTNode) : void {
     if (original === this.leftExpr) {
-      this.leftExpr = replacement;
+      this.leftExpr = <Expression> replacement;
       this.leftExpr.setParent(this);
     } else if (original === this.rightExpr) {
-      this.rightExpr = replacement;
+      this.rightExpr = <Expression> replacement;
       this.rightExpr.setParent(this);
     }
   }
@@ -158,6 +160,13 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     div.classList.add('selected');
     div.appendChild(astNodeDivMap.getCursorDiv());
   }
+
+  evaluate() {
+    let left = this.leftExpr.evaluate();
+    let right = this.rightExpr.evaluate();
+    let func = operatorToFunc(this.operator);
+    return func(left, right);
+  }
 }
 
 export class PrimaryExpression extends Expression {
@@ -209,6 +218,10 @@ export class PrimaryExpression extends Expression {
     div.classList.add('selected');
     div.appendChild(astNodeDivMap.getCursorDiv());
   }
+
+  evaluate() {
+    return this.value;
+  }
 }
 
 export class EmptyExpression extends Expression {
@@ -242,6 +255,10 @@ export class EmptyExpression extends Expression {
     let div = astNodeDivMap.getDiv(this);  
     div.classList.add('selected');
   }
+
+  evaluate() {
+    return undefined;
+  }
 }
 
 export enum Operator {
@@ -266,6 +283,15 @@ function operatorToChar(o : Operator) {
     case Operator.Subtract: return "-";
     case Operator.Multiply: return "*";
     case Operator.Divide: return "/";
+  }
+}
+
+function operatorToFunc(o: Operator): (l: any, r: any) => any {
+  switch (o) {
+    case Operator.Add: return (l, r) => l + r;
+    case Operator.Subtract: return (l, r) => l - r;
+    case Operator.Multiply: return (l, r) => l * r;
+    case Operator.Divide: return (l, r) => l / r;
   }
 }
 
@@ -343,7 +369,7 @@ export class Lexer {
   }
 
   lex(): [Token] {
-    let tokens = [];
+    let tokens: [Token] = <[Token]>[];
     let c = this.getChar();
     let buf = '';
     while (this.charsRemaining()) {

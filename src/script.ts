@@ -1,9 +1,10 @@
-require ("./styles.scss");
+require("./styles.scss");
 import * as lang from "./lang";
 
 let astDiv : HTMLElement = document.getElementById("astDiv");
 let astCursorDiv : HTMLElement = document.createElement("div");
 astCursorDiv.id = "astCursorDiv";
+let evalDiv: HTMLElement = document.getElementById("evalDiv");
 
 let initialEmptyExpression = new lang.EmptyExpression()
 let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialEmptyExpression);
@@ -112,6 +113,7 @@ export function renderAST() {
   if (selectedASTNode) {
     selectedASTNode.makeSelected(theDivASTNodeMap);
   }
+  evalDiv.textContent = rootASTNode.child.evaluate();
 }
 
 renderAST();
