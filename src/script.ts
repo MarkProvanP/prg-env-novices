@@ -1,31 +1,18 @@
 require ("./styles.scss");
 import * as lang from "./lang";
 
-let lexedDiv : HTMLElement = document.getElementById("lexedDiv");
-let inputDiv : HTMLElement = document.getElementById("inputDiv");
-let parsedDiv : HTMLElement = document.getElementById("parsedDiv");
 let astDiv : HTMLElement = document.getElementById("astDiv");
 let astCursorDiv : HTMLElement = document.createElement("div");
 astCursorDiv.id = "astCursorDiv";
 
-let text : string = "";
-let cursorPosition : number = 0;
-let rootASTNode : lang.RootASTNode;
+let initialEmptyExpression = new lang.EmptyExpression()
+let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialEmptyExpression);
 let expr : lang.ASTNode; 
 let isCursorActive : boolean = false;
-var cursorDiv = document.getElementById("cursorDiv");
 
 let selectedASTNode : lang.ASTNode;
 
 let theDivASTNodeMap : ASTNodeDivMap;
-
-inputDiv.onclick = function() {
-  toggleCursorActive();
-};
-
-export function lexText() {
-  console.log(lang.lex(text));
-}
 
 export class ASTNodeDivMap {
   private divToASTNode : WeakMap<HTMLElement, lang.ASTNode>;
@@ -95,62 +82,11 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
   renderAST();
 }
 
-inputDiv.onkeyup = function(event : KeyboardEvent) {
-  if (isCursorActive) {
-    if (event.key.length === 1) {
-      insertText(event.key, cursorPosition);
-    } else {
-      if (event.key === "ArrowLeft") {
-        cursorLeft();
-      } else if (event.key === "ArrowRight") {
-        cursorRight();
-      } else if (event.key === "Backspace") {
-        deleteText(cursorPosition - 1, cursorPosition);
-      } else {
-        console.log(event.key);
-      }
-    }
-    renderText();
-    renderAST();
-  }
-};
-
-function cursorLeft() {
-  if (cursorPosition > 0) {
-    cursorPosition--;
-  }
-}
-
-function cursorRight() {
-  if (cursorPosition < text.length) {
-    cursorPosition++;
-  }
-}
-
-function insertText(content: string, position : number) {
-  let beforeCursorString : string = text.substring(0, cursorPosition);
-  let afterCursorString : string = text.substring(cursorPosition, text.length);
-  text = beforeCursorString + content + afterCursorString;
-  cursorPosition++;
-}
-
-function deleteText(from: number, to: number) {
-  if (from < 0) {
-    from = 0;
-  }
-  if (to > text.length) {
-    to = text.length;
-  }
-  let beforeString : string = text.substring(0, from);
-  let afterString : string = text.substring(to, text.length);
-  text = beforeString + afterString;
-  cursorPosition = from;
-}
-
 function astNodeDivOnclick(event: MouseEvent) {
   event.stopPropagation();
   let selectedDiv = <HTMLElement> event.target;
   let found  = theDivASTNodeMap.getASTNode(selectedDiv);
+  console.log('clicked on', found);
   makeNodeSelected(found);
   renderAST();
 }
@@ -161,63 +97,21 @@ function makeNodeSelected(node: lang.ASTNode) : void {
 
 function applySelectedStylingToNode(node : lang.ASTNode) : void {
   let nodeDiv = theDivASTNodeMap.getDiv(node);
+  console.log('applying selected styling to node', node, nodeDiv);
   nodeDiv.classList.add('selectedASTNode');
   nodeDiv.appendChild(astCursorDiv);
-}
-
-export function renderText() {
-  inputDiv.innerHTML = "";
-  let beforeCursorString : string = text.substring(0, cursorPosition);
-  let afterCursorString : string = text.substring(cursorPosition, text.length);
-  let beforeCursorNodes : Node[] = stringToDom(beforeCursorString);
-  let afterCursorNodes : Node[] = stringToDom(afterCursorString);
-  beforeCursorNodes.forEach((node: Node) => {
-    inputDiv.appendChild(node);
-  });
-
-  inputDiv.appendChild(cursorDiv);
-
-  afterCursorNodes.forEach((node: Node) => {
-    inputDiv.appendChild(node);
-  });
-
-  lexAndParse();
-}
-
-function lexAndParse() {
-  let lexed : lang.Token[] = lang.lex(text);
-  lexedDiv.textContent = lexed.toString();
-
-  let parser : lang.Parser = new lang.Parser(lexed);
-  expr = lang.Expression.parse(parser);
-  rootASTNode = new lang.RootASTNode(expr);
-  parsedDiv.textContent = expr.toString();
 }
 
 export function renderAST() {
   theDivASTNodeMap = new ASTNodeDivMap();
   astDiv.innerHTML = "";
-  astDiv.appendChild(rootASTNode.toDOM(theDivASTNodeMap));
+  let d = rootASTNode.toDOM(theDivASTNodeMap);
+  console.log(rootASTNode, d);
+  astDiv.appendChild(d);
   astDiv.onclick = astNodeDivOnclick;
   if (selectedASTNode) {
     applySelectedStylingToNode(selectedASTNode);
   }
 }
 
-function stringToDom(s: string) : Node[] {
-  return s.split(" ").map((word : string) => {
-    var node = document.createElement("div");
-    node.textContent = word;
-    node.classList.add("wordDiv");
-    return node;
-  });
-}
-
-function toggleCursorActive() {
-  isCursorActive = !isCursorActive;
-  if (isCursorActive) {
-    cursorDiv.classList.add("blinking");
-  } else {
-    cursorDiv.classList.remove("blinking");
-  }
-}
+renderAST();
