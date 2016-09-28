@@ -45,6 +45,8 @@ export abstract class ASTNode {
   abstract getFirstEmpty(): EmptyExpression;
 
   abstract makeSelected(astNodeDivMap: ASTNodeDivMap): void;
+
+  abstract makeClone(): ASTNode;
 }
 
 export abstract class Expression extends ASTNode {
@@ -123,7 +125,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
       + this.rightExpr.getText();
   }
 
-  getFirstEmpty(): Expression {
+  getFirstEmpty(): EmptyExpression {
     if (this.leftExpr instanceof EmptyExpression) {
       return this.leftExpr;
     }
@@ -168,6 +170,12 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     let right = this.rightExpr.evaluate();
     let func = OperatorUtils.toFunc(this.operator);
     return func(left, right);
+  }
+
+  makeClone(): BinaryExpression {
+    let left = this.leftExpr.makeClone();
+    let right = this.rightExpr.makeClone();
+    return new BinaryExpression(left, right, this.operator);
   }
 }
 
@@ -224,6 +232,10 @@ export class PrimaryExpression extends Expression {
   evaluate() {
     return this.value;
   }
+
+  makeClone(): PrimaryExpression {
+    return new PrimaryExpression(this.value);
+  }
 }
 
 export class EmptyExpression extends Expression {
@@ -260,6 +272,10 @@ export class EmptyExpression extends Expression {
 
   evaluate() {
     return undefined;
+  }
+
+  makeClone(): EmptyExpression {
+    return new EmptyExpression();
   }
 }
 
