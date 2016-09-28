@@ -53,7 +53,8 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
     if (selectedASTNode instanceof lang.EmptyExpression) {
       if (event.key.length === 1) {
         let input = event.key;
-        let tokens = lang.lex(input);
+        let l = new lang.Lexer(input);
+        let tokens = l.lex();
         let p = new lang.Parser(tokens);
         let newExpr = lang.Expression.parse(p);
         parent.replaceASTNode(selectedASTNode, newExpr);
@@ -62,7 +63,8 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
     } else {
       if (event.key.length === 1) {
         let input = selectedASTNode.getText() + event.key;
-        let tokens = lang.lex(input);
+        let l = new lang.Lexer(input);
+        let tokens = l.lex();
         let p = new lang.Parser(tokens);
         let newExpr = lang.Expression.parse(p);
         parent.replaceASTNode(selectedASTNode, newExpr);

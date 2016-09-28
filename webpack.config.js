@@ -13,6 +13,6 @@ module.exports = {
     ]
   },
   watchOptions: {
-    poll: true
+    poll: 5
   }
 }

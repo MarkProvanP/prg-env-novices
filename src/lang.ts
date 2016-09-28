@@ -285,19 +285,76 @@ export class NumToken extends Token {
   }
 }
 
-export function lex(s: string) : Token[] {
-  let tokens : Token[] = [];
-  for (let i = 0; i < s.length; i++) {
-    let t : Token = null;
-    let c = s[i];
-    if (!isNaN(parseInt(c))) {
-      t = new NumToken(parseInt(c));
-    } else {
-      t = new OperatorToken(charToOperator(c));
-    }
-    tokens.push(t);
+export class IdentToken extends Token {
+  ident: string;
+
+  constructor(ident: string) {
+    super();
+    this.ident = ident;
   }
-  return tokens;
+
+  toString(): string {
+    return this.ident;
+  }
+}
+
+export class Lexer {
+  input: string;
+  n: number;
+
+  constructor(input: string) {
+    this.input = input;
+    this.n = 0;
+  }
+
+  getChar() {
+    return this.input[this.n++];
+  }
+
+  charsRemaining() {
+    return this.n <= this.input.length;
+  }
+
+  lex(): [Token] {
+    let tokens = [];
+    let c = this.getChar();
+    let buf = '';
+    while (this.charsRemaining()) {
+      if (isCharLetter(c)) {
+        while (isCharLetter(c) || isCharNumber(c)) {
+          buf += c;
+          c = this.getChar();
+        }
+        tokens.push(new IdentToken(buf));
+        buf = '';
+      } else if (isCharNumber(c)) {
+        while (isCharNumber(c)) {
+          buf += c;
+          c = this.getChar();
+        }
+        tokens.push(new NumToken(Number(buf)))
+        buf = '';
+      } else if (isCharOperator(c)) {
+        buf += c;
+        tokens.push(new OperatorToken(charToOperator(buf)));
+        c = this.getChar();
+        buf = '';
+      }
+    }
+    return tokens;
+  }
+}
+
+function isCharNumber(c) {
+  return (c >= '0' && c <= '9')
+}
+
+function isCharLetter(c) {
+  return !!c.match(/^[a-zA-Z]$/);
+}
+
+function isCharOperator(c) {
+  return !!c.match(/^(\+|\-|\/|\*)$/);
 }
 
 export class Parser {
