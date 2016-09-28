@@ -47,7 +47,11 @@ export abstract class ASTNode {
 
 export abstract class Expression extends ASTNode {
   static parse(p: Parser) : Expression {
-    return Expression.fraserHanson(1, p);
+    if (p.hasAnotherToken()) {
+      return Expression.fraserHanson(1, p);
+    } else {
+      return new EmptyExpression();
+    }
   };
 
   abstract toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement;

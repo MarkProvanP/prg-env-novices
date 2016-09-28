@@ -76,9 +76,13 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
       } else {
         if (event.key === "Backspace") {
           if (parent) {
-            let newEmpty = new lang.EmptyExpression();
-            parent.replaceASTNode(selectedASTNode, newEmpty);
-            makeNodeSelected(newEmpty);
+            let input = selectedASTNode.getText().slice(0, -1);
+            let l = new lang.Lexer(input);
+            let tokens = l.lex();
+            let p = new lang.Parser(tokens);
+            let newExpr = lang.Expression.parse(p);
+            parent.replaceASTNode(selectedASTNode, newExpr);
+            makeNodeSelected(newExpr);
           }
         }
       }
@@ -97,7 +101,6 @@ function astNodeDivOnclick(event: MouseEvent) {
 
 function makeNodeSelected(node: lang.ASTNode) : void {
   selectedASTNode = node;
-  console.log('made', node, 'selected');
 }
 
 export function renderAST() {
