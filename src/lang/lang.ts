@@ -1,4 +1,6 @@
-import { ASTNodeDivMap } from "./script";
+import { ASTNodeDivMap } from "../script";
+
+import { Token, NumToken, IdentToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
 
 export class RootASTNode implements ParentASTNode {
   child: ASTNode;  
@@ -117,7 +119,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
 
   getText() {
     return this.leftExpr.getText()
-      + operatorToChar(this.operator)
+      + OperatorUtils.toChar(this.operator)
       + this.rightExpr.getText();
   }
 
@@ -144,7 +146,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
 
     let operatorDiv : HTMLElement = document.createElement("div");
     operatorDiv.classList.add("operatorDiv");
-    operatorDiv.textContent = operatorToChar(this.operator);
+    operatorDiv.textContent = OperatorUtils.toChar(this.operator);
 
     rootElement.appendChild(leftElementDiv);
     rootElement.appendChild(operatorDiv);
@@ -164,7 +166,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
   evaluate() {
     let left = this.leftExpr.evaluate();
     let right = this.rightExpr.evaluate();
-    let func = operatorToFunc(this.operator);
+    let func = OperatorUtils.toFunc(this.operator);
     return func(left, right);
   }
 }
@@ -259,155 +261,6 @@ export class EmptyExpression extends Expression {
   evaluate() {
     return undefined;
   }
-}
-
-export enum Operator {
-  Add,
-  Subtract,
-  Multiply,
-  Divide
-}
-
-function charToOperator(c: string) {
-  switch (c) {
-    case "+": return Operator.Add;
-    case "-": return Operator.Subtract;
-    case "*": return Operator.Multiply;
-    case "/": return Operator.Divide;
-  }
-}
-
-function operatorToChar(o : Operator) {
-  switch (o) {
-    case Operator.Add: return "+";
-    case Operator.Subtract: return "-";
-    case Operator.Multiply: return "*";
-    case Operator.Divide: return "/";
-  }
-}
-
-function operatorToFunc(o: Operator): (l: any, r: any) => any {
-  switch (o) {
-    case Operator.Add: return (l, r) => l + r;
-    case Operator.Subtract: return (l, r) => l - r;
-    case Operator.Multiply: return (l, r) => l * r;
-    case Operator.Divide: return (l, r) => l / r;
-  }
-}
-
-export abstract class Token {
-  getPrecedence() : number {
-    return 0;
-  }
-}
-
-export class OperatorToken extends Token {
-  operator: Operator;
-
-  constructor(operator: Operator) {
-    super();
-    this.operator = operator;
-  }
-
-  getPrecedence() : number {
-    switch (this.operator) {
-      case Operator.Add:
-      case Operator.Subtract:
-        return 3;
-      case Operator.Multiply:
-      case Operator.Divide:
-        return 4;
-    }
-  }
-
-  toString() : string {
-    return Operator[this.operator];
-  }
-}
-
-export class NumToken extends Token {
-  value: number;
-
-  constructor(value: number) {
-    super();
-    this.value = value;
-  }
-
-  toString(): string {
-    return String(this.value);
-  }
-}
-
-export class IdentToken extends Token {
-  ident: string;
-
-  constructor(ident: string) {
-    super();
-    this.ident = ident;
-  }
-
-  toString(): string {
-    return this.ident;
-  }
-}
-
-export class Lexer {
-  input: string;
-  n: number;
-
-  constructor(input: string) {
-    this.input = input;
-    this.n = 0;
-  }
-
-  getChar() {
-    return this.input[this.n++];
-  }
-
-  charsRemaining() {
-    return this.n <= this.input.length;
-  }
-
-  lex(): [Token] {
-    let tokens: [Token] = <[Token]>[];
-    let c = this.getChar();
-    let buf = '';
-    while (this.charsRemaining()) {
-      if (isCharLetter(c)) {
-        while (isCharLetter(c) || isCharNumber(c)) {
-          buf += c;
-          c = this.getChar();
-        }
-        tokens.push(new IdentToken(buf));
-        buf = '';
-      } else if (isCharNumber(c)) {
-        while (isCharNumber(c)) {
-          buf += c;
-          c = this.getChar();
-        }
-        tokens.push(new NumToken(Number(buf)))
-        buf = '';
-      } else if (isCharOperator(c)) {
-        buf += c;
-        tokens.push(new OperatorToken(charToOperator(buf)));
-        c = this.getChar();
-        buf = '';
-      }
-    }
-    return tokens;
-  }
-}
-
-function isCharNumber(c) {
-  return (c >= '0' && c <= '9')
-}
-
-function isCharLetter(c) {
-  return !!c.match(/^[a-zA-Z]$/);
-}
-
-function isCharOperator(c) {
-  return !!c.match(/^(\+|\-|\/|\*)$/);
 }
 
 export class Parser {
