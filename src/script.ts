@@ -57,6 +57,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         let p = new lang.Parser(tokens);
         let newExpr = lang.Expression.parse(p);
         parent.replaceASTNode(selectedASTNode, newExpr);
+        makeNodeSelected(newExpr);
       }
     } else {
       if (event.key.length === 1) {
@@ -66,7 +67,6 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         let newExpr = lang.Expression.parse(p);
         parent.replaceASTNode(selectedASTNode, newExpr);
         let firstEmptyExpr = parent.getFirstEmpty();
-        console.log(firstEmptyExpr);
         makeNodeSelected(firstEmptyExpr);
       } else {
         if (event.key === "Backspace") {
@@ -86,7 +86,6 @@ function astNodeDivOnclick(event: MouseEvent) {
   event.stopPropagation();
   let selectedDiv = <HTMLElement> event.target;
   let found  = theDivASTNodeMap.getASTNode(selectedDiv);
-  console.log('clicked on', found);
   makeNodeSelected(found);
   renderAST();
 }
@@ -97,7 +96,6 @@ function makeNodeSelected(node: lang.ASTNode) : void {
 
 function applySelectedStylingToNode(node : lang.ASTNode) : void {
   let nodeDiv = theDivASTNodeMap.getDiv(node);
-  console.log('applying selected styling to node', node, nodeDiv);
   nodeDiv.classList.add('selectedASTNode');
   nodeDiv.appendChild(astCursorDiv);
 }
@@ -106,7 +104,6 @@ export function renderAST() {
   theDivASTNodeMap = new ASTNodeDivMap();
   astDiv.innerHTML = "";
   let d = rootASTNode.toDOM(theDivASTNodeMap);
-  console.log(rootASTNode, d);
   astDiv.appendChild(d);
   astDiv.onclick = astNodeDivOnclick;
   if (selectedASTNode) {
