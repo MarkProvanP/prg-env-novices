@@ -41,6 +41,8 @@ export abstract class ASTNode {
   abstract getText(): string;
 
   abstract getFirstEmpty(): EmptyExpression;
+
+  abstract makeSelected(astNodeDivMap: ASTNodeDivMap): void;
 }
 
 export abstract class Expression extends ASTNode {
@@ -146,6 +148,12 @@ export class BinaryExpression extends Expression implements ParentASTNode {
 
     return rootElement;
   }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let div = astNodeDivMap.getDiv(this);  
+    div.classList.add('selected');
+    div.appendChild(astNodeDivMap.getCursorDiv());
+  }
 }
 
 export class PrimaryExpression extends Expression {
@@ -191,6 +199,12 @@ export class PrimaryExpression extends Expression {
     
     return primaryExprDiv;
   }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let div = astNodeDivMap.getDiv(this);  
+    div.classList.add('selected');
+    div.appendChild(astNodeDivMap.getCursorDiv());
+  }
 }
 
 export class EmptyExpression extends Expression {
@@ -205,7 +219,11 @@ export class EmptyExpression extends Expression {
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let emptyExprDiv : HTMLElement = document.createElement("div");
     emptyExprDiv.classList.add("emptyExprDiv");
-    emptyExprDiv.textContent = '_';
+
+    let exprTextDiv = document.createElement("div");
+    exprTextDiv.textContent = 'expression';
+    exprTextDiv.classList.add('empty-expr-text');
+    emptyExprDiv.appendChild(exprTextDiv);
 
     astNodeDivMap.addDivNode(emptyExprDiv, this);
 
@@ -215,6 +233,11 @@ export class EmptyExpression extends Expression {
   getFirstEmpty() { return this; };
 
   getText() : string { return ""; }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let div = astNodeDivMap.getDiv(this);  
+    div.classList.add('selected');
+  }
 }
 
 export enum Operator {

@@ -45,6 +45,10 @@ export class ASTNodeDivMap {
   getASTNode(div: HTMLElement) {
     return this.divToASTNode.get(div); 
   }
+
+  getCursorDiv() {
+    return astCursorDiv;
+  }
 }
 
 astDiv.onkeydown = function(event: KeyboardEvent) {
@@ -68,8 +72,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         let p = new lang.Parser(tokens);
         let newExpr = lang.Expression.parse(p);
         parent.replaceASTNode(selectedASTNode, newExpr);
-        let firstEmptyExpr = parent.getFirstEmpty();
-        makeNodeSelected(firstEmptyExpr);
+        makeNodeSelected(newExpr);
       } else {
         if (event.key === "Backspace") {
           if (parent) {
@@ -94,12 +97,7 @@ function astNodeDivOnclick(event: MouseEvent) {
 
 function makeNodeSelected(node: lang.ASTNode) : void {
   selectedASTNode = node;
-}
-
-function applySelectedStylingToNode(node : lang.ASTNode) : void {
-  let nodeDiv = theDivASTNodeMap.getDiv(node);
-  nodeDiv.classList.add('selectedASTNode');
-  nodeDiv.appendChild(astCursorDiv);
+  console.log('made', node, 'selected');
 }
 
 export function renderAST() {
@@ -109,7 +107,7 @@ export function renderAST() {
   astDiv.appendChild(d);
   astDiv.onclick = astNodeDivOnclick;
   if (selectedASTNode) {
-    applySelectedStylingToNode(selectedASTNode);
+    selectedASTNode.makeSelected(theDivASTNodeMap);
   }
 }
 
