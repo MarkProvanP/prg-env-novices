@@ -1,3 +1,4 @@
+require ("./styles.scss");
 import * as lang from "./lang";
 
 let lexedDiv : HTMLElement = document.getElementById("lexedDiv");

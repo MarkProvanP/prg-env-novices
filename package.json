@@ -10,6 +10,7 @@
   "author": "Mark Provan <mrp4@st-andrews.ac.uk>",
   "license": "ISC",
   "dependencies": {
+    "css-loader": "^0.25.0",
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-sass": "^1.0.0",
@@ -17,8 +18,12 @@
     "grunt-ts": "^6.0.0-beta.3",
     "grunt-tslint": "^3.2.1",
     "sass": "^0.5.0",
+    "sass-loader": "^4.0.2",
+    "style-loader": "^0.13.1",
+    "ts-loader": "^0.8.2",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.0"
+    "typescript": "^2.0.0",
+    "webpack": "^1.13.2"
   },
   "devDependencies": {
     "babelify": "^7.3.0",
