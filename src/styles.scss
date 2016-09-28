@@ -96,3 +96,7 @@ $line-height: 30px;
 @keyframes background-blink {
   50% { background-color: transparent; }
 }
+
+#evalDiv .wrapper {
+  display: flex;
+}

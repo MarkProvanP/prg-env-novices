@@ -5,6 +5,7 @@ let astDiv : HTMLElement = document.getElementById("astDiv");
 let astCursorDiv : HTMLElement = document.createElement("div");
 astCursorDiv.id = "astCursorDiv";
 let evalDiv: HTMLElement = document.getElementById("evalDiv");
+let errorDiv: HTMLElement = document.getElementById("errorDiv");
 
 let initialEmptyExpression = new lang.EmptyExpression()
 let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialEmptyExpression);
@@ -53,41 +54,46 @@ export class ASTNodeDivMap {
 }
 
 astDiv.onkeydown = function(event: KeyboardEvent) {
-  if (selectedASTNode) {
-    let parent : lang.ParentASTNode = selectedASTNode.parent
-    if (selectedASTNode instanceof lang.EmptyExpression) {
-      if (event.key.length === 1) {
-        let input = event.key;
-        let l = new lang.Lexer(input);
-        let tokens = l.lex();
-        let p = new lang.Parser(tokens);
-        let newExpr = lang.Expression.parse(p);
-        parent.replaceASTNode(selectedASTNode, newExpr);
-        makeNodeSelected(newExpr);
-      }
-    } else {
-      if (event.key.length === 1) {
-        let input = selectedASTNode.getText() + event.key;
-        let l = new lang.Lexer(input);
-        let tokens = l.lex();
-        let p = new lang.Parser(tokens);
-        let newExpr = lang.Expression.parse(p);
-        parent.replaceASTNode(selectedASTNode, newExpr);
-        makeNodeSelected(newExpr);
+  errorDiv.textContent = "";
+  try {
+    if (selectedASTNode) {
+      let parent : lang.ParentASTNode = selectedASTNode.parent
+      if (selectedASTNode instanceof lang.EmptyExpression) {
+        if (event.key.length === 1) {
+          let input = event.key;
+          let l = new lang.Lexer(input);
+          let tokens = l.lex();
+          let p = new lang.Parser(tokens);
+          let newExpr = lang.Expression.parse(p);
+          parent.replaceASTNode(selectedASTNode, newExpr);
+          makeNodeSelected(newExpr);
+        }
       } else {
-        if (event.key === "Backspace") {
-          if (parent) {
-            let input = selectedASTNode.getText().slice(0, -1);
-            let l = new lang.Lexer(input);
-            let tokens = l.lex();
-            let p = new lang.Parser(tokens);
-            let newExpr = lang.Expression.parse(p);
-            parent.replaceASTNode(selectedASTNode, newExpr);
-            makeNodeSelected(newExpr);
+        if (event.key.length === 1) {
+          let input = selectedASTNode.getText() + event.key;
+          let l = new lang.Lexer(input);
+          let tokens = l.lex();
+          let p = new lang.Parser(tokens);
+          let newExpr = lang.Expression.parse(p);
+          parent.replaceASTNode(selectedASTNode, newExpr);
+          makeNodeSelected(newExpr);
+        } else {
+          if (event.key === "Backspace") {
+            if (parent) {
+              let input = selectedASTNode.getText().slice(0, -1);
+              let l = new lang.Lexer(input);
+              let tokens = l.lex();
+              let p = new lang.Parser(tokens);
+              let newExpr = lang.Expression.parse(p);
+              parent.replaceASTNode(selectedASTNode, newExpr);
+              makeNodeSelected(newExpr);
+            }
           }
         }
       }
     }
+  } catch (e) {
+    errorDiv.textContent = e;
   }
   renderAST();
 }
@@ -113,7 +119,49 @@ export function renderAST() {
   if (selectedASTNode) {
     selectedASTNode.makeSelected(theDivASTNodeMap);
   }
-  evalDiv.textContent = rootASTNode.child.evaluate();
+  renderEvalDiv();
+}
+
+class Limiter {
+  limit: number;
+
+  constructor(limit: number) {
+    this.limit = limit;
+  }
+
+  ok() {
+    return this.limit > 0
+  }
+
+  dec() {
+    this.limit--;
+  }
+}
+
+function renderEvalDiv() {
+  evalDiv.innerHTML = "";
+  let go = true;
+  let limit = 1;
+  let turns = 0;
+  while (go) {
+    let limiter = new Limiter(limit);
+    try {
+      let m = new ASTNodeDivMap();
+      let evaled = rootASTNode.child.evaluateToPrimaryExpr(limiter);
+      let wrapper = document.createElement("div");
+      wrapper.classList.add('wrapper');
+      evalDiv.appendChild(wrapper);
+      wrapper.appendChild(evaled.toDOM(m));
+      limit++;
+      if (evaled instanceof lang.PrimaryExpression) {
+        go = false;
+      }
+    } catch (e) {
+      go = false;
+      evalDiv.appendChild(document.createTextNode("no more eval steps possible"));
+    }
+    turns++;
+  }
 }
 
 renderAST();

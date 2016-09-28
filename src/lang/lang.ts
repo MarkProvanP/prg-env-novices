@@ -81,6 +81,7 @@ export abstract class Expression extends ASTNode {
   }
 
   abstract evaluate();
+  abstract evaluateToPrimaryExpr(limiter);
 }
 
 export class BinaryExpression extends Expression implements ParentASTNode {
@@ -172,6 +173,17 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     return func(left, right);
   }
 
+  evaluateToPrimaryExpr(limiter) {
+    let left = this.leftExpr.makeClone().evaluateToPrimaryExpr(limiter);
+    let right = this.rightExpr.makeClone().evaluateToPrimaryExpr(limiter);
+    if (limiter.ok()) {
+      limiter.dec();
+      return new PrimaryExpression(this.evaluate());
+    } else {
+      return new BinaryExpression(left, right, this.operator);
+    }
+  }
+
   makeClone(): BinaryExpression {
     let left = this.leftExpr.makeClone();
     let right = this.rightExpr.makeClone();
@@ -233,6 +245,10 @@ export class PrimaryExpression extends Expression {
     return this.value;
   }
 
+  evaluateToPrimaryExpr(limiter) {
+    return new PrimaryExpression(this.value);
+  }
+
   makeClone(): PrimaryExpression {
     return new PrimaryExpression(this.value);
   }
@@ -272,6 +288,10 @@ export class EmptyExpression extends Expression {
 
   evaluate() {
     return undefined;
+  }
+
+  evaluateToPrimaryExpr(limiter) {
+    throw new Error("can't eval empty expression!");
   }
 
   makeClone(): EmptyExpression {

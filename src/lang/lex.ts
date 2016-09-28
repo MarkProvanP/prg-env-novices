@@ -131,6 +131,8 @@ export class Lexer {
         tokens.push(new OperatorToken(OperatorUtils.fromChar(buf)));
         c = this.getChar();
         buf = '';
+      } else {
+        throw new Error(`invalid character "${c}"`);
       }
     }
     return tokens;
