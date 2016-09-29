@@ -68,25 +68,55 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
           parent.replaceASTNode(selectedASTNode, newExpr);
           makeNodeSelected(newExpr);
         }
-      } else {
+      } else if (selectedASTNode instanceof lang.EmptyStatement) {
         if (event.key.length === 1) {
-          let input = selectedASTNode.getText() + event.key;
+          let input = event.key;
           let l = new lang.Lexer(input);
           let tokens = l.lex();
           let p = new lang.Parser(tokens);
-          let newExpr = lang.Expression.parse(p);
-          parent.replaceASTNode(selectedASTNode, newExpr);
-          makeNodeSelected(newExpr);
+          let statement = lang.Statement.parse(p);
+          parent.replaceASTNode(selectedASTNode, statement);
+          makeNodeSelected(statement);
+        }
+      } else {
+        if (event.key.length === 1) {
+          if (selectedASTNode instanceof lang.Expression) {
+            let input = selectedASTNode.getText() + event.key;
+            let l = new lang.Lexer(input);
+            let tokens = l.lex();
+            let p = new lang.Parser(tokens);
+            let newExpr = lang.Expression.parse(p);
+            parent.replaceASTNode(selectedASTNode, newExpr);
+            makeNodeSelected(newExpr);
+          } else {
+            let input = selectedASTNode.getText() + event.key;
+            let l = new lang.Lexer(input);
+            let tokens = l.lex();
+            let p = new lang.Parser(tokens);
+            let statement = lang.Statement.parse(p);
+            parent.replaceASTNode(selectedASTNode, statement);
+            makeNodeSelected(statement);
+          }
         } else {
           if (event.key === "Backspace") {
             if (parent) {
-              let input = selectedASTNode.getText().slice(0, -1);
-              let l = new lang.Lexer(input);
-              let tokens = l.lex();
-              let p = new lang.Parser(tokens);
-              let newExpr = lang.Expression.parse(p);
-              parent.replaceASTNode(selectedASTNode, newExpr);
-              makeNodeSelected(newExpr);
+              if (selectedASTNode instanceof lang.Expression) {
+                let input = selectedASTNode.getText().slice(0, -1);
+                let l = new lang.Lexer(input);
+                let tokens = l.lex();
+                let p = new lang.Parser(tokens);
+                let newExpr = lang.Expression.parse(p);
+                parent.replaceASTNode(selectedASTNode, newExpr);
+                makeNodeSelected(newExpr);
+              } else {
+                let input = selectedASTNode.getText().slice(0, -1);
+                let l = new lang.Lexer(input);
+                let tokens = l.lex();
+                let p = new lang.Parser(tokens);
+                let statement = lang.Statement.parse(p);
+                parent.replaceASTNode(selectedASTNode, statement);
+                makeNodeSelected(statement);
+              }
             }
           }
         }
@@ -147,7 +177,7 @@ function renderEvalDiv() {
     let limiter = new Limiter(limit);
     try {
       let m = new ASTNodeDivMap();
-      let evaled = rootASTNode.child.evaluateToPrimaryExpr(limiter);
+      let evaled = rootASTNode.child.evaluateExpressions(limiter);
       let wrapper = document.createElement("div");
       wrapper.classList.add('wrapper');
       evalDiv.appendChild(wrapper);

@@ -1,6 +1,14 @@
 import { ASTNodeDivMap } from "../script";
 
-import { Token, NumToken, IdentToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
+import { Token, NumToken, IdentToken, AssignToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
+
+export interface EmptyASTNode {
+}
+
+export interface ParentASTNode {
+  replaceASTNode(original: ASTNode, replacement: ASTNode) : void;
+  getFirstEmpty(): EmptyASTNode;
+}
 
 export class RootASTNode implements ParentASTNode {
   child: ASTNode;  
@@ -23,16 +31,10 @@ export class RootASTNode implements ParentASTNode {
     return rootDiv;
   }
 
-  getFirstEmpty(): EmptyExpression {
+  getFirstEmpty(): EmptyASTNode {
     return this.child.getFirstEmpty();
   }
 }
-
-export interface ParentASTNode {
-  replaceASTNode(original: ASTNode, replacement: ASTNode) : void;
-  getFirstEmpty(): EmptyExpression;
-}
-
 export abstract class ASTNode {
   parent: ParentASTNode;
 
@@ -42,11 +44,231 @@ export abstract class ASTNode {
   
   abstract getText(): string;
 
-  abstract getFirstEmpty(): EmptyExpression;
+  abstract getFirstEmpty(): EmptyASTNode;
 
   abstract makeSelected(astNodeDivMap: ASTNodeDivMap): void;
 
   abstract makeClone(): ASTNode;
+
+  abstract evaluateExpressions(limiter);
+}
+
+export abstract class AbstractIdent extends ASTNode {
+
+}
+
+export class Ident extends AbstractIdent {
+  ident: string;
+
+  constructor(ident: string) {
+    super();
+    this.ident = ident;
+  }
+
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+  }
+
+  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
+    let rootElement = document.createElement("div");
+    rootElement.classList.add("identDiv");
+    rootElement.textContent = this.ident;
+    astNodeDivMap.addDivNode(rootElement, this);
+    return rootElement;
+  }
+
+  getText() {
+    return this.ident;
+  }
+
+  getFirstEmpty() {
+    return null;
+  }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let div = astNodeDivMap.getDiv(this);
+    div.classList.add('selected');
+  }
+
+  makeClone(): Ident {
+    return new Ident(this.ident);
+  }
+
+  evaluateExpressions(limiter) {
+    return this.makeClone();
+  }
+
+  static parse(p: Parser): AbstractIdent {
+    let ident;
+
+    if (p.getToken() instanceof IdentToken) {
+      ident = (<IdentToken> p.getToken()).ident;
+      p.advanceToken();
+    } else {
+      console.log('expected identToken');
+      p.advanceToken();
+      return new EmptyIdent();
+    }
+
+    return new Ident(ident);
+  }
+}
+
+export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+  }
+
+  toDOM(astNodeDivMap: ASTNodeDivMap) {
+    let rootElement = document.createElement("div");
+    rootElement.classList.add("emptyIdentDiv");
+    rootElement.textContent = "ident";
+    astNodeDivMap.addDivNode(rootElement, this);
+    return rootElement;
+  }
+
+  getText(): string {
+    return "";
+  }
+
+  makeClone(): EmptyIdent {
+    return new EmptyIdent();
+  }
+
+  getFirstEmpty() { return null; }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap) {
+    let rootElement = astNodeDivMap.getDiv(this);
+    rootElement.classList.add('selected');
+  }
+
+  evaluateExpressions(limiter) {
+    return this.makeClone();
+  }
+}
+
+export abstract class Statement extends ASTNode {
+  static parse(p: Parser) {
+    if (p.getToken() instanceof IdentToken) {
+      return AssignmentStatement.parse(p);
+    } else {
+      p.advanceToken();
+      return new EmptyStatement();
+    }
+  }
+}
+
+export class EmptyStatement extends ASTNode implements EmptyASTNode {
+  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
+    let rootElement: HTMLElement = document.createElement("div");
+    rootElement.classList.add("emptyStatementDiv");
+    rootElement.textContent = "statement";
+
+    astNodeDivMap.addDivNode(rootElement, this);
+
+    return rootElement;
+  }
+
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+  }
+
+  getText() {
+    return "";
+  }
+
+  getFirstEmpty(): EmptyASTNode {
+    return this;
+  }
+
+  makeClone() {
+    return new EmptyStatement();
+  }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let rootElement = astNodeDivMap.getDiv(this);
+    rootElement.classList.add('selected');
+  }
+
+  evaluateExpressions(limiter) {
+    throw new Error("can't eval empty statement");
+  }
+}
+
+export class AssignmentStatement extends Statement {
+  ident: AbstractIdent;
+  expression: Expression;
+
+  constructor(ident: AbstractIdent, expression: Expression) {
+    super();
+    this.ident = ident;
+    this.expression = expression;
+  }
+
+  static parse(p: Parser): AssignmentStatement {
+    let ident = Ident.parse(p);
+
+    if (p.getToken() instanceof AssignToken) {
+      p.advanceToken();
+    } else {
+      console.log('expected assignToken');
+      p.advanceToken();
+    }
+
+    let expression = Expression.parse(p);
+
+    return new AssignmentStatement(ident, expression);
+  }
+
+  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
+    let rootElement: HTMLElement = document.createElement("div");
+    rootElement.classList.add("assignmentStatementDiv");
+
+    let identDiv = this.ident.toDOM(astNodeDivMap);
+
+    let assignDiv = document.createElement("div");
+    assignDiv.classList.add("assignDiv");
+    assignDiv.textContent = "=";
+
+    let expression = this.expression.toDOM(astNodeDivMap);
+
+    rootElement.appendChild(identDiv);
+    rootElement.appendChild(assignDiv);
+    rootElement.appendChild(expression);
+
+    astNodeDivMap.addDivNode(rootElement, this);
+
+    return rootElement;
+  }
+
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+  }
+
+  getText() {
+    return this.ident.getText() + "=" + this.expression.getText();
+  }
+
+  getFirstEmpty(): EmptyASTNode {
+    return this.expression.getFirstEmpty();
+  }
+
+  makeClone() {
+    let identClone = this.ident.makeClone();
+    let expressionClone = this.expression.makeClone();
+    return new AssignmentStatement(identClone, expressionClone);
+  }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let rootElement = astNodeDivMap.getDiv(this);
+    rootElement.classList.add('selected');
+  }
+
+  evaluateExpressions(limiter) {
+    let ident = this.ident.evaluateExpressions(limiter);
+    let expression = this.expression.evaluateExpressions(limiter);
+    return new AssignmentStatement(ident, expression);
+  }
 }
 
 export abstract class Expression extends ASTNode {
@@ -80,8 +302,9 @@ export abstract class Expression extends ASTNode {
     return left;
   }
 
+  abstract makeClone(): Expression;
   abstract evaluate();
-  abstract evaluateToPrimaryExpr(limiter);
+  abstract evaluateExpressions(limiter);
 }
 
 export class BinaryExpression extends Expression implements ParentASTNode {
@@ -126,7 +349,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
       + this.rightExpr.getText();
   }
 
-  getFirstEmpty(): EmptyExpression {
+  getFirstEmpty(): EmptyASTNode {
     if (this.leftExpr instanceof EmptyExpression) {
       return this.leftExpr;
     }
@@ -173,9 +396,9 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     return func(left, right);
   }
 
-  evaluateToPrimaryExpr(limiter) {
-    let left = this.leftExpr.makeClone().evaluateToPrimaryExpr(limiter);
-    let right = this.rightExpr.makeClone().evaluateToPrimaryExpr(limiter);
+  evaluateExpressions(limiter): Expression {
+    let left = this.leftExpr.makeClone().evaluateExpressions(limiter);
+    let right = this.rightExpr.makeClone().evaluateExpressions(limiter);
     if (limiter.ok()) {
       limiter.dec();
       return new PrimaryExpression(this.evaluate());
@@ -245,7 +468,7 @@ export class PrimaryExpression extends Expression {
     return this.value;
   }
 
-  evaluateToPrimaryExpr(limiter) {
+  evaluateExpressions(limiter) {
     return new PrimaryExpression(this.value);
   }
 
@@ -290,7 +513,7 @@ export class EmptyExpression extends Expression {
     return undefined;
   }
 
-  evaluateToPrimaryExpr(limiter) {
+  evaluateExpressions(limiter) {
     throw new Error("can't eval empty expression!");
   }
 

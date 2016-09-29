@@ -90,6 +90,10 @@ export class IdentToken extends Token {
   }
 }
 
+export class AssignToken extends Token {
+  toString() { return '='; }
+}
+
 export class Lexer {
   input: string;
   n: number;
@@ -131,6 +135,11 @@ export class Lexer {
         tokens.push(new OperatorToken(OperatorUtils.fromChar(buf)));
         c = this.getChar();
         buf = '';
+      } else if (isCharOther(c)) {
+        if (c == '=') {
+          tokens.push(new AssignToken());
+          c = this.getChar();
+        }
       } else {
         throw new Error(`invalid character "${c}"`);
       }
@@ -149,4 +158,8 @@ function isCharLetter(c) {
 
 function isCharOperator(c) {
   return !!c.match(/^(\+|\-|\/|\*)$/);
+}
+
+function isCharOther(c) {
+  return !!c.match(/^\=$/);
 }
