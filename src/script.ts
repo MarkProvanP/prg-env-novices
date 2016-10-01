@@ -58,83 +58,41 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
   try {
     if (selectedASTNode) {
       let parent : lang.ParentASTNode = selectedASTNode.parent
-      if (selectedASTNode instanceof lang.EmptyExpression) {
-        if (event.key.length === 1) {
-          let input = event.key;
+      if (event.key.length === 1) {
+        let input = selectedASTNode.getText() + event.key;
+        let l = new lang.Lexer(input);
+        let tokens = l.lex();
+        let p = new lang.Parser(tokens);
+        let replacement;
+        if (selectedASTNode instanceof lang.EmptyExpression) {
+          replacement = lang.Expression.parse(p);
+        } else if (selectedASTNode instanceof lang.EmptyStatement) {
+          replacement = lang.Statement.parse(p);
+        } else if (selectedASTNode instanceof lang.Expression) {
+          replacement = lang.Expression.parse(p);
+        } else if (selectedASTNode instanceof lang.Statement) {
+          replacement = lang.Statement.parse(p);
+        } else if (selectedASTNode instanceof lang.Ident) {
+          replacement = lang.Ident.parse(p);
+        }
+        parent.replaceASTNode(selectedASTNode, replacement);
+        makeNodeSelected(replacement);
+      } else if (event.key === "Backspace") {
+        if (parent) {
+          let input = selectedASTNode.getText().slice(0, -1);
           let l = new lang.Lexer(input);
           let tokens = l.lex();
           let p = new lang.Parser(tokens);
-          let newExpr = lang.Expression.parse(p);
-          parent.replaceASTNode(selectedASTNode, newExpr);
-          makeNodeSelected(newExpr);
-        }
-      } else if (selectedASTNode instanceof lang.EmptyStatement) {
-        if (event.key.length === 1) {
-          let input = event.key;
-          let l = new lang.Lexer(input);
-          let tokens = l.lex();
-          let p = new lang.Parser(tokens);
-          let statement = lang.Statement.parse(p);
-          parent.replaceASTNode(selectedASTNode, statement);
-          makeNodeSelected(statement);
-        }
-      } else {
-        if (event.key.length === 1) {
+          let replacement;
           if (selectedASTNode instanceof lang.Expression) {
-            let input = selectedASTNode.getText() + event.key;
-            let l = new lang.Lexer(input);
-            let tokens = l.lex();
-            let p = new lang.Parser(tokens);
-            let newExpr = lang.Expression.parse(p);
-            parent.replaceASTNode(selectedASTNode, newExpr);
-            makeNodeSelected(newExpr);
+            replacement = lang.Expression.parse(p);
           } else if (selectedASTNode instanceof lang.Statement) {
-            let input = selectedASTNode.getText() + event.key;
-            let l = new lang.Lexer(input);
-            let tokens = l.lex();
-            let p = new lang.Parser(tokens);
-            let statement = lang.Statement.parse(p);
-            parent.replaceASTNode(selectedASTNode, statement);
-            makeNodeSelected(statement);
+            replacement = lang.Statement.parse(p);
           } else if (selectedASTNode instanceof lang.Ident) {
-            let input = selectedASTNode.getText() + event.key;
-            let l = new lang.Lexer(input);
-            let tokens = l.lex();
-            let p = new lang.Parser(tokens);
-            let ident = lang.Ident.parse(p);
-            parent.replaceASTNode(selectedASTNode, ident);
-            makeNodeSelected(ident);
+            replacement = lang.Ident.parse(p);
           }
-        } else {
-          if (event.key === "Backspace") {
-            if (parent) {
-              if (selectedASTNode instanceof lang.Expression) {
-                let input = selectedASTNode.getText().slice(0, -1);
-                let l = new lang.Lexer(input);
-                let tokens = l.lex();
-                let p = new lang.Parser(tokens);
-                let newExpr = lang.Expression.parse(p);
-                parent.replaceASTNode(selectedASTNode, newExpr);
-                makeNodeSelected(newExpr);
-              } else if (selectedASTNode instanceof lang.Statement) {
-                let input = selectedASTNode.getText().slice(0, -1);
-                let l = new lang.Lexer(input);
-                let tokens = l.lex();
-                let p = new lang.Parser(tokens);
-                let statement = lang.Statement.parse(p);
-                parent.replaceASTNode(selectedASTNode, statement);
-                makeNodeSelected(statement);
-              } else if (selectedASTNode instanceof lang.Ident) {
-                let input = selectedASTNode.getText().slice(0, -1);
-                let l = new lang.Lexer(input);
-                let tokens = l.lex();
-                let p = new lang.Parser(tokens);
-                let ident = lang.Ident.parse(p);
-                parent.replaceASTNode(selectedASTNode, ident);
-                makeNodeSelected(ident);
-              }
-            }
-          }
+          parent.replaceASTNode(selectedASTNode, replacement);
+          makeNodeSelected(replacement);
         }
       }
     }
