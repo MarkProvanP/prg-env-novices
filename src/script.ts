@@ -88,7 +88,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
             let newExpr = lang.Expression.parse(p);
             parent.replaceASTNode(selectedASTNode, newExpr);
             makeNodeSelected(newExpr);
-          } else {
+          } else if (selectedASTNode instanceof lang.Statement) {
             let input = selectedASTNode.getText() + event.key;
             let l = new lang.Lexer(input);
             let tokens = l.lex();
@@ -96,6 +96,14 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
             let statement = lang.Statement.parse(p);
             parent.replaceASTNode(selectedASTNode, statement);
             makeNodeSelected(statement);
+          } else if (selectedASTNode instanceof lang.Ident) {
+            let input = selectedASTNode.getText() + event.key;
+            let l = new lang.Lexer(input);
+            let tokens = l.lex();
+            let p = new lang.Parser(tokens);
+            let ident = lang.Ident.parse(p);
+            parent.replaceASTNode(selectedASTNode, ident);
+            makeNodeSelected(ident);
           }
         } else {
           if (event.key === "Backspace") {
@@ -108,7 +116,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
                 let newExpr = lang.Expression.parse(p);
                 parent.replaceASTNode(selectedASTNode, newExpr);
                 makeNodeSelected(newExpr);
-              } else {
+              } else if (selectedASTNode instanceof lang.Statement) {
                 let input = selectedASTNode.getText().slice(0, -1);
                 let l = new lang.Lexer(input);
                 let tokens = l.lex();
@@ -116,6 +124,14 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
                 let statement = lang.Statement.parse(p);
                 parent.replaceASTNode(selectedASTNode, statement);
                 makeNodeSelected(statement);
+              } else if (selectedASTNode instanceof lang.Ident) {
+                let input = selectedASTNode.getText().slice(0, -1);
+                let l = new lang.Lexer(input);
+                let tokens = l.lex();
+                let p = new lang.Parser(tokens);
+                let ident = lang.Ident.parse(p);
+                parent.replaceASTNode(selectedASTNode, ident);
+                makeNodeSelected(ident);
               }
             }
           }

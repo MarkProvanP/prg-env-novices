@@ -53,6 +53,12 @@ export abstract class ASTNode {
   abstract evaluateExpressions(limiter);
 }
 
+export class ParseError extends Error {
+  constructor() {
+    super();
+  }
+}
+
 export abstract class AbstractIdent extends ASTNode {
 
 }
@@ -212,11 +218,19 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
 
   replaceASTNode(original: ASTNode, replacement: ASTNode) {
     if (this.ident === original) {
-      this.ident = replacement;
-      this.ident.setParent(this);
+      if (replacement instanceof AbstractIdent) {
+        this.ident = replacement;
+        this.ident.setParent(this);
+      } else {
+        throw new ParseError('');
+      }
     } else if (this.expression === original) {
-      this.expression = <Expression> replacement;
-      this.expression.setParent(this);
+      if (replacement instanceof Expression) {
+        this.expression = <Expression> replacement;
+        this.expression.setParent(this);
+      } else {
+        throw new ParseError('');
+      }
     }
   }
 
