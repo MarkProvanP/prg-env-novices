@@ -95,6 +95,7 @@ export class Ident extends AbstractIdent {
   }
 
   evaluateExpressions(limiter) {
+    limiter.incScore();
     return this.makeClone();
   }
 
@@ -143,6 +144,7 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
   }
 
   evaluateExpressions(limiter) {
+    limiter.incScore();
     return this.makeClone();
   }
 }
@@ -191,11 +193,14 @@ export class EmptyStatement extends ASTNode implements EmptyASTNode {
   }
 
   evaluateExpressions(limiter) {
-    throw new Error("can't eval empty statement");
+    limiter.incScore();
+    limiter.stop();
+    return this.makeClone();
   }
+
 }
 
-export class AssignmentStatement extends Statement {
+export class AssignmentStatement extends Statement implements ParentASTNode {
   ident: AbstractIdent;
   expression: Expression;
 
@@ -203,6 +208,16 @@ export class AssignmentStatement extends Statement {
     super();
     this.ident = ident;
     this.expression = expression;
+  }
+
+  replaceASTNode(original: ASTNode, replacement: ASTNode) {
+    if (this.ident === original) {
+      this.ident = replacement;
+      this.ident.setParent(this);
+    } else if (this.expression === original) {
+      this.expression = <Expression> replacement;
+      this.expression.setParent(this);
+    }
   }
 
   static parse(p: Parser): AssignmentStatement {
@@ -243,6 +258,8 @@ export class AssignmentStatement extends Statement {
 
   setParent(parent: ParentASTNode) {
     this.parent = parent;
+    this.ident.setParent(this);
+    this.expression.setParent(this);
   }
 
   getText() {
@@ -265,6 +282,7 @@ export class AssignmentStatement extends Statement {
   }
 
   evaluateExpressions(limiter) {
+    limiter.incScore();
     let ident = this.ident.evaluateExpressions(limiter);
     let expression = this.expression.evaluateExpressions(limiter);
     return new AssignmentStatement(ident, expression);
@@ -397,6 +415,7 @@ export class BinaryExpression extends Expression implements ParentASTNode {
   }
 
   evaluateExpressions(limiter): Expression {
+    limiter.incScore();
     let left = this.leftExpr.makeClone().evaluateExpressions(limiter);
     let right = this.rightExpr.makeClone().evaluateExpressions(limiter);
     if (limiter.ok()) {
@@ -469,6 +488,7 @@ export class PrimaryExpression extends Expression {
   }
 
   evaluateExpressions(limiter) {
+    limiter.incScore();
     return new PrimaryExpression(this.value);
   }
 
@@ -514,7 +534,9 @@ export class EmptyExpression extends Expression {
   }
 
   evaluateExpressions(limiter) {
-    throw new Error("can't eval empty expression!");
+    limiter.incScore();
+    limiter.stop();
+    return this.makeClone();
   }
 
   makeClone(): EmptyExpression {

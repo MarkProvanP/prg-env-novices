@@ -7,7 +7,7 @@ astCursorDiv.id = "astCursorDiv";
 let evalDiv: HTMLElement = document.getElementById("evalDiv");
 let errorDiv: HTMLElement = document.getElementById("errorDiv");
 
-let initialEmptyExpression = new lang.EmptyExpression()
+let initialEmptyExpression = new lang.EmptyStatement()
 let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialEmptyExpression);
 let expr : lang.ASTNode; 
 let isCursorActive : boolean = false;
@@ -124,6 +124,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
     }
   } catch (e) {
     errorDiv.textContent = e;
+    console.error(e);
   }
   renderAST();
 }
@@ -154,9 +155,14 @@ export function renderAST() {
 
 class Limiter {
   limit: number;
+  score: number = 0;
 
   constructor(limit: number) {
     this.limit = limit;
+  }
+
+  incScore() {
+    this.score++;
   }
 
   ok() {
@@ -166,6 +172,10 @@ class Limiter {
   dec() {
     this.limit--;
   }
+
+  stop() {
+    this.limit = 0;
+  }
 }
 
 function renderEvalDiv() {
@@ -173,19 +183,24 @@ function renderEvalDiv() {
   let go = true;
   let limit = 1;
   let turns = 0;
+  let STOP = 20;
+  let lastEvalString;
   while (go) {
+    if (turns > STOP) throw new Error('exceeded STOP limit in renderEvalDiv!');
     let limiter = new Limiter(limit);
     try {
       let m = new ASTNodeDivMap();
       let evaled = rootASTNode.child.evaluateExpressions(limiter);
+      let newEvalString = JSON.stringify(evaled);
+      if (newEvalString == lastEvalString) {
+        return;
+      }
+      lastEvalString = newEvalString;
       let wrapper = document.createElement("div");
       wrapper.classList.add('wrapper');
       evalDiv.appendChild(wrapper);
       wrapper.appendChild(evaled.toDOM(m));
       limit++;
-      if (evaled instanceof lang.PrimaryExpression) {
-        go = false;
-      }
     } catch (e) {
       go = false;
       evalDiv.appendChild(document.createTextNode("no more eval steps possible"));

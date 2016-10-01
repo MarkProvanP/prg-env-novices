@@ -47,6 +47,21 @@ $line-height: 30px;
   height: $line-height;
 }
 
+.assignmentStatementDiv {
+  display: flex;
+  background-color: aliceblue;
+  margin: 2px;
+  align-items: center;
+}
+
+.emptyStatementDiv {
+  background-color: white;
+  padding: 2px;
+  border: 1px solid black;
+  margin: 2px;
+  font-style: italic;
+}
+
 .binaryExprDiv {
   display: flex;
   align-items: center;

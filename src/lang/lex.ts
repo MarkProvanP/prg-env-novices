@@ -112,15 +112,19 @@ export class Lexer {
   }
 
   lex(): [Token] {
+    console.log(this.input);
     let tokens: [Token] = <[Token]>[];
     let c = this.getChar();
     let buf = '';
     while (this.charsRemaining()) {
       if (isCharLetter(c)) {
+        console.log('char', c, 'is letter');
         while (isCharLetter(c) || isCharNumber(c)) {
           buf += c;
           c = this.getChar();
+          console.log('next char', c, 'buf', buf);
         }
+        console.log('adding identToken', buf);
         tokens.push(new IdentToken(buf));
         buf = '';
       } else if (isCharNumber(c)) {
@@ -153,13 +157,13 @@ function isCharNumber(c) {
 }
 
 function isCharLetter(c) {
-  return !!c.match(/^[a-zA-Z]$/);
+  return c && !!c.match(/^[a-zA-Z]$/);
 }
 
 function isCharOperator(c) {
-  return !!c.match(/^(\+|\-|\/|\*)$/);
+  return c && !!c.match(/^(\+|\-|\/|\*)$/);
 }
 
 function isCharOther(c) {
-  return !!c.match(/^\=$/);
+  return c && !!c.match(/^\=$/);
 }
