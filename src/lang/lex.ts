@@ -112,58 +112,48 @@ export class Lexer {
   }
 
   lex(): [Token] {
-    console.log(this.input);
     let tokens: [Token] = <[Token]>[];
-    let c = this.getChar();
-    let buf = '';
-    while (this.charsRemaining()) {
-      if (isCharLetter(c)) {
-        console.log('char', c, 'is letter');
-        while (isCharLetter(c) || isCharNumber(c)) {
-          buf += c;
-          c = this.getChar();
-          console.log('next char', c, 'buf', buf);
+    let chars = this.input;
+    let charsRemaining = () => chars.length > 0
+    let regexToToken = [
+      {
+        regex: /^(\+|\-|\/|\*)/,
+        do: (s) => new OperatorToken(OperatorUtils.fromChar(s))
+      },
+      {
+        regex: /^(\=)/,
+        do: (s) => new AssignToken()
+      },
+      {
+        regex: /^([a-zA-Z]+)/,
+        do: (s) => new IdentToken(s)
+      },
+      {
+        regex: /^(\d)+/,
+        do: (s) => new NumToken(Number(s))
+      }
+    ];
+    let numberChecksSinceLastMatch = 0;
+    let go = true;
+    while (go && charsRemaining()) {
+      regexToToken.forEach(check => {
+        let regex = check.regex;
+        let f = check.do;
+        let match = chars.match(regex);
+        if (match) {
+          let found = match[0];
+          let result = f(found);
+          tokens.push(result);
+          chars = chars.substring(found.length);
+          numberChecksSinceLastMatch = 0;
+        } else {
+          numberChecksSinceLastMatch++;
         }
-        console.log('adding identToken', buf);
-        tokens.push(new IdentToken(buf));
-        buf = '';
-      } else if (isCharNumber(c)) {
-        while (isCharNumber(c)) {
-          buf += c;
-          c = this.getChar();
-        }
-        tokens.push(new NumToken(Number(buf)))
-        buf = '';
-      } else if (isCharOperator(c)) {
-        buf += c;
-        tokens.push(new OperatorToken(OperatorUtils.fromChar(buf)));
-        c = this.getChar();
-        buf = '';
-      } else if (isCharOther(c)) {
-        if (c == '=') {
-          tokens.push(new AssignToken());
-          c = this.getChar();
-        }
-      } else {
-        throw new Error(`invalid character "${c}"`);
+      });
+      if (numberChecksSinceLastMatch >= regexToToken.length) {
+        go = false;
       }
     }
     return tokens;
   }
-}
-
-function isCharNumber(c) {
-  return (c >= '0' && c <= '9')
-}
-
-function isCharLetter(c) {
-  return c && !!c.match(/^[a-zA-Z]$/);
-}
-
-function isCharOperator(c) {
-  return c && !!c.match(/^(\+|\-|\/|\*)$/);
-}
-
-function isCharOther(c) {
-  return c && !!c.match(/^\=$/);
 }
