@@ -7,8 +7,9 @@ astCursorDiv.id = "astCursorDiv";
 let evalDiv: HTMLElement = document.getElementById("evalDiv");
 let errorDiv: HTMLElement = document.getElementById("errorDiv");
 
-let initialEmptyExpression = new lang.UndefinedStatement("")
-let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialEmptyExpression);
+let empty = new Array(new lang.UndefinedStatement(""));
+let initialStatements = new lang.Statements(empty);
+let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialStatements);
 let expr : lang.ASTNode; 
 let isCursorActive : boolean = false;
 
@@ -58,6 +59,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
   try {
     if (selectedASTNode) {
       let parent : lang.ParentASTNode = selectedASTNode.parent
+      console.log('parent', parent);
       if (event.key.length === 1) {
         let input = selectedASTNode.getText() + event.key;
         let l = new lang.Lexer(input);
@@ -76,6 +78,8 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
           replacement = lang.Statement.parse(p);
         } else if (selectedASTNode instanceof lang.Ident) {
           replacement = lang.Ident.parse(p);
+        } else if (selectedASTNode instanceof lang.Statements) {
+          replacement = lang.Statements.parse(p);
         }
         console.log('replacement', replacement);
         parent.replaceASTNode(selectedASTNode, replacement);
@@ -93,6 +97,8 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
             replacement = lang.Statement.parse(p);
           } else if (selectedASTNode instanceof lang.Ident) {
             replacement = lang.Ident.parse(p);
+          } else if (selectedASTNode instanceof lang.Statements) {
+            replacement = lang.Statements.parse(p);
           }
           parent.replaceASTNode(selectedASTNode, replacement);
           makeNodeSelected(replacement);

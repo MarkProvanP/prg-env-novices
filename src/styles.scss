@@ -52,6 +52,7 @@ $line-height: 30px;
   background-color: aliceblue;
   margin: 2px;
   align-items: center;
+  border: 1px solid black;
 }
 
 .emptyStatementDiv {
@@ -94,6 +95,13 @@ $line-height: 30px;
   padding: 3px;
   margin: 2px;
   pointer-events: none;
+}
+
+.statementsDiv {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  background-color: pink;
 }
 
 .selected {

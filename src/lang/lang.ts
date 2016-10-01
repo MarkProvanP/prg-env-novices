@@ -159,6 +159,77 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
   }
 }
 
+export class Statements extends ASTNode implements ParentASTNode {
+  statements: Statement[];
+
+  constructor(statements: Statement[]) {
+    super();
+    this.statements = statements;
+    this.statements.forEach(statement => statement.setParent(this));
+  }
+
+  replaceASTNode(original: ASTNode, replacement: ASTNode) {
+    let index = this.statements.indexOf(original);
+    if (index > -1) {
+      this.statements[index] = replacement;
+      replacement.setParent(this);
+    }
+  }
+
+  static parse(p: Parser) {
+    let tokenPosition = p.getTokenPosition();
+    let statements = []
+
+    while (p.hasAnotherToken()) {
+      let statement = Statement.parse(p);
+      statement.setParent(this);
+      statements.push(p);
+    }
+
+    statements.push(new UndefinedStatement(""));
+
+    return new Statements(statements);
+  }
+
+  setParent(parent) {
+    this.parent = parent;
+  }
+
+  getText() {
+    return this.statements.map(statement => statement.getText()).join('');
+  }
+
+  makeClone() {
+    let statements = this.statements.map(statement => statement.makeClone());
+    return new Statements(statements);
+  }
+
+  getFirstEmpty() {
+    return null;
+  }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap) {
+    let rootElement = astNodeDivMap.getDiv(this);
+    rootElement.classList.add('selected');
+  }
+
+  evaluateExpressions(limiter) {
+    this.statements.forEach(statement => statement.evaluateExpressions(limiter));
+  }
+
+  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
+    let rootElement = document.createElement("div");
+    rootElement.classList.add("statementsDiv");
+
+    this.statements.forEach(statement => {
+      rootElement.appendChild(statement.toDOM(astNodeDivMap));
+    });
+
+    astNodeDivMap.addDivNode(rootElement, this);
+    return rootElement;
+  }
+}
+
 export abstract class Statement extends ASTNode {
   static parse(p: Parser) {
     let tokenPosition = p.getTokenPosition();
