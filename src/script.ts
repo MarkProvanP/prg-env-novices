@@ -7,7 +7,7 @@ astCursorDiv.id = "astCursorDiv";
 let evalDiv: HTMLElement = document.getElementById("evalDiv");
 let errorDiv: HTMLElement = document.getElementById("errorDiv");
 
-let initialEmptyExpression = new lang.EmptyStatement()
+let initialEmptyExpression = new lang.UndefinedStatement("")
 let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialEmptyExpression);
 let expr : lang.ASTNode; 
 let isCursorActive : boolean = false;
@@ -64,9 +64,11 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         let tokens = l.lex();
         let p = new lang.Parser(tokens);
         let replacement;
+        console.log('input', input);
+        console.log('tokens', tokens);
         if (selectedASTNode instanceof lang.EmptyExpression) {
           replacement = lang.Expression.parse(p);
-        } else if (selectedASTNode instanceof lang.EmptyStatement) {
+        } else if (selectedASTNode instanceof lang.UndefinedStatement) {
           replacement = lang.Statement.parse(p);
         } else if (selectedASTNode instanceof lang.Expression) {
           replacement = lang.Expression.parse(p);
@@ -75,6 +77,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         } else if (selectedASTNode instanceof lang.Ident) {
           replacement = lang.Ident.parse(p);
         }
+        console.log('replacement', replacement);
         parent.replaceASTNode(selectedASTNode, replacement);
         makeNodeSelected(replacement);
       } else if (event.key === "Backspace") {

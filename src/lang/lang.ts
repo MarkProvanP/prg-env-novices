@@ -54,8 +54,12 @@ export abstract class ASTNode {
 }
 
 export class ParseError extends Error {
-  constructor() {
-    super();
+  constructor(message, public possibility: ASTNode, public trace: ParseError[]) {
+    super(message);
+  }
+
+  buildTrace(): ParseError[] {
+    return new Array(<ParseError>this).concat(this.trace);
   }
 }
 
@@ -112,7 +116,7 @@ export class Ident extends AbstractIdent {
       ident = (<IdentToken> p.getToken()).ident;
       p.advanceToken();
     } else {
-      console.log('expected identToken');
+      console.log('expected identToken, got', p.getToken());
       p.advanceToken();
       return new EmptyIdent();
     }
@@ -126,7 +130,7 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
     this.parent = parent;
   }
 
-  toDOM(astNodeDivMap: ASTNodeDivMap) {
+  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
     let rootElement = document.createElement("div");
     rootElement.classList.add("emptyIdentDiv");
     rootElement.textContent = "ident";
@@ -157,20 +161,51 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
 
 export abstract class Statement extends ASTNode {
   static parse(p: Parser) {
-    if (p.getToken() instanceof IdentToken) {
+    let tokenPosition = p.getTokenPosition();
+    let possibilities = [];
+
+    try {
       return AssignmentStatement.parse(p);
-    } else {
-      p.advanceToken();
-      return new EmptyStatement();
+    } catch (e) {
+      if (e instanceof ParseError) {
+        possibilities.push(e.possibility);
+      }
     }
+    p.setTokenPosition(tokenPosition);
+
+    try {
+      return UndefinedStatement.parse(p);
+    } catch (e) {
+      if (e instanceof ParseError) {
+        possibilities.push(e.possibility);
+      }
+    }
+    p.setTokenPosition(tokenPosition);
+
+    console.log('possibilities for statement are', possibilities);
+
+    return new UndefinedStatement();
   }
 }
 
-export class EmptyStatement extends ASTNode implements EmptyASTNode {
+export class UndefinedStatement extends ASTNode implements EmptyASTNode {
+  text: string;
+
+  constructor(text: string) {
+    super();
+    this.text = text;
+  }
+
+  static parse(p: Parser) {
+    let text = p.getToken().toString();
+    p.advanceToken();
+    return new UndefinedStatement(text);   
+  }
+
   toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
     let rootElement: HTMLElement = document.createElement("div");
     rootElement.classList.add("emptyStatementDiv");
-    rootElement.textContent = "statement";
+    rootElement.textContent = this.text || '[empty]';
 
     astNodeDivMap.addDivNode(rootElement, this);
 
@@ -182,7 +217,7 @@ export class EmptyStatement extends ASTNode implements EmptyASTNode {
   }
 
   getText() {
-    return "";
+    return this.text;
   }
 
   getFirstEmpty(): EmptyASTNode {
@@ -190,7 +225,7 @@ export class EmptyStatement extends ASTNode implements EmptyASTNode {
   }
 
   makeClone() {
-    return new EmptyStatement();
+    return new UndefinedStatement(this.text);
   }
 
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
@@ -222,29 +257,48 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
         this.ident = replacement;
         this.ident.setParent(this);
       } else {
-        throw new ParseError('');
+        throw new Error("can't replace with non-ident", replacement, original);
       }
     } else if (this.expression === original) {
       if (replacement instanceof Expression) {
         this.expression = <Expression> replacement;
         this.expression.setParent(this);
       } else {
-        throw new ParseError('');
+        throw new Error("can't replace with non-expression", replacement, original);
       }
     }
   }
 
   static parse(p: Parser): AssignmentStatement {
-    let ident = Ident.parse(p);
+    let ident = new EmptyIdent();
+    let expression = new EmptyExpression();
+    let attemptSoFar = () => new AssignmentStatement(ident, expression);
+    try {
+      ident = Ident.parse(p);
+    } catch (e) {
+      if (e instanceof ParseError) {
+        throw new ParseError('error parsing ident of assignmentStatement', attemptSoFar(), e.buildTrace());
+      } else {
+        throw e;
+      }
+    }
 
+    attemptSoFar = () => new AssignmentStatement(ident, expression);
     if (p.getToken() instanceof AssignToken) {
       p.advanceToken();
     } else {
-      console.log('expected assignToken');
-      p.advanceToken();
+      throw new ParseError('expected AssignToken', attemptSoFar(), []);
     }
 
-    let expression = Expression.parse(p);
+    try {
+      let expression = Expression.parse(p);
+    } catch (e) {
+      if (e instanceof ParseError) {
+        throw new ParseError('error parsing expression of assignmentstatement', attemptSoFar(), e.buildTrace());
+      } else {
+        throw e;
+      }
+    }
 
     return new AssignmentStatement(ident, expression);
   }
@@ -561,6 +615,14 @@ export class EmptyExpression extends Expression {
 export class Parser {
   tokenList : Token[];
   tokenPosition : number = 0;
+
+  getTokenPosition() {
+    return this.tokenPosition;
+  }
+
+  setTokenPosition(tokenPosition) {
+    this.tokenPosition = tokenPosition;
+  }
 
   constructor(tokenList: Token[]) {
     this.tokenList = tokenList;
