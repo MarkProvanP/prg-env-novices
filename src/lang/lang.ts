@@ -27,6 +27,7 @@ export class RootASTNode implements ParentASTNode {
 
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
     let rootDiv = document.createElement("div");
+    rootDiv.classList.add('ast-root');
     rootDiv.appendChild(this.child.toDOM(astNodeDivMap));
     return rootDiv;
   }
@@ -165,7 +166,9 @@ export class Statements extends ASTNode implements ParentASTNode {
   constructor(statements: Statement[]) {
     super();
     this.statements = statements;
-    this.statements.forEach(statement => statement.setParent(this));
+    this.statements.forEach(statement => {
+      statement.setParent(this)
+    });
   }
 
   replaceASTNode(original: ASTNode, replacement: ASTNode) {
@@ -178,12 +181,12 @@ export class Statements extends ASTNode implements ParentASTNode {
 
   static parse(p: Parser) {
     let tokenPosition = p.getTokenPosition();
-    let statements = []
+    let statements: Statement[] = []
 
     while (p.hasAnotherToken()) {
       let statement = Statement.parse(p);
       statement.setParent(this);
-      statements.push(p);
+      statements.push(statement);
     }
 
     statements.push(new UndefinedStatement(""));
@@ -221,8 +224,19 @@ export class Statements extends ASTNode implements ParentASTNode {
     let rootElement = document.createElement("div");
     rootElement.classList.add("statementsDiv");
 
+    let titleElement = document.createElement("p");
+    titleElement.textContent = "Statements";
+    titleElement.classList.add('title');
+    rootElement.appendChild(titleElement);
+
+    let statementListElement = document.createElement("ol");
+    rootElement.appendChild(statementListElement);
+
     this.statements.forEach(statement => {
-      rootElement.appendChild(statement.toDOM(astNodeDivMap));
+      let statementDiv = statement.toDOM(astNodeDivMap);
+      let statementListItem = document.createElement("li");
+      statementListItem.appendChild(statementDiv);
+      statementListElement.appendChild(statementListItem);
     });
 
     astNodeDivMap.addDivNode(rootElement, this);
@@ -259,7 +273,7 @@ export abstract class Statement extends ASTNode {
   }
 }
 
-export class UndefinedStatement extends ASTNode implements EmptyASTNode {
+export class UndefinedStatement extends Statement implements EmptyASTNode {
   text: string;
 
   constructor(text: string) {

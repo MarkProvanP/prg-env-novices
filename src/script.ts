@@ -55,25 +55,42 @@ export class ASTNodeDivMap {
 }
 
 astDiv.onkeydown = function(event: KeyboardEvent) {
-  errorDiv.textContent = "";
-  try {
-    if (selectedASTNode) {
-      console.log('selected', selectedASTNode);
-      let parent : lang.ParentASTNode = selectedASTNode.parent
-      console.log('parent', parent);
-      if (event.key.length === 1) {
-        let input = selectedASTNode.getText() + event.key;
+  if (selectedASTNode) {
+    console.log('selected', selectedASTNode);
+    let parent : lang.ParentASTNode = selectedASTNode.parent
+    console.log('parent', parent);
+    if (event.key.length === 1) {
+      let input = selectedASTNode.getText() + event.key;
+      let l = new lang.Lexer(input);
+      let tokens = l.lex();
+      let p = new lang.Parser(tokens);
+      let replacement;
+      console.log('input', input);
+      console.log('tokens', tokens);
+      if (selectedASTNode instanceof lang.EmptyExpression) {
+        replacement = lang.Expression.parse(p);
+      } else if (selectedASTNode instanceof lang.UndefinedStatement) {
+        replacement = lang.Statement.parse(p);
+      } else if (selectedASTNode instanceof lang.Expression) {
+        replacement = lang.Expression.parse(p);
+      } else if (selectedASTNode instanceof lang.Statement) {
+        replacement = lang.Statement.parse(p);
+      } else if (selectedASTNode instanceof lang.Ident) {
+        replacement = lang.Ident.parse(p);
+      } else if (selectedASTNode instanceof lang.Statements) {
+        replacement = lang.Statements.parse(p);
+      }
+      console.log('replacement', replacement);
+      parent.replaceASTNode(selectedASTNode, replacement);
+      makeNodeSelected(replacement);
+    } else if (event.key === "Backspace") {
+      if (parent) {
+        let input = selectedASTNode.getText().slice(0, -1);
         let l = new lang.Lexer(input);
         let tokens = l.lex();
         let p = new lang.Parser(tokens);
         let replacement;
-        console.log('input', input);
-        console.log('tokens', tokens);
-        if (selectedASTNode instanceof lang.EmptyExpression) {
-          replacement = lang.Expression.parse(p);
-        } else if (selectedASTNode instanceof lang.UndefinedStatement) {
-          replacement = lang.Statement.parse(p);
-        } else if (selectedASTNode instanceof lang.Expression) {
+        if (selectedASTNode instanceof lang.Expression) {
           replacement = lang.Expression.parse(p);
         } else if (selectedASTNode instanceof lang.Statement) {
           replacement = lang.Statement.parse(p);
@@ -82,33 +99,10 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
         } else if (selectedASTNode instanceof lang.Statements) {
           replacement = lang.Statements.parse(p);
         }
-        console.log('replacement', replacement);
         parent.replaceASTNode(selectedASTNode, replacement);
         makeNodeSelected(replacement);
-      } else if (event.key === "Backspace") {
-        if (parent) {
-          let input = selectedASTNode.getText().slice(0, -1);
-          let l = new lang.Lexer(input);
-          let tokens = l.lex();
-          let p = new lang.Parser(tokens);
-          let replacement;
-          if (selectedASTNode instanceof lang.Expression) {
-            replacement = lang.Expression.parse(p);
-          } else if (selectedASTNode instanceof lang.Statement) {
-            replacement = lang.Statement.parse(p);
-          } else if (selectedASTNode instanceof lang.Ident) {
-            replacement = lang.Ident.parse(p);
-          } else if (selectedASTNode instanceof lang.Statements) {
-            replacement = lang.Statements.parse(p);
-          }
-          parent.replaceASTNode(selectedASTNode, replacement);
-          makeNodeSelected(replacement);
-        }
       }
     }
-  } catch (e) {
-    errorDiv.textContent = e;
-    console.error(e);
   }
   renderAST();
 }
