@@ -41,7 +41,12 @@ export abstract class ASTNode {
 
   abstract setParent(parent: ParentASTNode);
 
-  abstract toDOM(astNodeDivMap: ASTNodeDivMap) : HTMLElement;
+  toDOM(astNodeDivMap: ASTNodeDivMap) : HTMLElement {
+    let rootElement = document.createElement("div");
+    rootElement.classList.add('ast-node');
+    astNodeDivMap.addDivNode(rootElement, this);
+    return rootElement;
+  }
   
   abstract getText(): string;
 
@@ -81,10 +86,9 @@ export class Ident extends AbstractIdent {
   }
 
   toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
-    let rootElement = document.createElement("div");
-    rootElement.classList.add("identDiv");
+    let rootElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("ident");
     rootElement.textContent = this.ident;
-    astNodeDivMap.addDivNode(rootElement, this);
     return rootElement;
   }
 
@@ -132,10 +136,9 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
   }
 
   toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
-    let rootElement = document.createElement("div");
-    rootElement.classList.add("emptyIdentDiv");
+    let rootElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("empty-ident");
     rootElement.textContent = "ident";
-    astNodeDivMap.addDivNode(rootElement, this);
     return rootElement;
   }
 
@@ -189,7 +192,7 @@ export class Statements extends ASTNode implements ParentASTNode {
       statements.push(statement);
     }
 
-    statements.push(new UndefinedStatement(""));
+    statements.push(new UndefinedStatement());
 
     return new Statements(statements);
   }
@@ -221,8 +224,8 @@ export class Statements extends ASTNode implements ParentASTNode {
   }
 
   toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
-    let rootElement = document.createElement("div");
-    rootElement.classList.add("statementsDiv");
+    let rootElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("statements");
 
     let titleElement = document.createElement("p");
     titleElement.textContent = "Statements";
@@ -239,7 +242,6 @@ export class Statements extends ASTNode implements ParentASTNode {
       statementListElement.appendChild(statementListItem);
     });
 
-    astNodeDivMap.addDivNode(rootElement, this);
     return rootElement;
   }
 }
@@ -278,7 +280,7 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
 
   constructor(text: string) {
     super();
-    this.text = text;
+    this.text = text || "";
   }
 
   static parse(p: Parser) {
@@ -288,12 +290,9 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
   }
 
   toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
-    let rootElement: HTMLElement = document.createElement("div");
-    rootElement.classList.add("emptyStatementDiv");
+    let rootElement: HTMLElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("empty-statement");
     rootElement.textContent = this.text || '[empty]';
-
-    astNodeDivMap.addDivNode(rootElement, this);
-
     return rootElement;
   }
 
@@ -390,8 +389,8 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
   }
 
   toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
-    let rootElement: HTMLElement = document.createElement("div");
-    rootElement.classList.add("assignmentStatementDiv");
+    let rootElement: HTMLElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("assignment-statement");
 
     let identDiv = this.ident.toDOM(astNodeDivMap);
 
@@ -404,8 +403,6 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
     rootElement.appendChild(identDiv);
     rootElement.appendChild(assignDiv);
     rootElement.appendChild(expression);
-
-    astNodeDivMap.addDivNode(rootElement, this);
 
     return rootElement;
   }
@@ -536,8 +533,8 @@ export class BinaryExpression extends Expression implements ParentASTNode {
   }
 
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
-    let rootElement : HTMLElement = document.createElement("div");
-    rootElement.classList.add("binaryExprDiv"); 
+    let rootElement : HTMLElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("binary-expression"); 
     
     let leftElementDiv : HTMLElement = this.leftExpr.toDOM(astNodeDivMap);
     let rightElementDiv : HTMLElement = this.rightExpr.toDOM(astNodeDivMap);
@@ -549,8 +546,6 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     rootElement.appendChild(leftElementDiv);
     rootElement.appendChild(operatorDiv);
     rootElement.appendChild(rightElementDiv);
-
-    astNodeDivMap.addDivNode(rootElement, this);
 
     return rootElement;
   }
@@ -622,12 +617,9 @@ export class PrimaryExpression extends Expression {
   getFirstEmpty() { return null; }
 
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
-    let primaryExprDiv : HTMLElement = document.createElement("div");
-    primaryExprDiv.classList.add("primaryExprDiv");
+    let primaryExprDiv : HTMLElement = super.toDOM(astNodeDivMap);
+    primaryExprDiv.classList.add("primary-expression");
     primaryExprDiv.textContent = String(this.value);
-
-    astNodeDivMap.addDivNode(primaryExprDiv, this);
-    
     return primaryExprDiv;
   }
 
@@ -661,15 +653,13 @@ export class EmptyExpression extends Expression {
   }
 
   toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
-    let emptyExprDiv : HTMLElement = document.createElement("div");
-    emptyExprDiv.classList.add("emptyExprDiv");
+    let emptyExprDiv : HTMLElement = super.toDOM(astNodeDivMap);
+    emptyExprDiv.classList.add("empty-expression");
 
     let exprTextDiv = document.createElement("div");
     exprTextDiv.textContent = 'expression';
     exprTextDiv.classList.add('empty-expr-text');
     emptyExprDiv.appendChild(exprTextDiv);
-
-    astNodeDivMap.addDivNode(emptyExprDiv, this);
 
     return emptyExprDiv;
   }

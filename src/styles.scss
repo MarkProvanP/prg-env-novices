@@ -47,46 +47,40 @@ $line-height: 30px;
   height: $line-height;
 }
 
-.assignmentStatementDiv {
-  display: flex;
-  background-color: aliceblue;
-  margin: 2px;
-  align-items: center;
+.ast-node {
+  display: inline-flex;
+  margin: 5px;
   border: 1px solid black;
 }
 
-.emptyStatementDiv {
+.ast-node.assignment-statement {
+  background-color: aliceblue;
+  align-items: center;
+}
+
+.ast-node.empty-statement {
   background-color: white;
-  padding: 2px;
-  border: 1px solid black;
-  margin: 2px;
   font-style: italic;
 }
 
-.binaryExprDiv {
-  display: flex;
+.ast-node.binary-expression {
   align-items: center;
   background-color: #FFEE88;
   padding: 5px;
-  border: 1px solid black;
-  margin: 2px;
 }
 
-.primaryExprDiv {
-  display: flex;
+.ast-node.primary-expression {
   align-items: center;
   background-color: #88FFFF;
-  padding: 2px;
-  border: 1px solid black;
-  margin: 2px;
 }
 
-.emptyExprDiv {
+.ast-node.empty-expression {
   background-color: white;
-  padding: 2px;
-  border: 1px solid black;
-  margin: 2px;
   font-style: italic;
+}
+.ast-node.statements {
+  flex-direction: column;
+  background-color: pink;
 }
 
 .operatorDiv {
@@ -95,13 +89,6 @@ $line-height: 30px;
   padding: 3px;
   margin: 2px;
   pointer-events: none;
-}
-
-.statementsDiv {
-  display: flex;
-  flex-direction: column;
-  padding: 5px;
-  background-color: pink;
 }
 
 .selected {
