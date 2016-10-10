@@ -58,6 +58,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
   errorDiv.textContent = "";
   try {
     if (selectedASTNode) {
+      console.log('selected', selectedASTNode);
       let parent : lang.ParentASTNode = selectedASTNode.parent
       console.log('parent', parent);
       if (event.key.length === 1) {

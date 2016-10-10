@@ -11,8 +11,5 @@ module.exports = {
       { test: /\.ts$/, loader: 'ts-loader' },
       { test: /\.scss$/, loaders: ['style', 'css', 'sass'] }
     ]
-  },
-  watchOptions: {
-    poll: 1
   }
 }

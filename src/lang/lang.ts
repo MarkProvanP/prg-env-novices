@@ -341,8 +341,8 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
   }
 
   static parse(p: Parser): AssignmentStatement {
-    let ident = new EmptyIdent();
-    let expression = new EmptyExpression();
+    let ident: AbstractIdent = new EmptyIdent();
+    let expression: Expression = new EmptyExpression();
     let attemptSoFar = () => new AssignmentStatement(ident, expression);
     try {
       ident = Ident.parse(p);
@@ -362,7 +362,7 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
     }
 
     try {
-      let expression = Expression.parse(p);
+      expression = Expression.parse(p);
     } catch (e) {
       if (e instanceof ParseError) {
         throw new ParseError('error parsing expression of assignmentstatement', attemptSoFar(), e.buildTrace());
@@ -371,6 +371,7 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
       }
     }
 
+    console.log('completed parsing of assignment statement!', ident, expression);
     return new AssignmentStatement(ident, expression);
   }
 
