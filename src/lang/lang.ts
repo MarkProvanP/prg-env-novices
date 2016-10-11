@@ -606,15 +606,83 @@ export class BinaryExpression extends Expression implements ParentASTNode {
 
 export abstract class PrimaryExpression extends Expression {
   static parse(p: Parser): Expression {
-    let staticExpression: Expression = new EmptyExpression();
     let initialParsePosition = p.getTokenPosition();
     try {
-      staticExpression = NumberExpression.parse(p);
+      let numberExpression = NumberExpression.parse(p);
+      return numberExpression;
     } catch (e) {
       console.log(`tried parsing number expression, didn't work`);
       p.setTokenPosition(initialParsePosition);
     }
-    return staticExpression;
+    try {
+      let identExpression = IdentExpression.parse(p);
+      return identExpression;
+    } catch (e) {
+      console.log(`tried parsing ident expression, didn't work`);
+      p.setTokenPosition(initialParsePosition);
+    }
+    return new EmptyExpression();
+  }
+}
+
+export class IdentExpression extends PrimaryExpression {
+  ident: string;
+
+  constructor(ident: string) {
+    super();
+    this.ident = ident;
+  }
+
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+  }
+
+  static parse(p: Parser) : IdentExpression {
+    let staticIdentExpression : IdentExpression;
+    if (p.getToken() instanceof IdentToken) {
+      staticIdentExpression = new IdentExpression((<IdentToken> p.getToken()).ident);
+      p.advanceToken();
+    } else {
+      throw Error('not valid ident expression');
+    }
+    return staticIdentExpression;
+  }
+
+  toString() : string {
+    return String(this.ident);
+  }
+
+  getText() : string {
+    return String(this.ident);
+  }
+
+  getFirstEmpty() { return null; }
+
+  toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement {
+    let rootElement : ASTElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("primary-expression");
+    let contentElement = rootElement.contentElement;
+    contentElement.textContent = String(this.ident);
+    return rootElement;
+  }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let div = astNodeDivMap.getDiv(this);  
+    div.classList.add('selected');
+    div.appendChild(astNodeDivMap.getCursorDiv());
+  }
+
+  evaluate() {
+    return this.ident;
+  }
+
+  evaluateExpressions(limiter) {
+    limiter.incScore();
+    return new IdentExpression(this.ident);
+  }
+
+  makeClone(): IdentExpression {
+    return new IdentExpression(this.ident);
   }
 }
 
