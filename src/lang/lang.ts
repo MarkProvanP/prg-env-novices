@@ -117,8 +117,10 @@ export class Ident extends AbstractIdent {
   }
 
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
-    let div = astNodeDivMap.getDiv(this);
-    div.classList.add('selected');
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   makeClone(): Ident {
@@ -170,8 +172,10 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
   getFirstEmpty() { return null; }
 
   makeSelected(astNodeDivMap: ASTNodeDivMap) {
-    let rootElement = astNodeDivMap.getDiv(this);
+    let rootElement = astNodeDivMap.getDiv(this);  
     rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluateExpressions(limiter) {
@@ -240,6 +244,8 @@ export class Statements extends ASTNode implements ParentASTNode {
   makeSelected(astNodeDivMap: ASTNodeDivMap) {
     let rootElement = astNodeDivMap.getDiv(this);
     rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluateExpressions(limiter) {
@@ -335,6 +341,8 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
     let rootElement = astNodeDivMap.getDiv(this);
     rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluateExpressions(limiter) {
@@ -450,6 +458,8 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
     let rootElement = astNodeDivMap.getDiv(this);
     rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluateExpressions(limiter) {
@@ -573,9 +583,10 @@ export class BinaryExpression extends Expression implements ParentASTNode {
   }
 
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
-    let div = astNodeDivMap.getDiv(this);  
-    div.classList.add('selected');
-    div.appendChild(astNodeDivMap.getCursorDiv());
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluate() {
@@ -667,9 +678,10 @@ export class IdentExpression extends PrimaryExpression {
   }
 
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
-    let div = astNodeDivMap.getDiv(this);  
-    div.classList.add('selected');
-    div.appendChild(astNodeDivMap.getCursorDiv());
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluate() {
@@ -728,9 +740,10 @@ export class NumberExpression extends PrimaryExpression {
   }
 
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
-    let div = astNodeDivMap.getDiv(this);  
-    div.classList.add('selected');
-    div.appendChild(astNodeDivMap.getCursorDiv());
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluate() {
@@ -774,8 +787,10 @@ export class EmptyExpression extends Expression {
   getText() : string { return ""; }
 
   makeSelected(astNodeDivMap: ASTNodeDivMap): void {
-    let div = astNodeDivMap.getDiv(this);  
-    div.classList.add('selected');
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
   evaluate() {
