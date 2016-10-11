@@ -18,20 +18,20 @@ let selectedASTNode : lang.ASTNode;
 let theDivASTNodeMap : ASTNodeDivMap;
 
 export class ASTNodeDivMap {
-  private divToASTNode : WeakMap<HTMLElement, lang.ASTNode>;
-  private astNodeToDiv : WeakMap<lang.ASTNode, HTMLElement>;
+  private divToASTNode : WeakMap<lang.ASTElement, lang.ASTNode>;
+  private astNodeToDiv : WeakMap<lang.ASTNode, lang.ASTElement>;
 
   constructor() {
-    this.divToASTNode = new WeakMap<HTMLElement, lang.ASTNode>();
-    this.astNodeToDiv = new WeakMap<lang.ASTNode, HTMLElement>();
+    this.divToASTNode = new WeakMap<lang.ASTElement, lang.ASTNode>();
+    this.astNodeToDiv = new WeakMap<lang.ASTNode, lang.ASTElement>();
   }
 
-  addNodeDiv(node: lang.ASTNode, div: HTMLElement) {
+  addNodeDiv(node: lang.ASTNode, div: lang.ASTElement) {
     this.divToASTNode.set(div, node);
     this.astNodeToDiv.set(node, div);
   }
 
-  addDivNode(div: HTMLElement, node: lang.ASTNode) {
+  addDivNode(div: lang.ASTElement, node: lang.ASTNode) {
     this.addNodeDiv(node, div);
   }
 
@@ -45,7 +45,7 @@ export class ASTNodeDivMap {
     return this.astNodeToDiv.get(node);
   }
 
-  getASTNode(div: HTMLElement) {
+  getASTNode(div: lang.ASTElement) {
     return this.divToASTNode.get(div); 
   }
 
@@ -109,7 +109,7 @@ astDiv.onkeydown = function(event: KeyboardEvent) {
 
 function astNodeDivOnclick(event: MouseEvent) {
   event.stopPropagation();
-  let selectedDiv = <HTMLElement> event.target;
+  let selectedDiv = <lang.ASTElement> event.target;
   let found  = theDivASTNodeMap.getASTNode(selectedDiv);
   makeNodeSelected(found);
   renderAST();

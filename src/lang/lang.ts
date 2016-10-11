@@ -2,6 +2,10 @@ import { ASTNodeDivMap } from "../script";
 
 import { Token, NumToken, IdentToken, AssignToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
 
+export class ASTElement extends HTMLElement {
+  contentElement: HTMLElement;
+}
+
 export interface EmptyASTNode {
 }
 
@@ -41,7 +45,7 @@ export abstract class ASTNode {
 
   abstract setParent(parent: ParentASTNode);
 
-  toDOM(astNodeDivMap: ASTNodeDivMap) : HTMLElement {
+  toDOM(astNodeDivMap: ASTNodeDivMap) : ASTElement {
     let rootElement = document.createElement("div");
     rootElement.classList.add('ast-node');
     astNodeDivMap.addDivNode(rootElement, this);
@@ -96,7 +100,7 @@ export class Ident extends AbstractIdent {
     this.parent = parent;
   }
 
-  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
+  toDOM(astNodeDivMap: ASTNodeDivMap): ASTElement {
     let rootElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("ident");
     let contentElement = rootElement.contentElement;
@@ -147,7 +151,7 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
     this.parent = parent;
   }
 
-  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
+  toDOM(astNodeDivMap: ASTNodeDivMap): ASTElement {
     let rootElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("empty-ident");
     let contentElement = rootElement.contentElement;
@@ -187,7 +191,7 @@ export class Statements extends ASTNode implements ParentASTNode {
     });
   }
 
-  replaceASTNode(original: ASTNode, replacement: ASTNode) {
+  replaceASTNode(original: ASTNode, replacement: ASTNode): void {
     let index = this.statements.indexOf(original);
     if (index > -1) {
       this.statements[index] = replacement;
@@ -242,7 +246,7 @@ export class Statements extends ASTNode implements ParentASTNode {
     this.statements.forEach(statement => statement.evaluateExpressions(limiter));
   }
 
-  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
+  toDOM(astNodeDivMap: ASTNodeDivMap): ASTElement {
     let rootElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("statements");
     let contentElement = rootElement.contentElement;
@@ -262,7 +266,7 @@ export class Statements extends ASTNode implements ParentASTNode {
 }
 
 export abstract class Statement extends ASTNode {
-  static parse(p: Parser) {
+  static parse(p: Parser): Statement {
     let tokenPosition = p.getTokenPosition();
     let possibilities = [];
 
@@ -293,7 +297,7 @@ export abstract class Statement extends ASTNode {
 export class UndefinedStatement extends Statement implements EmptyASTNode {
   text: string;
 
-  constructor(text: string) {
+  constructor(text?: string) {
     super();
     this.text = text || "";
   }
@@ -304,8 +308,8 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
     return new UndefinedStatement(text);   
   }
 
-  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
-    let rootElement: HTMLElement = super.toDOM(astNodeDivMap);
+  toDOM(astNodeDivMap: ASTNodeDivMap): ASTElement {
+    let rootElement: ASTElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("empty-statement");
     let contentElement = rootElement.contentElement;
     contentElement.textContent = this.text || '[empty]';
@@ -404,8 +408,8 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
     return new AssignmentStatement(ident, expression);
   }
 
-  toDOM(astNodeDivMap: ASTNodeDivMap): HTMLElement {
-    let rootElement: HTMLElement = super.toDOM(astNodeDivMap);
+  toDOM(astNodeDivMap: ASTNodeDivMap): ASTElement {
+    let rootElement: ASTElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("assignment-statement");
     let contentElement = rootElement.contentElement;
 
@@ -465,7 +469,7 @@ export abstract class Expression extends ASTNode {
     }
   };
 
-  abstract toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement;
+  abstract toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement;
 
   static fraserHanson(k: number, p: Parser) : Expression {
     let i : number;
@@ -548,21 +552,21 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     return null;
   }
 
-  toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
-    let rootElement : HTMLElement = super.toDOM(astNodeDivMap);
+  toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement {
+    let rootElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("binary-expression"); 
     let contentElement = rootElement.contentElement;
     
-    let leftElementDiv : HTMLElement = this.leftExpr.toDOM(astNodeDivMap);
+    let leftElementDiv = this.leftExpr.toDOM(astNodeDivMap);
     contentElement.appendChild(leftElementDiv);
 
 
-    let operatorDiv : HTMLElement = document.createElement("div");
+    let operatorDiv = document.createElement("div");
     operatorDiv.classList.add("operatorDiv");
     operatorDiv.textContent = OperatorUtils.toChar(this.operator);
     contentElement.appendChild(operatorDiv);
 
-    let rightElementDiv : HTMLElement = this.rightExpr.toDOM(astNodeDivMap);
+    let rightElementDiv = this.rightExpr.toDOM(astNodeDivMap);
     contentElement.appendChild(rightElementDiv);
 
     return rootElement;
@@ -634,8 +638,8 @@ export class PrimaryExpression extends Expression {
 
   getFirstEmpty() { return null; }
 
-  toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
-    let rootElement : HTMLElement = super.toDOM(astNodeDivMap);
+  toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement {
+    let rootElement : ASTElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("primary-expression");
     let contentElement = rootElement.contentElement;
     contentElement.textContent = String(this.value);
@@ -671,8 +675,8 @@ export class EmptyExpression extends Expression {
     this.parent = parent;
   }
 
-  toDOM(astNodeDivMap : ASTNodeDivMap) : HTMLElement {
-    let rootElement: HTMLElement = super.toDOM(astNodeDivMap);
+  toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement {
+    let rootElement: ASTElement = super.toDOM(astNodeDivMap);
     rootElement.classList.add("empty-expression");
     let contentElement = rootElement.contentElement;
 
