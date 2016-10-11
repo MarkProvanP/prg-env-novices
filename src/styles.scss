@@ -48,19 +48,37 @@ $line-height: 30px;
 }
 
 .ast-node {
-  display: inline-flex;
   margin: 5px;
-  border: 1px solid black;
+  border: 2px solid black;
+
+  .title {
+    font-weight: bold;
+    margin: 2px;
+    pointer-events: none;
+    border: 1px solid grey;
+  }
+
+  .content {
+    margin: 2px;
+    display: flex;
+    border: 1px solid grey;
+  }
 }
 
 .ast-node.assignment-statement {
   background-color: aliceblue;
-  align-items: center;
+
+  .content {
+    align-items: center;
+  }
 }
 
 .ast-node.empty-statement {
   background-color: white;
-  font-style: italic;
+
+  .content {
+    font-style: italic;
+  }
 }
 
 .ast-node.binary-expression {
