@@ -193,6 +193,12 @@ export class Statements extends ASTNode implements ParentASTNode {
       this.statements[index] = replacement;
       replacement.setParent(this);
     }
+    let lastStatement = this.statements[this.statements.length - 1];
+    if (!(lastStatement instanceof UndefinedStatement)) {
+      let newUndefinedStatement = new UndefinedStatement();
+      newUndefinedStatement.setParent(this);
+      this.statements.push(newUndefinedStatement);
+    }
   }
 
   static parse(p: Parser) {
