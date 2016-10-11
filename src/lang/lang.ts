@@ -604,7 +604,21 @@ export class BinaryExpression extends Expression implements ParentASTNode {
   }
 }
 
-export class PrimaryExpression extends Expression {
+export abstract class PrimaryExpression extends Expression {
+  static parse(p: Parser): Expression {
+    let staticExpression: Expression = new EmptyExpression();
+    let initialParsePosition = p.getTokenPosition();
+    try {
+      staticExpression = NumberExpression.parse(p);
+    } catch (e) {
+      console.log(`tried parsing number expression, didn't work`);
+      p.setTokenPosition(initialParsePosition);
+    }
+    return staticExpression;
+  }
+}
+
+export class NumberExpression extends PrimaryExpression {
   value: number;
 
   constructor(value: number) {
@@ -616,16 +630,15 @@ export class PrimaryExpression extends Expression {
     this.parent = parent;
   }
 
-  static parse(p: Parser) : Expression {
-    let staticPrimaryExpression : Expression;
+  static parse(p: Parser) : NumberExpression {
+    let staticNumberExpression : NumberExpression;
     if (p.getToken() instanceof NumToken) {
-      staticPrimaryExpression = new PrimaryExpression((<NumToken> p.getToken()).value);
+      staticNumberExpression = new NumberExpression((<NumToken> p.getToken()).value);
       p.advanceToken();
     } else {
-      staticPrimaryExpression = new EmptyExpression();
-      p.advanceToken();
+      throw Error('not valid number expression');
     }
-    return staticPrimaryExpression;
+    return staticNumberExpression;
   }
 
   toString() : string {
@@ -658,11 +671,11 @@ export class PrimaryExpression extends Expression {
 
   evaluateExpressions(limiter) {
     limiter.incScore();
-    return new PrimaryExpression(this.value);
+    return new NumberExpression(this.value);
   }
 
-  makeClone(): PrimaryExpression {
-    return new PrimaryExpression(this.value);
+  makeClone(): NumberExpression {
+    return new NumberExpression(this.value);
   }
 }
 
