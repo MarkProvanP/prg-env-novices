@@ -94,9 +94,23 @@ export class AssignToken extends Token {
   toString() { return '='; }
 }
 
+export class StringToken extends Token {
+  value: string;
+
+  constructor(value: string) {
+    super();
+    this.value = value;
+  }
+
+  toString(): string {
+    return '"' + this.value + '"';
+  }
+}
+
 export class Lexer {
   input: string;
   n: number;
+  remainingInput: string;
 
   constructor(input: string) {
     this.input = input;
@@ -109,6 +123,10 @@ export class Lexer {
 
   charsRemaining() {
     return this.n <= this.input.length;
+  }
+
+  getRemainingInput() {
+    return this.remainingInput;
   }
 
   lex(): [Token] {
@@ -131,6 +149,10 @@ export class Lexer {
       {
         regex: /^(\d)+/,
         do: (s) => new NumToken(Number(s))
+      },
+      {
+        regex: /^\"\w*\"/,
+        do: (s) => new StringToken(s)
       }
     ];
     let numberChecksSinceLastMatch = 0;
@@ -154,6 +176,7 @@ export class Lexer {
         go = false;
       }
     }
+    this.remainingInput = chars;
     return tokens;
   }
 }

@@ -1,6 +1,6 @@
 import { ASTNodeDivMap } from "../script";
 
-import { Token, NumToken, IdentToken, AssignToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
+import { Token, NumToken, StringToken, IdentToken, AssignToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
 
 export class Environment {
   mapping = {}
@@ -630,17 +630,24 @@ export abstract class PrimaryExpression extends Expression {
   static parse(p: Parser): Expression {
     let initialParsePosition = p.getTokenPosition();
     try {
-      let numberExpression = NumberExpression.parse(p);
+      let numberExpression = NumberLiteral.parse(p);
       return numberExpression;
     } catch (e) {
-      console.log(`tried parsing number expression, didn't work`);
+      console.log(`tried parsing number expression, didn't work, ${e}`);
+      p.setTokenPosition(initialParsePosition);
+    }
+    try {
+      let stringLiteral = StringLiteral.parse(p);
+      return stringLiteral;
+    } catch (e) {
+      console.log(`tried parsing string literal, didn't work, ${e}`);
       p.setTokenPosition(initialParsePosition);
     }
     try {
       let identExpression = IdentExpression.parse(p);
       return identExpression;
     } catch (e) {
-      console.log(`tried parsing ident expression, didn't work`);
+      console.log(`tried parsing ident expression, didn't work, ${e}`);
       p.setTokenPosition(initialParsePosition);
     }
     return new EmptyExpression();
@@ -709,7 +716,9 @@ export class IdentExpression extends PrimaryExpression {
   }
 }
 
-export class NumberExpression extends PrimaryExpression {
+export abstract class LiteralExpression extends PrimaryExpression{}
+
+export class NumberLiteral extends LiteralExpression {
   value: number;
 
   constructor(value: number) {
@@ -721,15 +730,15 @@ export class NumberExpression extends PrimaryExpression {
     this.parent = parent;
   }
 
-  static parse(p: Parser) : NumberExpression {
-    let staticNumberExpression : NumberExpression;
+  static parse(p: Parser) : NumberLiteral {
+    let staticNumberLiteral : NumberLiteral;
     if (p.getToken() instanceof NumToken) {
-      staticNumberExpression = new NumberExpression((<NumToken> p.getToken()).value);
+      staticNumberLiteral = new NumberLiteral((<NumToken> p.getToken()).value);
       p.advanceToken();
     } else {
       throw Error('not valid number expression');
     }
-    return staticNumberExpression;
+    return staticNumberLiteral;
   }
 
   toString() : string {
@@ -763,11 +772,73 @@ export class NumberExpression extends PrimaryExpression {
 
   evaluateExpressions(environment, limiter) {
     limiter.incScore();
-    return new NumberExpression(this.value);
+    return new NumberLiteral(this.value);
   }
 
-  makeClone(): NumberExpression {
-    return new NumberExpression(this.value);
+  makeClone(): NumberLiteral {
+    return new NumberLiteral(this.value);
+  }
+}
+
+export class StringLiteral extends LiteralExpression {
+  value: number;
+
+  constructor(value: number) {
+    super();
+    this.value = value;
+  }
+
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+  }
+
+  static parse(p: Parser): StringLiteral {
+    let staticStringLiteral: StringLiteral;
+    if (p.getToken() instanceof StringToken) {
+      staticStringLiteral = new StringLiteral((<StringToken> p.getToken()).value);
+      p.advanceToken();
+    } else {
+      throw Error('not valid string literal');
+    }
+    return staticStringLiteral;
+  }
+
+  toString() : string {
+    return String(this.value);
+  }
+
+  getText() : string {
+    return String(this.value);
+  }
+
+  getFirstEmpty() { return null; }
+
+  toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement {
+    let rootElement : ASTElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("primary-expression");
+    let contentElement = rootElement.contentElement;
+    contentElement.textContent = String(this.value);
+    return rootElement;
+  }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
+  }
+
+  evaluate(environment: Environment) {
+    return this.value;
+  }
+
+  evaluateExpressions(environment, limiter) {
+    limiter.incScore();
+    return new StringLiteral(this.value);
+  }
+
+  makeClone(): StringLiteral {
+    return new StringLiteral(this.value);
   }
 }
 

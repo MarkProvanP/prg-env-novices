@@ -54,15 +54,23 @@ export class ASTNodeDivMap {
   }
 }
 
+let lastRemainingInput = "";
+
 astDiv.onkeydown = function(event: KeyboardEvent) {
   if (selectedASTNode) {
     console.log('selected', selectedASTNode);
     let parent : lang.ParentASTNode = selectedASTNode.parent
     console.log('parent', parent);
     if (event.key.length === 1) {
-      let input = selectedASTNode.getText() + event.key;
+      console.log('last remaining input was', lastRemainingInput);
+      let existingInput = selectedASTNode.getText() + lastRemainingInput;
+      console.log('existing input was', existingInput);
+      let input = existingInput + event.key;
       let l = new lang.Lexer(input);
       let tokens = l.lex();
+      let remainingInput = l.getRemainingInput();
+      console.log('new last remaining input', remainingInput);
+      lastRemainingInput = remainingInput;
       let p = new lang.Parser(tokens);
       let replacement;
       console.log('input', input);
