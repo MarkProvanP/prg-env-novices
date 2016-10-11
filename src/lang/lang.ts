@@ -2,6 +2,17 @@ import { ASTNodeDivMap } from "../script";
 
 import { Token, NumToken, IdentToken, AssignToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
 
+export class Environment {
+  mapping = {}
+  setValue(ident, value) {
+    this.mapping[ident] = value;
+  }
+
+  getValue(ident) {
+    return this.mapping[value];
+  }
+}
+
 export class ASTElement extends HTMLElement {
   contentElement: HTMLElement;
 }
@@ -71,7 +82,7 @@ export abstract class ASTNode {
 
   abstract makeClone(): ASTNode;
 
-  abstract evaluateExpressions(limiter);
+  abstract evaluateExpressions(environemnt, limiter);
 }
 
 export class ParseError extends Error {
@@ -127,7 +138,7 @@ export class Ident extends AbstractIdent {
     return new Ident(this.ident);
   }
 
-  evaluateExpressions(limiter) {
+  evaluateExpressions(environment, limiter) {
     limiter.incScore();
     return this.makeClone();
   }
@@ -178,7 +189,7 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluateExpressions(limiter) {
+  evaluateExpressions(environment, limiter) {
     limiter.incScore();
     return this.makeClone();
   }
@@ -248,8 +259,8 @@ export class Statements extends ASTNode implements ParentASTNode {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluateExpressions(limiter) {
-    this.statements.forEach(statement => statement.evaluateExpressions(limiter));
+  evaluateExpressions(environment, limiter) {
+    this.statements.forEach(statement => statement.evaluateExpressions(environment, limiter));
   }
 
   toDOM(astNodeDivMap: ASTNodeDivMap): ASTElement {
@@ -345,7 +356,7 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluateExpressions(limiter) {
+  evaluateExpressions(environment, limiter) {
     limiter.incScore();
     limiter.stop();
     return this.makeClone();
@@ -462,10 +473,10 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluateExpressions(limiter) {
+  evaluateExpressions(environment, limiter) {
     limiter.incScore();
-    let ident = this.ident.evaluateExpressions(limiter);
-    let expression = this.expression.evaluateExpressions(limiter);
+    let ident = this.ident.evaluateExpressions(environment, limiter);
+    let expression = this.expression.evaluateExpressions(environment, limiter);
     return new AssignmentStatement(ident, expression);
   }
 }
@@ -502,8 +513,8 @@ export abstract class Expression extends ASTNode {
   }
 
   abstract makeClone(): Expression;
-  abstract evaluate();
-  abstract evaluateExpressions(limiter);
+  abstract evaluate(environment);
+  abstract evaluateExpressions(environment, limiter);
 }
 
 export class BinaryExpression extends Expression implements ParentASTNode {
@@ -589,20 +600,20 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluate() {
-    let left = this.leftExpr.evaluate();
-    let right = this.rightExpr.evaluate();
+  evaluate(environment: Environment) {
+    let left = this.leftExpr.evaluate(environment);
+    let right = this.rightExpr.evaluate(environment);
     let func = OperatorUtils.toFunc(this.operator);
     return func(left, right);
   }
 
-  evaluateExpressions(limiter): Expression {
+  evaluateExpressions(environment, limiter): Expression {
     limiter.incScore();
-    let left = this.leftExpr.makeClone().evaluateExpressions(limiter);
-    let right = this.rightExpr.makeClone().evaluateExpressions(limiter);
+    let left = this.leftExpr.makeClone().evaluateExpressions(environment, limiter);
+    let right = this.rightExpr.makeClone().evaluateExpressions(environment, limiter);
     if (limiter.ok()) {
       limiter.dec();
-      return new PrimaryExpression(this.evaluate());
+      return new PrimaryExpression(this.evaluate(environment));
     } else {
       return new BinaryExpression(left, right, this.operator);
     }
@@ -684,11 +695,11 @@ export class IdentExpression extends PrimaryExpression {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluate() {
-    return this.ident;
+  evaluate(environment: Environment) {
+    return environment.getValue(this.ident);
   }
 
-  evaluateExpressions(limiter) {
+  evaluateExpressions(environment, limiter) {
     limiter.incScore();
     return new IdentExpression(this.ident);
   }
@@ -746,11 +757,11 @@ export class NumberExpression extends PrimaryExpression {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluate() {
+  evaluate(environment: Environment) {
     return this.value;
   }
 
-  evaluateExpressions(limiter) {
+  evaluateExpressions(environment, limiter) {
     limiter.incScore();
     return new NumberExpression(this.value);
   }
@@ -793,11 +804,11 @@ export class EmptyExpression extends Expression {
     contentElement.appendChild(astNodeDivMap.getCursorDiv());
   }
 
-  evaluate() {
+  evaluate(environment: Environment) {
     return undefined;
   }
 
-  evaluateExpressions(limiter) {
+  evaluateExpressions(environment, limiter) {
     limiter.incScore();
     limiter.stop();
     return this.makeClone();
