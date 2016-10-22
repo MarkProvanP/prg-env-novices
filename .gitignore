@@ -1,6 +1,6 @@
 *.swp
 gen
-shwww
+shwww/bundle.js
 out
 node_modules
 .tscache
