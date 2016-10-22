@@ -107,10 +107,15 @@ export class StringToken extends Token {
   }
 }
 
+export class RemainingInputToken extends Token {
+  constructor(public remainingInput) {}
+  toString() { return this.remainingInput; }
+}
+
 export class Lexer {
   input: string;
   n: number;
-  remainingInput: string;
+  remainingInput: string = "";
 
   constructor(input: string) {
     this.input = input;
@@ -176,7 +181,7 @@ export class Lexer {
         go = false;
       }
     }
-    this.remainingInput = chars;
+    tokens.push(new RemainingInputToken(chars));
     return tokens;
   }
 }

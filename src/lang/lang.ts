@@ -322,6 +322,10 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
   static parse(p: Parser) {
     let text = p.getToken().toString();
     p.advanceToken();
+    if (p.hasAnotherToken()) {
+      let remaining = p.getToken().toString();
+      text += remaining;
+    }
     return new UndefinedStatement(text);   
   }
 
@@ -843,8 +847,10 @@ export class StringLiteral extends LiteralExpression {
 }
 
 export class EmptyExpression extends Expression {
+  constructor(public text: string) {}
+
   toString() : string {
-    return "_";
+    return this.text;
   }
 
   setParent(parent: ParentASTNode) {
@@ -857,7 +863,7 @@ export class EmptyExpression extends Expression {
     let contentElement = rootElement.contentElement;
 
     let exprTextDiv = document.createElement("div");
-    exprTextDiv.textContent = 'expression';
+    exprTextDiv.textContent = this.text || 'expression';
     exprTextDiv.classList.add('empty-expr-text');
     contentElement.appendChild(exprTextDiv);
 
@@ -886,7 +892,7 @@ export class EmptyExpression extends Expression {
   }
 
   makeClone(): EmptyExpression {
-    return new EmptyExpression();
+    return new EmptyExpression(this.text);
   }
 }
 
