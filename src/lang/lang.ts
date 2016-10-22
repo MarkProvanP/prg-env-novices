@@ -5,6 +5,7 @@ import { Token, NumToken, StringToken, IdentToken, AssignToken, OperatorToken, O
 export class Environment {
   mapping = {}
   setValue(ident: string, value) {
+    console.log('mapping', ident, 'to value', value);
     this.mapping[ident] = value;
   }
 
@@ -34,6 +35,8 @@ export class Environment {
 }
 
 export type EvaluateResult = [ASTNode, Environment];
+
+export type ExecuteResult = [ASTNode, Environment];
 
 export class ASTElement extends HTMLElement {
   contentElement: HTMLElement;
@@ -72,6 +75,14 @@ export class RootASTNode implements ParentASTNode {
   getFirstEmpty(): EmptyASTNode {
     return this.child.getFirstEmpty();
   }
+
+  makeClone(): RootASTNode {
+    return new RootASTNode(this.child.makeClone());
+  }
+
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    return this.child.oneStepExecute(environment, astNodeDivMap);
+  }
 }
 export abstract class ASTNode {
   parent: ParentASTNode;
@@ -102,10 +113,12 @@ export abstract class ASTNode {
 
   abstract makeSelected(astNodeDivMap: ASTNodeDivMap): void;
 
+
   abstract makeClone(): ASTNode;
 
   abstract evaluateExpressions(environemnt, limiter);
 
+  abstract oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult;
 }
 
 export class ParseError extends Error {
@@ -119,7 +132,10 @@ export class ParseError extends Error {
 }
 
 export abstract class AbstractIdent extends ASTNode {
-
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    console.trace("this shouldn't ever be called!");
+    return [this, environment];
+  }
 }
 
 export class Ident extends AbstractIdent {
@@ -303,11 +319,26 @@ export class Statements extends ASTNode implements ParentASTNode {
 
     return rootElement;
   }
+
+  executeStatementNo = 0;
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    let statementToExecute = this.statements[this.executeStatementNo];
+    let resultAfterExecuting = statementToExecute.oneStepExecute(environment, astNodeDivMap);
+    let newStatement = resultAfterExecuting[0];
+    let newEnvironment = resultAfterExecuting[1];
+    console.log('environment now', newEnvironment);
+    this.statements[this.executeStatementNo] = <Statement> newStatement;
+    if (newStatement.hasExecuted()) {
+      this.executeStatementNo++;
+    }
+    return [this, newEnvironment];
+  }
 }
 
 export abstract class Statement extends ASTNode {
   abstract evaluate(environment: Environment): EvaluateResult;
   abstract makeClone(): Statement;
+  abstract hasExecuted(): boolean;
   static parse(p: Parser): Statement {
     let tokenPosition = p.getTokenPosition();
     let possibilities = [];
@@ -333,6 +364,12 @@ export abstract class Statement extends ASTNode {
     console.log('possibilities for statement are', possibilities);
 
     return new UndefinedStatement();
+  }
+
+  makeExecuting(astNodeDivMap: ASTNodeDivMap): void {
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('executing');
+    let contentElement = rootElement.contentElement
   }
 }
 
@@ -400,6 +437,8 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
 export class AssignmentStatement extends Statement implements ParentASTNode {
   ident: AbstractIdent;
   expression: Expression;
+
+  executed: boolean = false;
 
   constructor(ident: AbstractIdent, expression: Expression) {
     super();
@@ -523,6 +562,24 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
 
     return [newStatement, newEnvironment];
   }
+
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    this.makeExecuting(astNodeDivMap);
+    let newStatement = this;
+    let executeResult = this.expression.oneStepExecute(environment, astNodeDivMap);
+    let newExpression = executeResult[0];
+    let newEnvironment = executeResult[1];
+    if (newExpression instanceof LiteralExpression ) {
+      newEnvironment.setValue(this.ident.ident, newExpression.evaluate(environment));
+      this.executed = true;
+    }
+    newStatement.expression = <Expression> newExpression;
+    return [newStatement, newEnvironment];
+  }
+
+  hasExecuted() {
+    return this.executed;
+  }
 }
 
 export abstract class Expression extends ASTNode {
@@ -561,9 +618,15 @@ export abstract class Expression extends ASTNode {
   abstract makeClone(): Expression;
   abstract evaluate(environment);
   abstract evaluateExpressions(environment, limiter);
+
+  makeEvaluating(astNodeDivMap: ASTNodeDivMap): void {
+    let rootElement = astNodeDivMap.getDiv(this);  
+    rootElement.classList.add('evaluating');
+    let contentElement = rootElement.contentElement
+  }
 }
 
-export class BinaryExpression extends Expression implements ParentASTNode {
+export class BinaryExpression extends Expression implements ParentASTNode, ASTNode {
   leftExpr : Expression;
   rightExpr : Expression;
   operator: Operator;
@@ -665,10 +728,33 @@ export class BinaryExpression extends Expression implements ParentASTNode {
     }
   }
 
-  makeClone(): BinaryExpression {
+  makeClone(): Expression {
     let left = this.leftExpr.makeClone();
     let right = this.rightExpr.makeClone();
     return new BinaryExpression(left, right, this.operator);
+  }
+
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    if (this.leftExpr instanceof LiteralExpression) {
+      // Left cannot be evaluated any more
+    } else {
+      let leftEvalResult = this.leftExpr.oneStepExecute(environment, astNodeDivMap)
+      this.leftExpr = <Expression> leftEvalResult[0];
+      let newEnvironment = leftEvalResult[1];
+      return [<BinaryExpression> this, newEnvironment];
+    }
+    if (this.rightExpr instanceof LiteralExpression) {
+      // Right cannot be evaluated any more
+    } else {
+      let rightEvalResult = this.rightExpr.oneStepExecute(environment, astNodeDivMap);
+      this.rightExpr = <Expression> rightEvalResult[0];
+      let newEnvironment = rightEvalResult[1];
+      return [<BinaryExpression> this, newEnvironment];
+    }
+    this.makeEvaluating(astNodeDivMap);
+    let evaluatedExpression = this.evaluate(environment);
+    let newExpression = PrimaryExpression.create(evaluatedExpression);
+    return [newExpression, environment];
   }
 }
 
@@ -768,9 +854,21 @@ export class IdentExpression extends PrimaryExpression {
   makeClone(): IdentExpression {
     return new IdentExpression(this.ident);
   }
+
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    this.makeEvaluating(astNodeDivMap);
+    let value = this.evaluate(environment);
+    let newExpression = PrimaryExpression.create(value);
+    return [newExpression, environment];
+  }
 }
 
-export abstract class LiteralExpression extends PrimaryExpression{}
+export abstract class LiteralExpression extends PrimaryExpression{
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    console.trace("this shouldn't ever be called!");
+    return [this, environment];
+  }
+}
 
 export class NumberLiteral extends LiteralExpression {
   value: number;
@@ -832,6 +930,7 @@ export class NumberLiteral extends LiteralExpression {
   makeClone(): NumberLiteral {
     return new NumberLiteral(this.value);
   }
+
 }
 
 export class StringLiteral extends LiteralExpression {
@@ -948,6 +1047,10 @@ export class EmptyExpression extends Expression {
 
   makeClone(): EmptyExpression {
     return new EmptyExpression(this.text);
+  }
+
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    return [<EmptyExpression> this, environment];
   }
 }
 

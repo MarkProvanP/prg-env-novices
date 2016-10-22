@@ -126,6 +126,14 @@ $line-height: 30px;
   border: 2px solid red;
 }
 
+.executing {
+  border: 2px solid green;
+}
+
+.evaluating {
+  border: 2px solid pink;
+}
+
 .empty-expr-text {
   pointer-events: none;
 }

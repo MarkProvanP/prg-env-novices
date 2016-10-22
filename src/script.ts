@@ -14,6 +14,7 @@ let expr : lang.ASTNode;
 let isCursorActive : boolean = false;
 
 let executeButton = document.getElementById("executeButton");
+let stepButton = document.getElementById("stepButton");
 let execASTDiv = document.getElementById("execASTDiv");
 let execEnvDiv = document.getElementById("execEnvDiv");
 let execEnvTable = <HTMLTableElement> document.getElementById("execEnvTable");
@@ -133,38 +134,67 @@ function makeNodeSelected(node: lang.ASTNode) : void {
 }
 
 export function renderAST() {
-  renderASTintoDiv(astDiv);
-}
-
-export function renderASTintoDiv(div: HTMLElement) {
   theDivASTNodeMap = new ASTNodeDivMap();
-  div.innerHTML = "";
+  astDiv.innerHTML = "";
   let d = rootASTNode.toDOM(theDivASTNodeMap);
-  div.appendChild(d);
-  div.onclick = astNodeDivOnclick;
+  astDiv.appendChild(d);
+  astDiv.onclick = astNodeDivOnclick;
   if (selectedASTNode) {
     selectedASTNode.makeSelected(theDivASTNodeMap);
   }
 }
 
+export function renderASTexecute() {
+  execASTDiv.innerHTML = "";
+  let d = execStateAST.toDOM(execASTNodeDivMap);
+  execASTDiv.appendChild(d);
+}
+
+let execStateAST;
+let executeEnvironment;
+let execASTNodeDivMap;
+let buttonEnabled = true;
+
 executeButton.onclick = function(event) {
-  renderASTintoDiv(execASTDiv);
+  execASTNodeDivMap = new ASTNodeDivMap();
+  execStateAST = rootASTNode.makeClone();
+  executeEnvironment = new lang.Environment();
+  renderEnvironment(executeEnvironment);
+  renderASTexecute();
+}
+
+stepButton.onclick = (event) => {
+  if (!buttonEnabled) return;
+  let result = execStateAST.oneStepExecute(executeEnvironment, execASTNodeDivMap);
+  let newAST = result[0];
+  let newRootNode = new lang.RootASTNode(newAST);
+  let newEnvironment = result[1];
+  execStateAST = newRootNode;
+  executeEnvironment = newEnvironment;
+  buttonEnabled = false;
+  window.setTimeout(() => {
+    renderASTexecute();
+    renderEnvironment(executeEnvironment);
+    buttonEnabled = true;
+  }, 1000);
 }
 
 function renderEnvironment(environment) {
-  while (execEnvTable.tBodies.length) {
-    execEnvTable.deleteRow();
+  let tBody = execEnvTable.tBodies[0]
+  while (tBody.rows.length) {
+    tBody.deleteRow(0);
   }
 
-  for (let key in environment) {
+  let mapping = environment.mapping
+  for (let key in mapping) {
     let row = document.createElement("tr");
     let keyTd = document.createElement("td");
     keyTd.textContent = key;
     row.appendChild(keyTd);
     let valueTd = document.createElement("td");
-    valueTd.textContent = environment[key];
+    valueTd.textContent = mapping[key];
     row.appendChild(valueTd);
-    execEnvTable.appendChild(row);
+    tBody.appendChild(row);
   }
 }
 
