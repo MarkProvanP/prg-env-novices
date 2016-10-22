@@ -108,7 +108,9 @@ export class StringToken extends Token {
 }
 
 export class RemainingInputToken extends Token {
-  constructor(public remainingInput) {}
+  constructor(public remainingInput) {
+    super();
+  }
   toString() { return this.remainingInput; }
 }
 

@@ -4,14 +4,36 @@ import { Token, NumToken, StringToken, IdentToken, AssignToken, OperatorToken, O
 
 export class Environment {
   mapping = {}
-  setValue(ident, value) {
+  setValue(ident: string, value) {
     this.mapping[ident] = value;
   }
 
-  getValue(ident) {
-    return this.mapping[value];
+  getValue(ident: string) {
+    return this.mapping[ident];
+  }
+
+  constructor(mapping?) {
+    if (mapping) {
+      this.mapping = mapping;
+    } else {
+      this.mapping = {};
+    }
+  }
+
+  makeClone() {
+    let copiedMapping = {};
+    for (let key in this.mapping) {
+      if (this.mapping[key].makeClone) {
+        copiedMapping[key] = this.mapping[key].makeClone();
+      } else {
+        copiedMapping[key] = JSON.parse(JSON.stringify(this.mapping[key]));
+      }
+    }
+    return new Environment(copiedMapping);
   }
 }
+
+export type EvaluateResult = [ASTNode, Environment];
 
 export class ASTElement extends HTMLElement {
   contentElement: HTMLElement;
@@ -33,7 +55,7 @@ export class RootASTNode implements ParentASTNode {
     this.child.setParent(this);
   }
 
-  replaceASTNode(original: ASTNode, replacement: ASTNode) {
+  replaceASTNode(original: ASTNode, replacement: ASTNode): void {
     if (this.child === original) {
       this.child = replacement;
       this.child.setParent(this);
@@ -57,7 +79,7 @@ export abstract class ASTNode {
   abstract setParent(parent: ParentASTNode);
 
   toDOM(astNodeDivMap: ASTNodeDivMap) : ASTElement {
-    let rootElement = document.createElement("div");
+    let rootElement = document.createElement("div") as ASTElement;
     rootElement.classList.add('ast-node');
     astNodeDivMap.addDivNode(rootElement, this);
 
@@ -83,6 +105,7 @@ export abstract class ASTNode {
   abstract makeClone(): ASTNode;
 
   abstract evaluateExpressions(environemnt, limiter);
+
 }
 
 export class ParseError extends Error {
@@ -139,7 +162,7 @@ export class Ident extends AbstractIdent {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     return this.makeClone();
   }
 
@@ -190,7 +213,7 @@ export class EmptyIdent extends AbstractIdent implements EmptyASTNode {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     return this.makeClone();
   }
 }
@@ -207,9 +230,9 @@ export class Statements extends ASTNode implements ParentASTNode {
   }
 
   replaceASTNode(original: ASTNode, replacement: ASTNode): void {
-    let index = this.statements.indexOf(original);
+    let index = this.statements.indexOf(<Statement> original);
     if (index > -1) {
-      this.statements[index] = replacement;
+      this.statements[index] = <Statement> replacement;
       replacement.setParent(this);
     }
     let lastStatement = this.statements[this.statements.length - 1];
@@ -283,6 +306,8 @@ export class Statements extends ASTNode implements ParentASTNode {
 }
 
 export abstract class Statement extends ASTNode {
+  abstract evaluate(environment: Environment): EvaluateResult;
+  abstract makeClone(): Statement;
   static parse(p: Parser): Statement {
     let tokenPosition = p.getTokenPosition();
     let possibilities = [];
@@ -361,9 +386,13 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     limiter.stop();
     return this.makeClone();
+  }
+
+  evaluate(environment: Environment): EvaluateResult {
+    return [this.makeClone(), environment];
   }
 
 }
@@ -384,14 +413,16 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
         this.ident = replacement;
         this.ident.setParent(this);
       } else {
-        throw new Error("can't replace with non-ident", replacement, original);
+        console.error("can't replace with non-ident", replacement, original);
+        throw new Error("can't replace with non-ident" + replacement + original);
       }
     } else if (this.expression === original) {
       if (replacement instanceof Expression) {
         this.expression = <Expression> replacement;
         this.expression.setParent(this);
       } else {
-        throw new Error("can't replace with non-expression", replacement, original);
+        console.error("can't replace with non-expression", replacement, original);
+        throw new Error("can't replace with non-expression" + replacement + original);
       }
     }
   }
@@ -478,10 +509,19 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     let ident = this.ident.evaluateExpressions(environment, limiter);
     let expression = this.expression.evaluateExpressions(environment, limiter);
     return new AssignmentStatement(ident, expression);
+  }
+
+  evaluate(environment: Environment): EvaluateResult {
+    let newStatement = this.makeClone();
+    let newEnvironment = environment.makeClone();
+    let evaluatedResult = this.expression.evaluate(environment);
+    newEnvironment.setValue((<Ident> this.ident).ident, evaluatedResult);
+
+    return [newStatement, newEnvironment];
   }
 }
 
@@ -494,7 +534,9 @@ export abstract class Expression extends ASTNode {
     }
   };
 
-  abstract toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement;
+  toDOM(astNodeDivMap : ASTNodeDivMap) : ASTElement {
+    return super.toDOM(astNodeDivMap);
+  }
 
   static fraserHanson(k: number, p: Parser) : Expression {
     let i : number;
@@ -612,12 +654,12 @@ export class BinaryExpression extends Expression implements ParentASTNode {
   }
 
   evaluateExpressions(environment, limiter): Expression {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     let left = this.leftExpr.makeClone().evaluateExpressions(environment, limiter);
     let right = this.rightExpr.makeClone().evaluateExpressions(environment, limiter);
     if (limiter.ok()) {
       limiter.dec();
-      return new PrimaryExpression(this.evaluate(environment));
+      return PrimaryExpression.create(this.evaluate(environment));
     } else {
       return new BinaryExpression(left, right, this.operator);
     }
@@ -655,6 +697,14 @@ export abstract class PrimaryExpression extends Expression {
       p.setTokenPosition(initialParsePosition);
     }
     return new EmptyExpression();
+  }
+
+  static create(value): PrimaryExpression {
+    if (typeof value == 'number') {
+      return new NumberLiteral(value);
+    } else if (typeof value == 'string') {
+      return new StringLiteral(value);
+    }
   }
 }
 
@@ -711,7 +761,7 @@ export class IdentExpression extends PrimaryExpression {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     return new IdentExpression(this.ident);
   }
 
@@ -775,7 +825,7 @@ export class NumberLiteral extends LiteralExpression {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     return new NumberLiteral(this.value);
   }
 
@@ -785,9 +835,9 @@ export class NumberLiteral extends LiteralExpression {
 }
 
 export class StringLiteral extends LiteralExpression {
-  value: number;
+  value: string;
 
-  constructor(value: number) {
+  constructor(value: string) {
     super();
     this.value = value;
   }
@@ -837,7 +887,7 @@ export class StringLiteral extends LiteralExpression {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     return new StringLiteral(this.value);
   }
 
@@ -847,7 +897,12 @@ export class StringLiteral extends LiteralExpression {
 }
 
 export class EmptyExpression extends Expression {
-  constructor(public text: string) {}
+  constructor(public text?: string) {
+    super();
+    if (!text) {
+      this.text = "";
+    }
+  }
 
   toString() : string {
     return this.text;
@@ -886,7 +941,7 @@ export class EmptyExpression extends Expression {
   }
 
   evaluateExpressions(environment, limiter) {
-    limiter.incScore();
+    if (limiter) limiter.incScore();
     limiter.stop();
     return this.makeClone();
   }

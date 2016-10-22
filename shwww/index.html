@@ -8,6 +8,26 @@
   <div id='errorDiv'></div>
   <label>Type into the AST</label>
   <div id='astDiv' tabindex='0'></div>
+
+  <button id='executeButton'>Execute</button>
+  <div id='executeDiv'>
+    <div id='execASTDiv'>
+    </div>
+    <div id='execEnvDiv'>
+      <h3>Environment</h3>
+      <table id='execEnvTable'>
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+
+  <br/>
+
   <label>Evaluates to:<div id='evalDiv'></div></label>
 
   <script src="bundle.js"></script>

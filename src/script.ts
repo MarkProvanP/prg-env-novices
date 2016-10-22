@@ -13,6 +13,11 @@ let rootASTNode : lang.RootASTNode = new lang.RootASTNode(initialStatements);
 let expr : lang.ASTNode; 
 let isCursorActive : boolean = false;
 
+let executeButton = document.getElementById("executeButton");
+let execASTDiv = document.getElementById("execASTDiv");
+let execEnvDiv = document.getElementById("execEnvDiv");
+let execEnvTable = <HTMLTableElement> document.getElementById("execEnvTable");
+
 let selectedASTNode : lang.ASTNode;
 
 let theDivASTNodeMap : ASTNodeDivMap;
@@ -128,15 +133,39 @@ function makeNodeSelected(node: lang.ASTNode) : void {
 }
 
 export function renderAST() {
+  renderASTintoDiv(astDiv);
+}
+
+export function renderASTintoDiv(div: HTMLElement) {
   theDivASTNodeMap = new ASTNodeDivMap();
-  astDiv.innerHTML = "";
+  div.innerHTML = "";
   let d = rootASTNode.toDOM(theDivASTNodeMap);
-  astDiv.appendChild(d);
-  astDiv.onclick = astNodeDivOnclick;
+  div.appendChild(d);
+  div.onclick = astNodeDivOnclick;
   if (selectedASTNode) {
     selectedASTNode.makeSelected(theDivASTNodeMap);
   }
-  renderEvalDiv();
+}
+
+executeButton.onclick = function(event) {
+  renderASTintoDiv(execASTDiv);
+}
+
+function renderEnvironment(environment) {
+  while (execEnvTable.tBodies.length) {
+    execEnvTable.deleteRow();
+  }
+
+  for (let key in environment) {
+    let row = document.createElement("tr");
+    let keyTd = document.createElement("td");
+    keyTd.textContent = key;
+    row.appendChild(keyTd);
+    let valueTd = document.createElement("td");
+    valueTd.textContent = environment[key];
+    row.appendChild(valueTd);
+    execEnvTable.appendChild(row);
+  }
 }
 
 class Limiter {
@@ -176,7 +205,8 @@ function renderEvalDiv() {
     let limiter = new Limiter(limit);
     try {
       let m = new ASTNodeDivMap();
-      let evaled = rootASTNode.child.evaluateExpressions(limiter);
+      let environment = new lang.Environment();
+      let evaled = rootASTNode.child.evaluateExpressions(environment, limiter);
       let newEvalString = JSON.stringify(evaled);
       if (newEvalString == lastEvalString) {
         return;

@@ -1,5 +1,18 @@
 $line-height: 30px;
 
+#executeDiv {
+  width: 100%;
+  display: flex;
+}
+
+#execASTDiv {
+  flex: 1;
+}
+
+#execEnvDiv {
+  flex: 1;
+}
+
 #inputDiv {
   border: 1px solid black;
   height: 500px;
