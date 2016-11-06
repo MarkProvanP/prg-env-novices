@@ -1,6 +1,6 @@
 import { ASTNodeDivMap } from "../script";
 
-import { Token, NumToken, StringToken, IdentToken, AssignToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
+import { Token, NumToken, StringToken, IdentToken, AssignToken, DoToken, WhileToken, LParenToken, RParenToken, LBraceToken, RBraceToken, OperatorToken, Operator, OperatorUtils, Lexer } from "./lex";
 
 export class Environment {
   mapping = {}
@@ -344,7 +344,7 @@ export abstract class Statement extends ASTNode {
     let possibilities = [];
 
     try {
-      return AssignmentStatement.parse(p);
+      return DoWhileStatement.parse(p);
     } catch (e) {
       if (e instanceof ParseError) {
         possibilities.push(e.possibility);
@@ -353,7 +353,7 @@ export abstract class Statement extends ASTNode {
     p.setTokenPosition(tokenPosition);
 
     try {
-      return UndefinedStatement.parse(p);
+      return AssignmentStatement.parse(p);
     } catch (e) {
       if (e instanceof ParseError) {
         possibilities.push(e.possibility);
@@ -363,7 +363,7 @@ export abstract class Statement extends ASTNode {
 
     console.log('possibilities for statement are', possibilities);
 
-    return new UndefinedStatement();
+    return UndefinedStatement.parse(p);
   }
 
   makeExecuting(astNodeDivMap: ASTNodeDivMap): void {
@@ -372,6 +372,8 @@ export abstract class Statement extends ASTNode {
     let contentElement = rootElement.contentElement
   }
 }
+
+window.STATEMENT = Statement;
 
 export class UndefinedStatement extends Statement implements EmptyASTNode {
   text: string;
@@ -434,6 +436,169 @@ export class UndefinedStatement extends Statement implements EmptyASTNode {
 
 }
 
+export class DoWhileStatement extends Statement {
+  executed: boolean = false;
+  constructor(public statements: Statements, public condition: Expression) {
+    super();
+  }
+
+  replaceASTNode(original: ASTNode, replacement: ASTNode) {
+    if (this.statements == original) {
+      if (replacement instanceof Statements) {
+        this.statements = <Statements> replacement;
+        this.statements.setParent(this);
+      } else {
+        console.error("can't replace with non-statements", replacement, original);
+        throw new Error("");
+      }
+    } else if (this.condition == original) {
+      if (replacement instanceof Expression) {
+        this.condition = <Expression> replacement;
+        this.condition.setParent(this);
+      } else {
+        console.error("can't replace with non-expression", replacement, original);
+        throw new Error("");
+      }
+    }
+  }
+
+  static parse(p: Parser): DoWhileStatement {
+    let statements: Statements = new Statements([]);
+    let condition: Expression = new EmptyExpression();
+
+    if (p.getToken() instanceof DoToken) {
+      p.advanceToken();
+    } else {
+      throw new ParseError('expected DoToken', new DoWhileStatement(statements, condition), []);
+    }
+
+    if (p.getToken() instanceof LParenToken) {
+      p.advanceToken();
+    } else {
+      throw new ParseError('expected LParenToken', new DoWhileStatement(statements, condition), []);
+    }
+
+    try {
+      statements = Statements.parse(p);
+    } catch (e) {
+      if (e instanceof ParseError) {
+        throw new ParseError('error parsing statements of DoWhileStatement', null, e.buildTrace());
+      } else {
+        throw e;
+      }
+    }
+
+    if (p.getToken() instanceof RParenToken) {
+      p.advanceToken();
+    } else {
+      throw new ParseError('expected RParenToken', new DoWhileStatement(statements, condition), []);
+    }
+
+    if (p.getToken() instanceof WhileToken) {
+      p.advanceToken();
+    } else {
+      throw new ParseError('expected DoToken', new DoWhileStatement(statements, condition), []);
+    }
+
+    if (p.getToken() instanceof LBraceToken) {
+      p.advanceToken();
+    } else {
+      throw new ParseError('expected LBraceToken', new DoWhileStatement(statements, condition), []);
+    }
+
+    try {
+      condition = Expression.parse(p);
+    } catch (e) {
+      if (e instanceof ParseError) {
+        throw new ParseError('error parsing statements of DoWhileStatement', null, e.buildTrace());
+      } else {
+        throw e;
+      }
+    }
+
+    if (p.getToken() instanceof RBraceToken) {
+      p.advanceToken();
+    } else {
+      throw new ParseError('expected RBraceToken', new DoWhileStatement(statements, condition), []);
+    }
+
+    return new DoWhileStatement(statements, condition);
+  }
+
+  toDOM(astNodeDivMap: ASTNodeDivMap) {
+    let rootElement: ASTElement = super.toDOM(astNodeDivMap);
+    rootElement.classList.add("do-while-statement");
+    let contentElement = rootElement.contentElement;
+
+    let doDiv = document.createElement("div");
+    doDiv.classList.add("do-div");
+    doDiv.textContent = "do";
+    contentElement.appendChild(doDiv);
+
+    let statementsDiv = this.statements.toDOM(astNodeDivMap);
+    contentElement.appendChild(statementsDiv);
+
+    let whileDiv = document.createElement("div");
+    whileDiv.classList.add("while-div");
+    whileDiv.textContent = "while";
+    contentElement.appendChild(whileDiv);
+
+    let conditionDiv = this.condition.toDOM(astNodeDivMap);
+    contentElement.appendChild(conditionDiv);
+
+    return rootElement;
+  }
+
+  setParent(parent: ParentASTNode) {
+    this.parent = parent;
+    this.statements.setParent(this);
+    this.condition.setParent(this);
+  }
+
+  getText() {
+    return `do{${this.statements.getText()}}while(${this.condition.getText()})`;
+  }
+
+  getFirstEmpty(): EmptyASTNode {
+    return this.statements.getFirstEmpty() || this.condition.getFirstEmpty();
+  }
+
+  makeClone() {
+    let statementsClone = this.statements.makeClone();
+    let conditionClone = this.condition.makeClone();
+    return new DoWhileStatement(statementsClone, conditionClone);
+  }
+
+  makeSelected(astNodeDivMap: ASTNodeDivMap): void {
+    let rootElement = astNodeDivMap.getDiv(this);
+    rootElement.classList.add('selected');
+    let contentElement = rootElement.contentElement
+    contentElement.appendChild(astNodeDivMap.getCursorDiv());
+  }
+
+  evaluateExpressions(environment, limiter) {
+    throw new Error("you can't evaluate a DoWhileStatement!");
+  }
+
+  evaluate(environment: Environment): EvaluateResult {
+    throw new Error("you can't evaluate a DoWhileStatement!");
+  }
+
+  oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
+    this.makeExecuting(astNodeDivMap);
+    let newStatement = this;
+    let executeResult = this.statements.oneStepExecute(environment, astNodeDivMap);
+    let newStatements = executeResult[0];
+    let newEnvironment = executeResult[1];
+    newStatement.statements = <Statements> newStatements;
+    return [newStatement, newEnvironment];
+  }
+
+  hasExecuted() {
+    return this.executed;
+  }
+}
+
 export class AssignmentStatement extends Statement implements ParentASTNode {
   ident: AbstractIdent;
   expression: Expression;
@@ -449,7 +614,7 @@ export class AssignmentStatement extends Statement implements ParentASTNode {
   replaceASTNode(original: ASTNode, replacement: ASTNode) {
     if (this.ident === original) {
       if (replacement instanceof AbstractIdent) {
-        this.ident = replacement;
+        this.ident = <AbstractIdent> replacement;
         this.ident.setParent(this);
       } else {
         console.error("can't replace with non-ident", replacement, original);
@@ -687,6 +852,9 @@ export class BinaryExpression extends Expression implements ParentASTNode, ASTNo
     rootElement.classList.add("binary-expression"); 
     let contentElement = rootElement.contentElement;
     
+    if (typeof this.leftExpr.toDOM != "function") {
+      debugger;
+    }
     let leftElementDiv = this.leftExpr.toDOM(astNodeDivMap);
     contentElement.appendChild(leftElementDiv);
 
@@ -858,7 +1026,7 @@ export class IdentExpression extends PrimaryExpression {
   oneStepExecute(environment: Environment, astNodeDivMap: ASTNodeDivMap): ExecuteResult {
     this.makeEvaluating(astNodeDivMap);
     let value = this.evaluate(environment);
-    let newExpression = (value);
+    let newExpression = new EvaluatedValue(value);
     return [newExpression, environment];
   }
 }
@@ -1138,3 +1306,5 @@ export class Parser {
     return this.tokenList.length > this.tokenPosition;
   }
 }
+
+window.PARSER = Parser;

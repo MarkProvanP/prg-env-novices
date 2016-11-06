@@ -94,6 +94,27 @@ export class AssignToken extends Token {
   toString() { return '='; }
 }
 
+export class DoToken extends Token {
+  toString() { return 'do'; }
+}
+
+export class WhileToken extends Token {
+  toString() { return 'while'; }
+}
+
+export class LBraceToken extends Token {
+  toString() { return '{'; }
+}
+export class RBraceToken extends Token {
+  toString() { return '}'; }
+}
+export class LParenToken extends Token {
+  toString() { return '('; }
+}
+export class RParenToken extends Token {
+  toString() { return ')'; }
+}
+
 export class StringToken extends Token {
   value: string;
 
@@ -150,6 +171,30 @@ export class Lexer {
         do: (s) => new AssignToken()
       },
       {
+        regex: /^do/,
+        do: (s) => new DoToken()
+      },
+      {
+        regex: /^while/,
+        do: (s) => new WhileToken()
+      },
+      {
+        regex: /^\{/,
+        do: (s) => new LBraceToken()
+      },
+      {
+        regex: /^\}/,
+        do: (s) => new RBraceToken()
+      },
+      {
+        regex: /^\(/,
+        do: (s) => new LParenToken()
+      },
+      {
+        regex: /^\)/,
+        do: (s) => new RParenToken()
+      },
+      {
         regex: /^([a-zA-Z]+)/,
         do: (s) => new IdentToken(s)
       },
@@ -187,3 +232,5 @@ export class Lexer {
     return tokens;
   }
 }
+
+window.LEXER = Lexer;
