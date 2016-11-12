@@ -14,9 +14,9 @@
     this.expression = e;
   }
 
-  function DoWhileStatement(s, c) {
-    this.statements = s;
+  function WhileStatement(c, s) {
     this.condition = c;
+    this.statements = s;
   }
 
   function Ident(n) {
@@ -32,13 +32,13 @@ statements
 
 statement
   = assignmentStatement
-  / doWhileStatement
+  / whileStatement
 
 assignmentStatement
-  = i:ident "=" e:expression { return new AssignmentStatement(i, e); }
+  = i:ident w "=" w e:expression { return new AssignmentStatement(i, e); }
 
-doWhileStatement
-  = "do" "{" s:statement "}" "while" "(" c:expression ")" { return new DoWhileStatement(s, c); }
+whileStatement
+  = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, s); }
 
 expression
   = additive
@@ -61,3 +61,6 @@ integer "integer"
 
 ident
   = name:[a-z]* { return new Ident(name) }
+
+w
+  = [ \t\n\r]*
