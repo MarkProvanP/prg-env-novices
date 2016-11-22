@@ -38,6 +38,7 @@ var StackElement = (function () {
 }());
 var EnvElement = (function () {
     function EnvElement() {
+        this.mapping = {};
     }
     EnvElement.prototype.get = function (key) {
         return this.mapping[key];
@@ -46,6 +47,7 @@ var EnvElement = (function () {
         this.mapping[key] = value;
     };
     EnvElement.prototype.hasKey = function (key) {
+        console.log("checking if key: " + key + " exists in mapping:", this.mapping);
         return this.mapping.hasOwnProperty(key);
     };
     return EnvElement;
@@ -53,6 +55,9 @@ var EnvElement = (function () {
 var EnvChange = (function () {
     function EnvChange(key, before, after, envNo) {
         this.key = key;
+        this.before = before;
+        this.after = after;
+        this.envNo = envNo;
     }
     return EnvChange;
 }());
@@ -64,6 +69,7 @@ var Machine = (function () {
         this.envStack = [];
         this.instructionPointer = 0;
         this.labelMap = {};
+        this.changeHistory = [];
         this.instructions.forEach(function (instruction, index) {
             if (instruction instanceof Label) {
                 var labelInstruction = instruction;
@@ -90,6 +96,48 @@ var Machine = (function () {
                 return i;
             }
         }
+        // If we haven't found it yet, just use the topmost env
+        return this.envStack.length - 1;
+    };
+    Machine.prototype.applyMachineChange = function (machineChange) {
+        var _this = this;
+        machineChange.stackPopped.forEach(function (popped) {
+            console.log('popping from stack', popped);
+            _this.stack.pop();
+        });
+        machineChange.stackPushed.forEach(function (pushed) {
+            console.log('pushing onto stack', pushed);
+            _this.stack.push(pushed);
+        });
+        machineChange.envPopped.forEach(function (popped) {
+            console.log('popping env from stack', popped);
+            _this.envStack.pop();
+        });
+        machineChange.envPushed.forEach(function (pushed) {
+            console.log('pushing env onto stack', pushed);
+            _this.envStack.push(pushed);
+        });
+        if (machineChange.envChanged) {
+            var envChanged = machineChange.envChanged;
+            var changedEnv = this.envStack[envChanged.envNo];
+            var key = envChanged.key;
+            changedEnv[key] = envChanged.after;
+        }
+        console.log("instruction pointer changing by " + machineChange.ipChange);
+        this.instructionPointer += machineChange.ipChange;
+    };
+    Machine.prototype.execute = function () {
+        while (this.instructionPointer < this.instructions.length) {
+            this.oneStepExecute();
+        }
+    };
+    Machine.prototype.oneStepExecute = function () {
+        var ip = this.instructionPointer;
+        var instruction = this.instructions[ip];
+        console.log("IP: " + ip + ", instruction:", instruction);
+        var change = instruction.machineChange(this);
+        this.changeHistory.push(change);
+        this.applyMachineChange(change);
     };
     return Machine;
 }());
@@ -103,7 +151,7 @@ var MachineChange = (function () {
         this.ipChange = ipChange;
     }
     MachineChange.create = function (_a) {
-        var _b = _a.stackPushed, stackPushed = _b === void 0 ? undefined : _b, _c = _a.stackPopped, stackPopped = _c === void 0 ? undefined : _c, _d = _a.envPushed, envPushed = _d === void 0 ? undefined : _d, _e = _a.envPopped, envPopped = _e === void 0 ? undefined : _e, _f = _a.envChanged, envChanged = _f === void 0 ? undefined : _f, _g = _a.ipChange, ipChange = _g === void 0 ? undefined : _g;
+        var _b = _a.stackPushed, stackPushed = _b === void 0 ? [] : _b, _c = _a.stackPopped, stackPopped = _c === void 0 ? [] : _c, _d = _a.envPushed, envPushed = _d === void 0 ? [] : _d, _e = _a.envPopped, envPopped = _e === void 0 ? [] : _e, _f = _a.envChanged, envChanged = _f === void 0 ? undefined : _f, _g = _a.ipChange, ipChange = _g === void 0 ? 0 : _g;
         return new MachineChange(stackPushed, stackPopped, envPushed, envPopped, envChanged, ipChange);
     };
     return MachineChange;
@@ -138,7 +186,7 @@ var Push = (function (_super) {
         this.val = val;
     }
     Push.prototype.machineChange = function (machine) {
-        return MachineChange.create({ stackPushed: this.val, ipChange: 1 });
+        return MachineChange.create({ stackPushed: [this.val], ipChange: 1 });
     };
     return Push;
 }(Instruction));
@@ -148,7 +196,7 @@ var Pop = (function (_super) {
         _super.call(this);
     }
     Pop.prototype.machineChange = function (machine) {
-        return MachineChange.create({ stackPopped: machine.peek(), ipChange: 1 });
+        return MachineChange.create({ stackPopped: [machine.peek()], ipChange: 1 });
     };
     return Pop;
 }(Instruction));
@@ -158,7 +206,7 @@ var Dup = (function (_super) {
         _super.call(this);
     }
     Dup.prototype.machineChange = function (machine) {
-        return MachineChange.create({ stackPushed: machine.peek(), ipChange: 1 });
+        return MachineChange.create({ stackPushed: [machine.peek()], ipChange: 1 });
     };
     return Dup;
 }(Instruction));
@@ -168,7 +216,7 @@ var NewEnv = (function (_super) {
         _super.call(this);
     }
     NewEnv.prototype.machineChange = function (machine) {
-        return MachineChange.create({ envPushed: new EnvElement(), ipChange: 1 });
+        return MachineChange.create({ envPushed: [new EnvElement()], ipChange: 1 });
     };
     return NewEnv;
 }(Instruction));
@@ -178,7 +226,7 @@ var PopEnv = (function (_super) {
         _super.call(this);
     }
     PopEnv.prototype.machineChange = function (machine) {
-        return MachineChange.create({ envPopped: machine.peekEnv(), ipChange: 1 });
+        return MachineChange.create({ envPopped: [machine.peekEnv()], ipChange: 1 });
     };
     return PopEnv;
 }(Instruction));
@@ -193,7 +241,7 @@ var CallFunction = (function (_super) {
         var args = machine.peek(arity);
         var popped = [this.func].concat(args);
         var pushed = [this.func.apply(null, args)];
-        return MachineChange.create({ stackPushed: pushed, stackPopped: popped, ipChange: 1 });
+        return MachineChange.create({ stackPushed: [pushed], stackPopped: [popped], ipChange: 1 });
     };
     return CallFunction;
 }(Instruction));
@@ -210,10 +258,10 @@ var IfGoto = (function (_super) {
             var originalIP = machine.instructionPointer;
             var newIP = machine.labelMap[this.label];
             var change = newIP - originalIP;
-            return MachineChange.create({ stackPopped: stackTop, ipChange: change });
+            return MachineChange.create({ stackPopped: [stackTop], ipChange: change });
         }
         else {
-            return MachineChange.create({ stackPopped: stackTop, ipChange: 1 });
+            return MachineChange.create({ stackPopped: [stackTop], ipChange: 1 });
         }
     };
     return IfGoto;
@@ -237,11 +285,12 @@ var Set = (function (_super) {
     }
     Set.prototype.machineChange = function (machine) {
         var index = machine.getIndexOfEnvWithKey(this.key);
+        console.log("index: " + index);
         var env = machine.envStack[index];
         var before = env.get(this.key);
         var value = machine.peek();
         var envChanged = new EnvChange(this.key, before, value, index);
-        return MachineChange.create({ stackPopped: value, envChanged: envChanged, ipChange: 1 });
+        return MachineChange.create({ stackPopped: [value], envChanged: envChanged, ipChange: 1 });
     };
     return Set;
 }(Instruction));
@@ -255,27 +304,56 @@ var Get = (function (_super) {
         var index = machine.getIndexOfEnvWithKey(this.key);
         var env = machine.envStack[index];
         var pushed = env.get(this.key);
-        return MachineChange.create({ stackPushed: pushed, ipChange: 1 });
+        return MachineChange.create({ stackPushed: [pushed], ipChange: 1 });
     };
     return Get;
 }(Instruction));
+var ASTBegin = (function (_super) {
+    __extends(ASTBegin, _super);
+    function ASTBegin(ast) {
+        _super.call(this);
+        this.ast = ast;
+    }
+    ASTBegin.prototype.machineChange = function (machine) {
+        return MachineChange.create({ ipChange: 1 });
+    };
+    return ASTBegin;
+}(Instruction));
+var ASTEnd = (function (_super) {
+    __extends(ASTEnd, _super);
+    function ASTEnd(ast) {
+        _super.call(this);
+        this.ast = ast;
+    }
+    ASTEnd.prototype.machineChange = function (machine) {
+        return MachineChange.create({ ipChange: 1 });
+    };
+    return ASTEnd;
+}(Instruction));
 var codegens = {
     Integer: function (i) {
+        addInstruction(new ASTBegin(i));
         operation("push " + i.value);
         addInstruction(new Push(i.value));
+        addInstruction(new ASTEnd(i));
     },
     BinaryExpression: function (e) {
+        addInstruction(new ASTBegin(e));
         callCodegen(e.left);
         callCodegen(e.right);
         operation(e.op);
         addInstruction(new CallFunction(builtInFunctions[e.op]));
+        addInstruction(new ASTEnd(e));
     },
     AssignmentStatement: function (s) {
+        addInstruction(new ASTBegin(s));
         callCodegen(s.expression);
         operation('set ' + s.ident.name);
         addInstruction(new Set(s.ident.name));
+        addInstruction(new ASTEnd(s));
     },
     WhileStatement: function (s) {
+        addInstruction(new ASTBegin(s));
         var whileBeginLabel = "whileBegin";
         var whileEndLabel = "whileEnd";
         operation('LABEL begin');
@@ -290,12 +368,15 @@ var codegens = {
         addInstruction(new IfGoto(whileBeginLabel));
         operation('LABEL end');
         addInstruction(new Label(whileEndLabel));
+        addInstruction(new ASTEnd(s));
     }
 };
 var instructions = [];
+instructions.push(new NewEnv());
 function addInstruction(instruction) {
     instructions.push(instruction);
 }
 callCodegen(r);
 var machine = new Machine(instructions);
 console.log(machine);
+machine.execute();

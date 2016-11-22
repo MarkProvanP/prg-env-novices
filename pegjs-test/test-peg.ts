@@ -1,7 +1,7 @@
 "use strict"
 
-let peg = require("pegjs")
-let fs = require("fs")
+import * as peg from "pegjs";
+import * as fs from "fs";
 
 let grammarString = fs.readFileSync("pegjs-grammar.txt", "utf8");
 
@@ -41,7 +41,7 @@ class StackElement {
 }
 
 class EnvElement {
-  mapping: {};
+  mapping = {};
 
   public get(key: string) {
     return this.mapping[key];
@@ -52,12 +52,18 @@ class EnvElement {
   }
 
   hasKey(key: string) {
+    console.log(`checking if key: ${key} exists in mapping:`, this.mapping)
     return this.mapping.hasOwnProperty(key);
   }
 }
 
 class EnvChange {
-  constructor(public key: string, before: any, after: any, envNo: number) {}
+  constructor(
+    public key: string,
+    public before: any,
+    public after: any,
+    public envNo: number
+  ) {}
 }
 
 class Machine {
@@ -66,6 +72,8 @@ class Machine {
 
   public instructionPointer = 0;
   public labelMap = {};
+
+  public changeHistory: MachineChange[] = [];
 
   constructor(private instructions: Instruction[]) {
     this.instructions.forEach((instruction, index) => {
@@ -98,22 +106,66 @@ class Machine {
         return i;
       }
     }
+    // If we haven't found it yet, just use the topmost env
+    return this.envStack.length - 1;
+  }
+
+  applyMachineChange(machineChange: MachineChange) {
+    machineChange.stackPopped.forEach(popped => {
+      console.log('popping from stack', popped);
+      this.stack.pop();
+    })
+    machineChange.stackPushed.forEach(pushed => {
+      console.log('pushing onto stack', pushed);
+      this.stack.push(pushed);
+    })
+    machineChange.envPopped.forEach(popped => {
+      console.log('popping env from stack', popped)
+      this.envStack.pop();
+    })
+    machineChange.envPushed.forEach(pushed => {
+      console.log('pushing env onto stack', pushed);
+      this.envStack.push(pushed);
+    })
+    if (machineChange.envChanged) {
+      let envChanged = machineChange.envChanged;
+      let changedEnv = this.envStack[envChanged.envNo];
+      let key = envChanged.key;
+      changedEnv[key] = envChanged.after;
+    }
+    console.log(`instruction pointer changing by ${machineChange.ipChange}`)
+    this.instructionPointer += machineChange.ipChange;
+  }
+
+  execute() {
+    while (this.instructionPointer < this.instructions.length) {
+      this.oneStepExecute();
+    }
+  }
+
+  oneStepExecute() {
+    let ip = this.instructionPointer;
+    let instruction = this.instructions[ip];
+    console.log(`IP: ${ip}, instruction:`, instruction)
+    let change = instruction.machineChange(this);
+    this.changeHistory.push(change);
+    this.applyMachineChange(change);
   }
 }
 
 class MachineChange {
   constructor(
-    private stackPushed: StackElement[],
-    private stackPopped: StackElement[],
-    private envPushed: EnvElement[],
-    private envPopped: EnvElement[],
-    private envChanged: EnvChange,
-    private ipChange: number
+    public stackPushed: StackElement[],
+    public stackPopped: StackElement[],
+    public envPushed: EnvElement[],
+    public envPopped: EnvElement[],
+    public envChanged: EnvChange,
+    public ipChange: number
   ) {
 
   }
 
-  static create({stackPushed = undefined, stackPopped = undefined, envPushed = undefined, envPopped = undefined, envChanged = undefined, ipChange = undefined}) {
+  static create({stackPushed = [], stackPopped = [], envPushed = [], envPopped = [], envChanged = undefined, ipChange = 0}) {
     return new MachineChange(stackPushed, stackPopped, envPushed, envPopped, envChanged, ipChange);
   }
 }
@@ -148,7 +200,7 @@ class Push extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({stackPushed: this.val, ipChange: 1})
+    return MachineChange.create({stackPushed: [this.val], ipChange: 1})
   }
 }
 
@@ -158,7 +210,7 @@ class Pop extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({stackPopped: machine.peek(), ipChange: 1})
+    return MachineChange.create({stackPopped: [machine.peek()], ipChange: 1})
   }
 }
 
@@ -168,7 +220,7 @@ class Dup extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({stackPushed: machine.peek(), ipChange: 1})
+    return MachineChange.create({stackPushed: [machine.peek()], ipChange: 1})
   }
 }
 
@@ -178,7 +230,7 @@ class NewEnv extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({envPushed: new EnvElement(), ipChange: 1})
+    return MachineChange.create({envPushed: [new EnvElement()], ipChange: 1})
   }
 }
 
@@ -188,7 +240,7 @@ class PopEnv extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({envPopped: machine.peekEnv(), ipChange: 1})
+    return MachineChange.create({envPopped: [machine.peekEnv()], ipChange: 1})
   }
 }
 
@@ -202,7 +254,7 @@ class CallFunction extends Instruction {
     let args = machine.peek(arity);
     let popped = [this.func].concat(args)
     let pushed = [this.func.apply(null, args)]
-    return MachineChange.create({stackPushed: pushed, stackPopped: popped, ipChange: 1})
+    return MachineChange.create({stackPushed: [pushed], stackPopped: [popped], ipChange: 1})
   }
 }
 
@@ -218,9 +270,9 @@ class IfGoto extends Instruction {
       let originalIP = machine.instructionPointer;
       let newIP = machine.labelMap[this.label];
       let change = newIP - originalIP;
-      return MachineChange.create({stackPopped: stackTop, ipChange: change})
+      return MachineChange.create({stackPopped: [stackTop], ipChange: change})
     } else {
-      return MachineChange.create({stackPopped: stackTop, ipChange: 1})
+      return MachineChange.create({stackPopped: [stackTop], ipChange: 1})
     }
   }
 }
@@ -242,11 +294,12 @@ class Set extends Instruction {
 
   machineChange(machine: Machine) {
     let index = machine.getIndexOfEnvWithKey(this.key);
+    console.log(`index: ${index}`)
     let env = machine.envStack[index];
     let before = env.get(this.key);
     let value = machine.peek();
     let envChanged = new EnvChange(this.key, before, value, index);
-    return MachineChange.create({stackPopped: value, envChanged: envChanged, ipChange: 1})
+    return MachineChange.create({stackPopped: [value], envChanged: envChanged, ipChange: 1})
   }
 }
 
@@ -259,27 +312,54 @@ class Get extends Instruction {
     let index = machine.getIndexOfEnvWithKey(this.key);
     let env = machine.envStack[index];
     let pushed = env.get(this.key);
-    return MachineChange.create({stackPushed: pushed, ipChange: 1})
+    return MachineChange.create({stackPushed: [pushed], ipChange: 1})
+  }
+}
+
+class ASTBegin extends Instruction {
+  constructor(public ast) {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    return MachineChange.create({ipChange: 1});
+  }
+}
+
+class ASTEnd extends Instruction {
+  constructor(public ast) {
+    super();
+  }
+
+  machineChange(machine: Machine) {
+    return MachineChange.create({ipChange: 1});
   }
 }
 
 let codegens = {
   Integer: function(i) {
+    addInstruction(new ASTBegin(i))
     operation("push " + i.value);
     addInstruction(new Push(i.value))
+    addInstruction(new ASTEnd(i));
   },
   BinaryExpression: function(e) {
+    addInstruction(new ASTBegin(e));
     callCodegen(e.left);
     callCodegen(e.right);
     operation(e.op);
     addInstruction(new CallFunction(builtInFunctions[e.op]))
+    addInstruction(new ASTEnd(e));
   },
   AssignmentStatement: function(s) {
+    addInstruction(new ASTBegin(s));
     callCodegen(s.expression);
     operation('set ' + s.ident.name);
     addInstruction(new Set(s.ident.name));
+    addInstruction(new ASTEnd(s));
   },
   WhileStatement: function(s) {
+    addInstruction(new ASTBegin(s));
     let whileBeginLabel = "whileBegin";
     let whileEndLabel = "whileEnd";
     operation('LABEL begin')
@@ -294,10 +374,13 @@ let codegens = {
     addInstruction(new IfGoto(whileBeginLabel));
     operation('LABEL end');
     addInstruction(new Label(whileEndLabel))
+    addInstruction(new ASTEnd(s));
   }
 }
 
 let instructions = []
+
+instructions.push(new NewEnv());
 
 function addInstruction(instruction: Instruction) {
   instructions.push(instruction);
@@ -308,3 +391,5 @@ callCodegen(r);
 let machine = new Machine(instructions);
 
 console.log(machine);
+
+machine.execute()
