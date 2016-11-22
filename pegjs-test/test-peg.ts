@@ -36,9 +36,7 @@ function callCodegen(thing) {
   }
 }
 
-class StackElement {
-
-}
+type StackElement = any;
 
 class EnvElement {
   mapping = {};
@@ -95,7 +93,8 @@ class Machine {
     return this.envStack[this.envStack.length - 1];
   }
 
-  static isTruthy(val) {
+  static isTruthy(val: StackElement) {
+    console.log('isTruthy?', val);
     return !!val;
   }
 
@@ -132,15 +131,20 @@ class Machine {
       let changedEnv = this.envStack[envChanged.envNo];
       let key = envChanged.key;
       changedEnv[key] = envChanged.after;
+      console.log(`Setting: ${key} to val: `, envChanged.after);
     }
     console.log(`instruction pointer changing by ${machineChange.ipChange}`)
     this.instructionPointer += machineChange.ipChange;
   }
 
+  instructionCount = 0;
+
   execute() {
     while (this.instructionPointer < this.instructions.length) {
+      console.log(`Instruction count now: ${this.instructionCount}`)
       this.oneStepExecute();
     }
+    console.log('execution complete');
   }
 
   oneStepExecute() {
@@ -150,6 +154,7 @@ class Machine {
     let change = instruction.machineChange(this);
     this.changeHistory.push(change);
     this.applyMachineChange(change);
+    this.instructionCount++;
   }
 }
 
@@ -252,9 +257,10 @@ class CallFunction extends Instruction {
   machineChange(machine: Machine) {
     let arity = this.func.arity;
     let args = machine.peek(arity);
-    let popped = [this.func].concat(args)
-    let pushed = [this.func.apply(null, args)]
-    return MachineChange.create({stackPushed: [pushed], stackPopped: [popped], ipChange: 1})
+    let poppedArray = [this.func].concat(args)
+    let pushedArray = [this.func.apply(null, args)]
+    console.log('arity', arity, 'args', args, 'popped', poppedArray, 'pushed', pushedArray);
+    return MachineChange.create({stackPushed: pushedArray, stackPopped: poppedArray, ipChange: 1})
   }
 }
 
@@ -264,7 +270,9 @@ class IfGoto extends Instruction {
   }
 
   machineChange(machine: Machine) {
+    console.log('machine.stack', machine.stack)
     let stackTop = machine.peek();
+    console.log('stackTop', stackTop);
     let isTruthy = Machine.isTruthy(stackTop);
     if (isTruthy) {
       let originalIP = machine.instructionPointer;

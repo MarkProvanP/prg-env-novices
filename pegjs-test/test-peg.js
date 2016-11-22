@@ -31,11 +31,6 @@ function callCodegen(thing) {
         decTabs();
     }
 }
-var StackElement = (function () {
-    function StackElement() {
-    }
-    return StackElement;
-}());
 var EnvElement = (function () {
     function EnvElement() {
         this.mapping = {};
@@ -70,6 +65,7 @@ var Machine = (function () {
         this.instructionPointer = 0;
         this.labelMap = {};
         this.changeHistory = [];
+        this.instructionCount = 0;
         this.instructions.forEach(function (instruction, index) {
             if (instruction instanceof Label) {
                 var labelInstruction = instruction;
@@ -87,6 +83,7 @@ var Machine = (function () {
         return this.envStack[this.envStack.length - 1];
     };
     Machine.isTruthy = function (val) {
+        console.log('isTruthy?', val);
         return !!val;
     };
     Machine.prototype.getIndexOfEnvWithKey = function (key) {
@@ -122,14 +119,17 @@ var Machine = (function () {
             var changedEnv = this.envStack[envChanged.envNo];
             var key = envChanged.key;
             changedEnv[key] = envChanged.after;
+            console.log("Setting: " + key + " to val: ", envChanged.after);
         }
         console.log("instruction pointer changing by " + machineChange.ipChange);
         this.instructionPointer += machineChange.ipChange;
     };
     Machine.prototype.execute = function () {
         while (this.instructionPointer < this.instructions.length) {
+            console.log("Instruction count now: " + this.instructionCount);
             this.oneStepExecute();
         }
+        console.log('execution complete');
     };
     Machine.prototype.oneStepExecute = function () {
         var ip = this.instructionPointer;
@@ -138,6 +138,7 @@ var Machine = (function () {
         var change = instruction.machineChange(this);
         this.changeHistory.push(change);
         this.applyMachineChange(change);
+        this.instructionCount++;
     };
     return Machine;
 }());
@@ -239,9 +240,10 @@ var CallFunction = (function (_super) {
     CallFunction.prototype.machineChange = function (machine) {
         var arity = this.func.arity;
         var args = machine.peek(arity);
-        var popped = [this.func].concat(args);
-        var pushed = [this.func.apply(null, args)];
-        return MachineChange.create({ stackPushed: [pushed], stackPopped: [popped], ipChange: 1 });
+        var poppedArray = [this.func].concat(args);
+        var pushedArray = [this.func.apply(null, args)];
+        console.log('arity', arity, 'args', args, 'popped', poppedArray, 'pushed', pushedArray);
+        return MachineChange.create({ stackPushed: pushedArray, stackPopped: poppedArray, ipChange: 1 });
     };
     return CallFunction;
 }(Instruction));
@@ -252,7 +254,9 @@ var IfGoto = (function (_super) {
         this.label = label;
     }
     IfGoto.prototype.machineChange = function (machine) {
+        console.log('machine.stack', machine.stack);
         var stackTop = machine.peek();
+        console.log('stackTop', stackTop);
         var isTruthy = Machine.isTruthy(stackTop);
         if (isTruthy) {
             var originalIP = machine.instructionPointer;
