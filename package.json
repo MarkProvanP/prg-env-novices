@@ -10,6 +10,8 @@
   "author": "Mark Provan <mrp4@st-andrews.ac.uk>",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^7.0.1",
+    "@types/pegjs": "^0.10.0",
     "css-loader": "^0.25.0",
     "ebnf-parser": "^0.1.10",
     "grunt": "^1.0.1",
