@@ -1,0 +1,40 @@
+start
+  = statements
+
+statements
+  = statement *
+
+statement
+  = assignmentStatement
+  / whileStatement
+
+assignmentStatement
+  = i:ident w "=" w e:expression { return new AssignmentStatement(i, e); }
+
+whileStatement
+  = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, s); }
+
+expression
+  = additive
+  / multiplicative
+
+additive
+  = left:multiplicative "+" right:additive { return new BinaryExpression(left, right, "+"); }
+  / multiplicative
+
+multiplicative
+  = left:primary "*" right:multiplicative { return new BinaryExpression(left, right, "*"); }
+  / primary
+
+primary
+  = integer
+  / "(" additive:additive ")" { return additive; }
+
+integer "integer"
+  = digits:[0-9]+ { return new Integer(parseInt(digits.join(""), 10)); }
+
+ident
+  = name:[a-z]* { return new Ident(name.join("")) }
+
+w
+  = [ \t\n\r]*

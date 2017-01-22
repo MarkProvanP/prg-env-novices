@@ -1,0 +1,82 @@
+{
+"use strict";
+var Integer = (function () {
+    function Integer(value) {
+        this.value = value;
+    }
+    return Integer;
+}());
+exports.Integer = Integer;
+var BinaryExpression = (function () {
+    function BinaryExpression(left, right, op) {
+        this.left = left;
+        this.right = right;
+        this.op = op;
+    }
+    return BinaryExpression;
+}());
+exports.BinaryExpression = BinaryExpression;
+var AssignmentStatement = (function () {
+    function AssignmentStatement(ident, expression) {
+        this.ident = ident;
+        this.expression = expression;
+    }
+    return AssignmentStatement;
+}());
+exports.AssignmentStatement = AssignmentStatement;
+var WhileStatement = (function () {
+    function WhileStatement(condition, statements) {
+        this.condition = condition;
+        this.statements = statements;
+    }
+    return WhileStatement;
+}());
+exports.WhileStatement = WhileStatement;
+var Ident = (function () {
+    function Ident(name) {
+        this.name = name;
+    }
+    return Ident;
+}());
+exports.Ident = Ident;
+}
+start
+  = statements
+
+statements
+  = statement *
+
+statement
+  = assignmentStatement
+  / whileStatement
+
+assignmentStatement
+  = i:ident w "=" w e:expression { return new AssignmentStatement(i, e); }
+
+whileStatement
+  = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, s); }
+
+expression
+  = additive
+  / multiplicative
+
+additive
+  = left:multiplicative "+" right:additive { return new BinaryExpression(left, right, "+"); }
+  / multiplicative
+
+multiplicative
+  = left:primary "*" right:multiplicative { return new BinaryExpression(left, right, "*"); }
+  / primary
+
+primary
+  = integer
+  / "(" additive:additive ")" { return additive; }
+
+integer "integer"
+  = digits:[0-9]+ { return new Integer(parseInt(digits.join(""), 10)); }
+
+ident
+  = name:[a-z]* { return new Ident(name.join("")) }
+
+w
+  = [ \t\n\r]*
