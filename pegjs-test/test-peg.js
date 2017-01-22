@@ -9,3 +9,4 @@ var instructions = lang.generateInstructions(r);
 var machine = new lang.Machine(instructions);
 console.log('Built machine');
 console.log(machine);
+machine.execute();
