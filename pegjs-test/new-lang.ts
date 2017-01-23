@@ -1,33 +1,47 @@
-export class Integer {
-  constructor(
-    public value
-  ) {}
+export class ASTNode {
+
 }
 
-export class BinaryExpression {
+export class Integer extends ASTNode {
+  constructor(
+    public value
+  ) {
+    super()
+  }
+}
+
+export class BinaryExpression extends ASTNode {
   constructor(
     public left,
     public right,
     public op
-  ) {}
+  ) {
+    super()
+  }
 }
 
-export class AssignmentStatement {
+export class AssignmentStatement extends ASTNode {
   constructor(
     public ident,
     public expression
-  ) {}
+  ) {
+    super()
+  }
 }
 
-export class WhileStatement {
+export class WhileStatement extends ASTNode {
   constructor(
     public condition,
     public statements
-  ) {}
+  ) {
+    super()
+  }
 }
 
-export class Ident {
+export class Ident extends ASTNode {
   constructor(
     public name
-  ) {}
+  ) {
+    super()
+  }
 }
