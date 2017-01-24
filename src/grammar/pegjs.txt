@@ -1,5 +1,5 @@
 start
-  = statements w
+  = w statements w
 
 statements
   = s:statement* { return new Statements(s)}

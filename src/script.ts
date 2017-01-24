@@ -22,7 +22,7 @@ parseButton.onclick = (event) => {
 
     let renderer = new render.Renderer();
 
-    let astRoot = parsed[0];
+    let astRoot = parsed[1];
 
     let rootASTElement = astRoot.render(renderer);
     astDiv.appendChild(rootASTElement);

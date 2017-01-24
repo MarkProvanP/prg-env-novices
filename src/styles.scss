@@ -10,6 +10,18 @@
     }
 }
 
+.instructions {
+    .instruction {
+        border: 1px solid black;
+        margin: 5px;
+        display: flex;
+
+        .index {
+            margin-right: 20px;
+        }
+    }
+}
+
 .ast-node {
     margin: 5px;
     border: 1px solid black;

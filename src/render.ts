@@ -185,6 +185,9 @@ function renderInstruction(instruction, index) {
   indexElement.textContent = index;
   rootElement.appendChild(indexElement);
 
-  rootElement.textContent = JSON.stringify(instruction);
+  let opcodeElement = document.createElement("div");
+  opcodeElement.textContent = instruction.constructor.name + JSON.stringify(instruction)
+  rootElement.appendChild(opcodeElement);
+  
   return rootElement;
 }
