@@ -1,0 +1,160 @@
+$line-height: 30px;
+
+#executeDiv {
+  width: 100%;
+  display: flex;
+}
+
+#execASTDiv {
+  flex: 1;
+}
+
+#execEnvDiv {
+  flex: 1;
+}
+
+#inputDiv {
+  border: 1px solid black;
+  height: 500px;
+  width: 600px;
+  display: flex;
+  line-height: $line-height;
+}
+
+#astDiv {
+  display: flex;
+  border: 1px solid black;
+  background-color: grey;
+}
+
+@keyframes blinker {
+  50% { opacity: 0.0; }
+}
+
+#cursorDiv {
+  width: 2px;
+  height: $line-height;
+  background-color: black;
+  display: inline-block;
+}
+
+.blinking {
+  animation: blinker 1s linear infinite;
+}
+
+#astCursorDiv {
+  width: 2px;
+  height: 15px;
+  background-color: black;
+  animation: blinker 1s linear infinite;
+}
+
+.textDiv {
+  display: inline-block;
+}
+
+.wordDiv {
+  margin-left: 2px;
+  margin-right: 2px;
+  display: inline-block;
+  height: $line-height;
+}
+
+.ast-node {
+  margin: 5px;
+  border: 2px solid black;
+
+  .title {
+    font-weight: bold;
+    margin: 2px;
+    pointer-events: none;
+    border: 1px solid grey;
+  }
+
+  .content {
+    margin: 2px;
+    display: flex;
+    border: 1px solid grey;
+  }
+}
+
+.ast-node.assignment-statement {
+  background-color: aliceblue;
+
+  .content {
+    align-items: center;
+  }
+}
+
+.ast-node.empty-statement {
+  background-color: white;
+
+  .content {
+    font-style: italic;
+  }
+}
+
+.ast-node.binary-expression {
+  align-items: center;
+  background-color: #FFEE88;
+  padding: 5px;
+}
+
+.ast-node.primary-expression {
+  align-items: center;
+  background-color: #88FFFF;
+}
+
+.ast-node.empty-expression {
+  background-color: white;
+  font-style: italic;
+}
+.ast-node.statements {
+  flex-direction: column;
+  background-color: pink;
+}
+
+.operatorDiv {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  margin: 2px;
+  pointer-events: none;
+}
+
+.selected {
+  border: 2px solid red;
+}
+
+.executing {
+  border: 2px solid green;
+}
+
+.evaluating {
+  border: 2px solid pink;
+}
+
+.empty-expr-text {
+  pointer-events: none;
+}
+
+.selected .empty-expr-text {
+  background-color: grey;
+  animation: background-blink 1s linear infinite;
+}
+@keyframes background-blink {
+  50% { background-color: transparent; }
+}
+
+#evalDiv .wrapper {
+  display: flex;
+}
+
+.ast-root {
+  padding: 10px;
+  background-color: purple;
+}
+
+.evaluated-value {
+  background-color: pink;  
+}

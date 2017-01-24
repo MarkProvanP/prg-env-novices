@@ -1,4 +1,4 @@
-import * as lang from "./new-lang";
+import * as lang from "./lang";
 
 function nodeClassName(node: lang.ASTNode) {
   return node.constructor.name;
@@ -82,7 +82,7 @@ export class Renderer {
 
     let operatorDiv = document.createElement("div");
     operatorDiv.classList.add("operator");
-    operatorDiv.textContent = OperatorUtils.toChar(binaryExpression.op);
+    operatorDiv.textContent = lang.OperatorUtils.toChar(binaryExpression.op);
     contentElement.appendChild(operatorDiv);
 
     let rightElementDiv = binaryExpression.right.render(this);

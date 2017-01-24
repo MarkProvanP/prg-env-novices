@@ -1,0 +1,183 @@
+{
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+(function (Operator) {
+    Operator[Operator["Add"] = 0] = "Add";
+    Operator[Operator["Subtract"] = 1] = "Subtract";
+    Operator[Operator["Multiply"] = 2] = "Multiply";
+    Operator[Operator["Divide"] = 3] = "Divide";
+})(exports.Operator || (exports.Operator = {}));
+var Operator = exports.Operator;
+var OperatorUtils = (function () {
+    function OperatorUtils() {
+    }
+    OperatorUtils.fromChar = function (c) {
+        switch (c) {
+            case "+": return Operator.Add;
+            case "-": return Operator.Subtract;
+            case "*": return Operator.Multiply;
+            case "/": return Operator.Divide;
+        }
+    };
+    OperatorUtils.toChar = function (o) {
+        switch (o) {
+            case Operator.Add: return "+";
+            case Operator.Subtract: return "-";
+            case Operator.Multiply: return "*";
+            case Operator.Divide: return "/";
+        }
+    };
+    OperatorUtils.toFunc = function (o) {
+        switch (o) {
+            case Operator.Add: return function (l, r) { return l + r; };
+            case Operator.Subtract: return function (l, r) { return l - r; };
+            case Operator.Multiply: return function (l, r) { return l * r; };
+            case Operator.Divide: return function (l, r) { return l / r; };
+        }
+    };
+    return OperatorUtils;
+}());
+exports.OperatorUtils = OperatorUtils;
+var ASTNode = (function () {
+    function ASTNode() {
+    }
+    return ASTNode;
+}());
+exports.ASTNode = ASTNode;
+var Expression = (function (_super) {
+    __extends(Expression, _super);
+    function Expression() {
+        _super.apply(this, arguments);
+    }
+    return Expression;
+}(ASTNode));
+exports.Expression = Expression;
+var Integer = (function (_super) {
+    __extends(Integer, _super);
+    function Integer(value) {
+        _super.call(this);
+        this.value = value;
+    }
+    Integer.prototype.render = function (renderer) {
+        return renderer.createIntegerElement(this);
+    };
+    return Integer;
+}(Expression));
+exports.Integer = Integer;
+var BinaryExpression = (function (_super) {
+    __extends(BinaryExpression, _super);
+    function BinaryExpression(left, right, op) {
+        _super.call(this);
+        this.left = left;
+        this.right = right;
+        this.op = op;
+    }
+    BinaryExpression.prototype.render = function (renderer) {
+        return renderer.createBinaryExpressionElement(this);
+    };
+    return BinaryExpression;
+}(Expression));
+exports.BinaryExpression = BinaryExpression;
+var Statements = (function (_super) {
+    __extends(Statements, _super);
+    function Statements(statements) {
+        _super.call(this);
+        this.statements = statements;
+    }
+    Statements.prototype.render = function (renderer) {
+        return renderer.createStatementsElement(this);
+    };
+    return Statements;
+}(ASTNode));
+exports.Statements = Statements;
+var Statement = (function (_super) {
+    __extends(Statement, _super);
+    function Statement() {
+        _super.apply(this, arguments);
+    }
+    return Statement;
+}(ASTNode));
+exports.Statement = Statement;
+var AssignmentStatement = (function (_super) {
+    __extends(AssignmentStatement, _super);
+    function AssignmentStatement(ident, expression) {
+        _super.call(this);
+        this.ident = ident;
+        this.expression = expression;
+    }
+    AssignmentStatement.prototype.render = function (renderer) {
+        return renderer.createAssignmentStatementElement(this);
+    };
+    return AssignmentStatement;
+}(Statement));
+exports.AssignmentStatement = AssignmentStatement;
+var WhileStatement = (function (_super) {
+    __extends(WhileStatement, _super);
+    function WhileStatement(condition, statements) {
+        _super.call(this);
+        this.condition = condition;
+        this.statements = statements;
+    }
+    WhileStatement.prototype.render = function (renderer) {
+        return renderer.createWhileStatementElement(this);
+    };
+    return WhileStatement;
+}(Statement));
+exports.WhileStatement = WhileStatement;
+var Ident = (function (_super) {
+    __extends(Ident, _super);
+    function Ident(name) {
+        _super.call(this);
+        this.name = name;
+    }
+    Ident.prototype.render = function (renderer) {
+        return renderer.createIdentElement(this);
+    };
+    return Ident;
+}(ASTNode));
+exports.Ident = Ident;
+}
+start
+  = statements
+
+statements
+  = statement *
+
+statement
+  = assignmentStatement
+  / whileStatement
+
+assignmentStatement
+  = i:ident w "=" w e:expression { return new AssignmentStatement(i, e); }
+
+whileStatement
+  = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, new Statements(s)); }
+
+expression
+  = additive
+  / multiplicative
+
+additive
+  = left:multiplicative "+" right:additive { return new BinaryExpression(left, right, "+"); }
+  / multiplicative
+
+multiplicative
+  = left:primary "*" right:multiplicative { return new BinaryExpression(left, right, "*"); }
+  / primary
+
+primary
+  = integer
+  / "(" additive:additive ")" { return additive; }
+
+integer "integer"
+  = digits:[0-9]+ { return new Integer(parseInt(digits.join(""), 10)); }
+
+ident
+  = name:[a-z]+ { return new Ident(name.join("")) }
+
+w
+  = [ \t\n\r]*

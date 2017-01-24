@@ -1,5 +1,7 @@
 "use strict"
 
+import * as lang from "./lang";
+
 export type StackElement = any;
 
 export class EnvElement {

@@ -1,9 +1,11 @@
 {
-  "typeRoots": [
-    "node_modules/@types"
-  ],
-  "types": "node",
   "compilerOptions": {
-    "target": "es6"
+    "target": "es6",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node"
+    ]
   }
 }
