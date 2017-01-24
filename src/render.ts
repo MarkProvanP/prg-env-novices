@@ -163,15 +163,31 @@ export function renderMachine(machine: vm.Machine) {
 
   let titleElement = document.createElement("div");
   titleElement.classList.add('title');
-  titleElement.textContent = "Virtual Machine"
+  titleElement.textContent = `Virtual Machine - IP: ${machine.instructionPointer}, Count: ${machine.instructionCount}`
   rootElement.appendChild(titleElement);
 
   let instructionsElement = document.createElement("div");
   instructionsElement.classList.add("instructions");
+  instructionsElement.textContent = "Instructions"
   machine.instructions.forEach((instruction, index) => {
-    instructionsElement.appendChild(renderInstruction(instruction, index))
+    let element = renderInstruction(instruction, index)
+    if (index == machine.instructionPointer) {
+      element.classList.add("current-ip");
+    }
+    instructionsElement.appendChild(element)
+
   })
   rootElement.appendChild(instructionsElement);
+
+  let stackElement = document.createElement("div");
+  stackElement.classList.add("stack");
+  stackElement.textContent = "Stack";
+  machine.stack.forEach((element) => {
+    let e = document.createElement("div");
+    e.textContent = element;
+    stackElement.appendChild(e);
+  })
+  rootElement.appendChild(stackElement);
 
   return rootElement;
 }

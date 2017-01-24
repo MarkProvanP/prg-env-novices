@@ -20,6 +20,10 @@
             margin-right: 20px;
         }
     }
+
+    .instruction.current-ip {
+        background-color: lime;
+    }
 }
 
 .ast-node {

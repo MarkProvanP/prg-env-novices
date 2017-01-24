@@ -24,6 +24,9 @@ parseButton.onclick = (event) => {
 
     let astRoot = parsed[1];
 
+    clearDiv(astDiv);
+    clearDiv(vmDiv);
+
     let rootASTElement = astRoot.render(renderer);
     astDiv.appendChild(rootASTElement);
 
@@ -33,4 +36,8 @@ parseButton.onclick = (event) => {
     vmDiv.appendChild(render.renderMachine(machine));
 
     console.log(vm);
+}
+
+function clearDiv(node) {
+    node.textContent = "";
 }
