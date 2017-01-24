@@ -6,7 +6,7 @@ import * as pegjs from "pegjs"
 
 let grammar = require("./grammar/generated.peg");
 
-let langInput = document.getElementById("lang-input")
+let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HTMLTextAreaElement;
 let parseButton = document.getElementById("parse-button")
 let outputDiv = document.getElementById("output-div")
 
