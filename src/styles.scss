@@ -26,6 +26,13 @@
     }
 }
 
+.stack {
+    .element {
+        border: 1px solid black;
+        background-color: darkgoldenrod
+    }
+}
+
 .ast-node {
     margin: 5px;
     border: 1px solid black;

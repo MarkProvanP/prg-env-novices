@@ -83,7 +83,7 @@ export class Renderer {
 
     let operatorDiv = document.createElement("div");
     operatorDiv.classList.add("operator");
-    operatorDiv.textContent = lang.OperatorUtils.toChar(binaryExpression.op);
+    operatorDiv.textContent = binaryExpression.op;
     contentElement.appendChild(operatorDiv);
 
     let rightElementDiv = binaryExpression.right.render(this);
@@ -184,6 +184,7 @@ export function renderMachine(machine: vm.Machine) {
   stackElement.textContent = "Stack";
   machine.stack.forEach((element) => {
     let e = document.createElement("div");
+    e.classList.add("element");
     e.textContent = element;
     stackElement.appendChild(e);
   })

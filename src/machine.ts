@@ -125,10 +125,10 @@ export class Machine {
 }
 
 class MachineChange {
-  public stackPushed: StackElement[]
-  public stackPopped: StackElement[]
-  public envPushed: EnvElement[]
-  public envPopped: EnvElement[]
+  public stackPushed: StackElement[] = []
+  public stackPopped: StackElement[] = []
+  public envPushed: EnvElement[] = []
+  public envPopped: EnvElement[] = []
   public envChanged: EnvChange
   public ipChange: number = 1
 
