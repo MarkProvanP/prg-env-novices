@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "grunt": "grunt"
+    "grunt": "grunt",
+    "webpack": "webpack"
   },
   "author": "Mark Provan <mrp4@st-andrews.ac.uk>",
   "license": "ISC",

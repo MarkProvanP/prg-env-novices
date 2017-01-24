@@ -5,10 +5,13 @@ import * as fs from "fs";
 
 import * as machine from "./machine";
 
-import { Operator } from "./lang";
-
 const GRAMMAR_FILE = process.argv[2]
 const INPUT_FILE = process.argv[3]
+
+if (!GRAMMAR_FILE || !INPUT_FILE) {
+  console.error("usage: node test-peg GRAMMAR_FILE INPUT_FILE")
+  process.exit(1);
+}
 console.log(`Grammar file is: ${GRAMMAR_FILE}`)
 let grammarString = fs.readFileSync(GRAMMAR_FILE, "utf8");
 
