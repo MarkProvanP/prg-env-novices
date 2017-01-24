@@ -6,3 +6,4 @@ node_modules
 .tscache
 src/.baseDir.ts
 pegjs-test/*.js
+.vscode/

@@ -1,17 +1,17 @@
 import * as peg from "pegjs";
 
-import * as lang from "./peg-lang";
+import * as virtmachine from "./machine";
 
 let input = document.getElementById("ast-input");
 
-let buildButton = document.getElementByid("build-button");
+let buildButton = document.getElementById("build-button");
 
 buildButton.onclick = (event) => {
   let parser = peg.generate(grammarString);
   let code = input.value;
   let ast = parser.parse(code);
-  let instructions = lang.generateInstructions(ast);
-  let machine = new lang.Machine(instructions);
+  let instructions = virtmachine.generateInstructions(ast);
+  let machine = new virtmachine.Machine(instructions);
 }
 
 let grammarString = `

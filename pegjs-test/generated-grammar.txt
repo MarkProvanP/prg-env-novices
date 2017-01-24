@@ -97,7 +97,7 @@ integer "integer"
   = digits:[0-9]+ { return new Integer(parseInt(digits.join(""), 10)); }
 
 ident
-  = name:[a-z]* { return new Ident(name.join("")) }
+  = name:[a-z]+ { return new Ident(name.join("")) }
 
 w
   = [ \t\n\r]*
