@@ -39,7 +39,7 @@ export class Machine {
 
   public changeHistory: MachineChange[] = [];
 
-  constructor(private instructions: Instruction[]) {
+  constructor(public instructions: Instruction[]) {
     this.instructions.forEach((instruction, index) => {
       if (instruction instanceof Label) {
         let labelInstruction = <Label> instruction;
@@ -357,6 +357,8 @@ export function generateInstructions(ast) {
 function callCodegen(thing, instructions) {
   if (Array.isArray(thing)) {
     thing.forEach(thing => callCodegen(thing, instructions))
+  } else if (thing.constructor.name == 'Statements') {
+    thing.statements.forEach(statement => callCodegen(statement, instructions))
   } else {
     codegens[thing.constructor.name](thing, instructions)
   }
@@ -390,7 +392,7 @@ let codegens = {
     callCodegen(s.condition, instructions);
     instructions.push(new CallFunction(builtInFunctions['!']))
     instructions.push(new IfGoto(whileEndLabel))
-    s.statements.forEach((statement) => callCodegen(statement, instructions));
+    callCodegen(s.statements, instructions);
     instructions.push(new Push(1))
     instructions.push(new IfGoto(whileBeginLabel));
     instructions.push(new Label(whileEndLabel))

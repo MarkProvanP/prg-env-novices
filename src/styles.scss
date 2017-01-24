@@ -1,3 +1,15 @@
+.main-pane {
+    display: flex;
+
+    #ast-div {
+        flex: 1;
+    }
+
+    #vm-div {
+        flex: 1;
+    }
+}
+
 .ast-node {
     margin: 5px;
     border: 1px solid black;

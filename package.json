@@ -6,7 +6,8 @@
   "scripts": {
     "test": "test",
     "grunt": "grunt",
-    "webpack": "webpack"
+    "webpack": "webpack",
+    "webpack:live": "webpack --watch"
   },
   "author": "Mark Provan <mrp4@st-andrews.ac.uk>",
   "license": "ISC",

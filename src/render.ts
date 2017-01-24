@@ -1,4 +1,5 @@
 import * as lang from "./lang";
+import * as vm from "machine";
 
 function nodeClassName(node: lang.ASTNode) {
   return node.constructor.name;
@@ -155,4 +156,35 @@ export class Renderer {
     contentElement.textContent = ident.name;
     return rootElement;
   }
+}
+
+export function renderMachine(machine: vm.Machine) {
+  let rootElement = document.createElement("div");
+
+  let titleElement = document.createElement("div");
+  titleElement.classList.add('title');
+  titleElement.textContent = "Virtual Machine"
+  rootElement.appendChild(titleElement);
+
+  let instructionsElement = document.createElement("div");
+  instructionsElement.classList.add("instructions");
+  machine.instructions.forEach((instruction, index) => {
+    instructionsElement.appendChild(renderInstruction(instruction, index))
+  })
+  rootElement.appendChild(instructionsElement);
+
+  return rootElement;
+}
+
+function renderInstruction(instruction, index) {
+  let rootElement = document.createElement("div");
+  rootElement.classList.add("instruction");
+
+  let indexElement = document.createElement("div");
+  indexElement.classList.add("index")
+  indexElement.textContent = index;
+  rootElement.appendChild(indexElement);
+
+  rootElement.textContent = JSON.stringify(instruction);
+  return rootElement;
 }
