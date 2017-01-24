@@ -4,34 +4,12 @@
   <title>SH Project Experiments</title>
 </head>
 <body>
-  <h1>SH Project</h1>
-  <div id='errorDiv'></div>
-  <label>Type into the AST</label>
-  <div id='astDiv' tabindex='0'></div>
+  <h1>SH Project (NEW)</h1>
 
-  <button id='executeButton'>Execute</button>
-  <div id='executeDiv'>
-    <button id='stepButton'>Step Forward</button>
-    <div id='execASTDiv'>
-    </div>
-    <div id='execEnvDiv'>
-      <h3>Environment</h3>
-      <table id='execEnvTable'>
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <textarea id="lang-input"></textarea>
+  <button id="parse-button">Parse</button>
 
-  <br/>
-
-  <label>Evaluates to:<div id='evalDiv'></div></label>
+  <div id='output-div'></div>
 
   <script src="bundle.js"></script>
 </body>

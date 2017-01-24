@@ -124,20 +124,42 @@ export class Machine {
   }
 }
 
-export class MachineChange {
-  constructor(
-    public stackPushed: StackElement[],
-    public stackPopped: StackElement[],
-    public envPushed: EnvElement[],
-    public envPopped: EnvElement[],
-    public envChanged: EnvChange,
-    public ipChange: number
-  ) {
+class MachineChange {
+  public stackPushed: StackElement[]
+  public stackPopped: StackElement[]
+  public envPushed: EnvElement[]
+  public envPopped: EnvElement[]
+  public envChanged: EnvChange
+  public ipChange: number = 1
 
+  withStackPushed(elements: StackElement[]) {
+    this.stackPushed = elements;
+    return this;
   }
 
-  static create({stackPushed = [], stackPopped = [], envPushed = [], envPopped = [], envChanged = undefined, ipChange = 0}) {
-    return new MachineChange(stackPushed, stackPopped, envPushed, envPopped, envChanged, ipChange);
+  withStackPopped(elements: StackElement[]) {
+    this.stackPopped = elements;
+    return this;
+  }
+
+  withEnvPushed(elements: EnvElement[]) {
+    this.envPushed = elements;
+    return this;
+  }
+
+  withEnvPopped(elements: EnvElement[]) {
+    this.envPopped = elements;
+    return this;
+  }
+
+  withEnvChanged(change: EnvChange) {
+    this.envChanged = change;
+    return this;
+  }
+
+  withIpChange(change: number) {
+    this.ipChange = change;
+    return this;
   }
 }
 
@@ -171,7 +193,8 @@ export class Push extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({stackPushed: [this.val], ipChange: 1})
+    return new MachineChange()
+    .withStackPushed([this.val])
   }
 }
 
@@ -181,7 +204,8 @@ export class Pop extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({stackPopped: [machine.peek()], ipChange: 1})
+    return new MachineChange()
+    .withStackPopped([machine.peek()])
   }
 }
 
@@ -191,7 +215,8 @@ export class Dup extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({stackPushed: [machine.peek()], ipChange: 1})
+    return new MachineChange()
+    .withStackPushed(machine.peek())
   }
 }
 
@@ -201,7 +226,8 @@ export class NewEnv extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({envPushed: [new EnvElement()], ipChange: 1})
+    return new MachineChange()
+    .withEnvPushed([new EnvElement()])
   }
 }
 
@@ -211,7 +237,8 @@ export class PopEnv extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({envPopped: [machine.peekEnv()], ipChange: 1})
+    return new MachineChange()
+    .withEnvPopped([machine.peekEnv()])
   }
 }
 
@@ -226,7 +253,9 @@ export class CallFunction extends Instruction {
     let poppedArray = [this.func].concat(args)
     let pushedArray = [this.func.apply(null, args)]
     console.log('arity', arity, 'args', args, 'popped', poppedArray, 'pushed', pushedArray);
-    return MachineChange.create({stackPushed: pushedArray, stackPopped: poppedArray, ipChange: 1})
+    return new MachineChange()
+    .withStackPushed(pushedArray)
+    .withStackPopped(poppedArray)
   }
 }
 
@@ -244,9 +273,12 @@ export class IfGoto extends Instruction {
       let originalIP = machine.instructionPointer;
       let newIP = machine.labelMap[this.label];
       let change = newIP - originalIP;
-      return MachineChange.create({stackPopped: [stackTop], ipChange: change})
+      return new MachineChange()
+      .withStackPopped([stackTop])
+      .withIpChange(change)
     } else {
-      return MachineChange.create({stackPopped: [stackTop], ipChange: 1})
+      return new MachineChange()
+      .withStackPopped([stackTop])
     }
   }
 }
@@ -257,7 +289,7 @@ export class Label extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({ipChange: 1})
+    return new MachineChange();
   }
 }
 
@@ -273,7 +305,9 @@ export class Set extends Instruction {
     let before = env.get(this.key);
     let value = machine.peek();
     let envChanged = new EnvChange(this.key, before, value, index);
-    return MachineChange.create({stackPopped: [value], envChanged: envChanged, ipChange: 1})
+    return new MachineChange()
+    .withStackPopped([value])
+    .withEnvChanged(envChanged)
   }
 }
 
@@ -286,7 +320,8 @@ export class Get extends Instruction {
     let index = machine.getIndexOfEnvWithKey(this.key);
     let env = machine.envStack[index];
     let pushed = env.get(this.key);
-    return MachineChange.create({stackPushed: [pushed], ipChange: 1})
+    return new MachineChange()
+    .withStackPushed([pushed])
   }
 }
 
@@ -296,7 +331,7 @@ export class ASTBegin extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({ipChange: 1});
+    return new MachineChange();
   }
 }
 
@@ -306,7 +341,7 @@ export class ASTEnd extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    return MachineChange.create({ipChange: 1});
+    return new MachineChange();
   }
 }
 

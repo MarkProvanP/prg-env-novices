@@ -142,10 +142,10 @@ var Ident = (function (_super) {
 exports.Ident = Ident;
 }
 start
-  = statements
+  = statements w
 
 statements
-  = statement *
+  = s:statement* { return new Statements(s)}
 
 statement
   = assignmentStatement
@@ -155,7 +155,7 @@ assignmentStatement
   = i:ident w "=" w e:expression { return new AssignmentStatement(i, e); }
 
 whileStatement
-  = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, new Statements(s)); }
+  = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, s); }
 
 expression
   = additive

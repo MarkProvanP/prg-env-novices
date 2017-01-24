@@ -1,0 +1,29 @@
+.ast-node {
+    margin: 5px;
+    border: 1px solid black;
+
+    .title {
+        font-style: italic;
+        font-weight: bold;
+        pointer-events: none;
+        border: 1px solid grey;
+    }
+    
+    .content {
+        display: flex;
+        flex-direction: row;
+        border: 1px solid grey;
+    }
+}
+
+.ast-node.AssignmentStatement {
+    background-color: aliceblue;
+}
+
+.ast-node.WhileStatement {
+    background-color: lightsalmon;
+}
+
+.ast-node.Integer {
+    background-color: palegreen;
+}

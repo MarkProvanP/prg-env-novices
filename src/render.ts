@@ -40,6 +40,10 @@ export class ASTNodeDivMap {
 export class Renderer {
   astNodeDivMap: ASTNodeDivMap
 
+  constructor() {
+    this.astNodeDivMap = new ASTNodeDivMap();
+  }
+
   getContentElement(element) {
     return element.getElementsByClassName("content")[0];
   }
@@ -60,10 +64,6 @@ export class Renderer {
     rootElement.appendChild(contentElement);
 
     return rootElement;
-  }
-
-  createExpressionElement(expression: lang.Expression) {
-
   }
 
   createIntegerElement(integer: lang.Integer) {
@@ -113,14 +113,6 @@ export class Renderer {
     let rootElement = this.createCommonElement(whileStatement);
     let contentElement = this.getContentElement(rootElement);
 
-    let doDiv = document.createElement("div");
-    doDiv.classList.add("do");
-    doDiv.textContent = "do";
-    contentElement.appendChild(doDiv);
-
-    let statementsDiv = whileStatement.statements.render(this)
-    contentElement.appendChild(statementsDiv);
-
     let whileDiv = document.createElement("div");
     whileDiv.classList.add("while");
     whileDiv.textContent = "while";
@@ -128,6 +120,14 @@ export class Renderer {
 
     let conditionDiv = whileStatement.condition.render(this)
     contentElement.appendChild(conditionDiv);
+
+    let doDiv = document.createElement("div");
+    doDiv.classList.add("do");
+    doDiv.textContent = "do";
+    contentElement.appendChild(doDiv);
+
+    let statementsDiv = whileStatement.statements.render(this)
+    contentElement.appendChild(statementsDiv);
 
     return rootElement;
   }
@@ -152,5 +152,7 @@ export class Renderer {
   createIdentElement(ident: lang.Ident) {
     let rootElement = this.createCommonElement(ident);
     let contentElement = this.getContentElement(rootElement);
+    contentElement.textContent = ident.name;
+    return rootElement;
   }
 }
