@@ -397,5 +397,10 @@ let codegens = {
     instructions.push(new IfGoto(whileBeginLabel));
     instructions.push(new Label(whileEndLabel))
     instructions.push(new ASTEnd(s));
+  },
+  ValueExpression: function(e, instructions) {
+    instructions.push(new ASTBegin(e));
+    instructions.push(new Get(e.ident.name))
+    instructions.push(new ASTEnd(e));
   }
 }

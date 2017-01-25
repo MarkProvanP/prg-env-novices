@@ -68,6 +68,18 @@ var Integer = (function (_super) {
     return Integer;
 }(Expression));
 exports.Integer = Integer;
+var ValueExpression = (function (_super) {
+    __extends(ValueExpression, _super);
+    function ValueExpression(ident) {
+        _super.call(this);
+        this.ident = ident;
+    }
+    ValueExpression.prototype.render = function (renderer) {
+        return renderer.createValueExpressionElement(this);
+    };
+    return ValueExpression;
+}(Expression));
+exports.ValueExpression = ValueExpression;
 var BinaryExpression = (function (_super) {
     __extends(BinaryExpression, _super);
     function BinaryExpression(left, right, op) {
@@ -152,7 +164,7 @@ statement
   / whileStatement
 
 assignmentStatement
-  = i:ident w "=" w e:expression { return new AssignmentStatement(i, e); }
+  = i:ident w "=" w e:expression w { return new AssignmentStatement(i, e); }
 
 whileStatement
   = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, s); }
@@ -163,14 +175,20 @@ expression
 
 additive
   = left:multiplicative "+" right:additive { return new BinaryExpression(left, right, "+"); }
+  / left:multiplicative "-" right:additive { return new BinaryExpression(left, right, "-"); }
   / multiplicative
 
 multiplicative
   = left:primary "*" right:multiplicative { return new BinaryExpression(left, right, "*"); }
+  / left:primary "/" right:multiplicative { return new BinaryExpression(left, right, "/"); }
   / primary
 
+value
+  = i:ident { return new ValueExpression(i); }
+
 primary
-  = integer
+  = value
+  / integer
   / "(" additive:additive ")" { return additive; }
 
 integer "integer"

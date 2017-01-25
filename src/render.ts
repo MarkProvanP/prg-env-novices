@@ -74,6 +74,13 @@ export class Renderer {
     return rootElement;
   }
 
+  createValueExpressionElement(value: lang.ValueExpression) {
+    let rootElement = this.createCommonElement(value);
+    let contentElement = this.getContentElement(rootElement);
+    contentElement.textContent = value.ident.name;
+    return rootElement;
+  }
+
   createBinaryExpressionElement(binaryExpression: lang.BinaryExpression) {
     let rootElement = this.createCommonElement(binaryExpression);
     let contentElement = this.getContentElement(rootElement);
@@ -189,6 +196,18 @@ export function renderMachine(machine: vm.Machine) {
     stackElement.appendChild(e);
   })
   rootElement.appendChild(stackElement);
+
+  let envElement = document.createElement("div");
+  envElement.classList.add("env");
+  envElement.textContent = "Environment";
+  machine.envStack.forEach((element) => {
+    let e = document.createElement("div");
+    e.classList.add("element");
+    e.textContent = element;
+    envElement.appendChild(e);
+  })
+  rootElement.appendChild(envElement);
+
 
   return rootElement;
 }

@@ -57,6 +57,18 @@ export class Integer extends Expression {
   }
 }
 
+export class ValueExpression extends Expression {
+  constructor(
+    public ident
+  ) {
+    super()
+  }
+
+  render(renderer: Renderer) {
+    return renderer.createValueExpressionElement(this);
+  }
+}
+
 export class BinaryExpression extends Expression {
   constructor(
     public left,
