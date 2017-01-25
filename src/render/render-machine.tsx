@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import * as vm from "./machine";
+import * as vm from "../machine";
 
 export function renderMachine(machine: vm.Machine) {
     ReactDOM.render(

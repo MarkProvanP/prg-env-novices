@@ -84,10 +84,11 @@ body {
         border: 1px solid grey;
     }
     
-    .content {
+    .ast-row {
         display: flex;
         flex-direction: row;
         border: 1px solid grey;
+        align-items: center;
     }
 }
 
