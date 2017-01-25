@@ -10,6 +10,49 @@ body {
     background-color: aliceblue;
 }
 
+.ast-statements-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .ast-statements-list-row {
+        display: flex;
+        align-items: center;
+        width: 100%;
+
+        .ast-statements-list-row-index {
+            width: 30px;
+            text-align: center;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .ast-statements-list-row-content {
+            flex: 1;
+        }
+
+        .ast-statements-list-row-buttons {
+            display: flex;
+        }
+    }
+}
+
+.ast-button {
+    width: 40px;
+    height: 20px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.ast-button:hover {
+    background-color: beige;
+}
+
 .main-pane {
     flex: 1;
     display: flex;

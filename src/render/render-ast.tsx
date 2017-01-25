@@ -94,7 +94,9 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
     render() {
         return <div className='ast-row'>
             <div className='while'>while</div>
+            <div className='leftparen'>(</div>
             <ASTNodeComponent node={this.props.whileStatement.condition} />
+            <div className='rightparen'>)</div>
             <div className='do'>do</div>
             <div className='leftbrace'>&#123;</div>
             <ASTNodeComponent node={this.props.whileStatement.statements} />
@@ -107,14 +109,49 @@ interface StatementsComponentProps {
     statements: lang.Statements
 }
 class StatementsComponent extends React.Component<StatementsComponentProps, NoState> {
+    editRow(e) {
+        console.log('Edit!')
+    }
+
+    deleteRow(e) {
+        console.log('Delete!')
+    }
+
+    insertRow(index) {
+        return function(e) {
+            console.log('Insert at index', index);
+        }
+    }
+
+    private createPlusButton(index) {
+        return <div className='ast-button ast-row-insert' key={index * 2} onClick={this.insertRow(index)}>+</div>
+    }
+
     render() {
         const statements = this.props.statements.statements;
         const statementsList = statements.map((statement, index) => {
-            return <li key={index}><ASTNodeComponent node={statement} /></li>
+            return <div key={(index * 2) + 1} className='ast-statements-list-row'>
+                <div className='ast-statements-list-row-index'>{index}</div>
+                <div className='ast-statements-list-row-content'>
+                    <ASTNodeComponent node={statement} />
+                </div>
+                <div className='ast-statements-list-row-buttons'>
+                    <div className='ast-button ast-row-delete' onClick={this.deleteRow}>-</div>
+                    <div className='ast-button ast-row-edit' onClick={this.editRow}>Edit</div>
+                </div>
+            </div>
         })
-        return <ol>
-            {statementsList}
-        </ol>
+        let elementsList = []
+        statementsList.forEach((statement, index) => {
+            let plusButton = this.createPlusButton(index);
+            elementsList.push(plusButton);
+            elementsList.push(statement);
+        })
+        let plusButton = this.createPlusButton(statements.length);
+            elementsList.push(plusButton);
+        return <div className='ast-statements-list'>
+            {elementsList}
+        </div>
     }
 }
 
