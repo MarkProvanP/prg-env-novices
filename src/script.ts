@@ -3,6 +3,8 @@ import * as lang from "./lang";
 import * as render from "./render";
 import * as vm from "./machine";
 import * as pegjs from "pegjs"
+import * as reactrender from "./react-render.tsx";
+reactrender.run();
 
 let grammar = require("./grammar/generated.peg");
 

@@ -6,7 +6,9 @@
     ],
     "types": [
       "node"
-    ]
+    ],
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "src-old",
