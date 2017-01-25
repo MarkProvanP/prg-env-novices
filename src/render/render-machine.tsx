@@ -60,7 +60,28 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
         return <div className={'instruction ' + ((this.props.currentIp == this.props.index) ? 'current-ip' : '')}>
             <div className='index'>{this.props.index}</div>
             <div className='opcode'>{this.props.instruction.constructor.name}</div>
+            {getComponentForInstruction(this.props.instruction)}
         </div>
+    }
+}
+
+function getComponentForInstruction(instruction: vm.Instruction) {
+    if (instruction instanceof vm.Push) {
+        return <div className='args machine-push-val'>{instruction.val}</div>
+    } else if (instruction instanceof vm.CallFunction) {
+        return <div className='args machine-call-function'>{instruction.func.name}</div>
+    } else if (instruction instanceof vm.IfGoto) {
+        return <div className='args machine-if-goto'>{instruction.label}</div>
+    } else if (instruction instanceof vm.Label) {
+        return <div className='args machine-label'>{instruction.label}</div>
+    } else if (instruction instanceof vm.Set) {
+        return <div className='args machine-set'>{instruction.key}</div>
+    } else if (instruction instanceof vm.Get) {
+        return <div className='args machine-get'>{instruction.key}</div>
+    } else if (instruction instanceof vm.ASTBegin) {
+        return <div className='args machine-ast-begin'>{instruction.ast.constructor.name}</div>
+    } else if (instruction instanceof vm.ASTEnd) {
+        return <div className='args machine-ast-end'>{instruction.ast.constructor.name}</div>
     }
 }
 

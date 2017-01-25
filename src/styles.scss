@@ -94,6 +94,15 @@ body {
         .index {
             margin-right: 20px;
         }
+
+        .opcode {
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .args {
+            font-style: italic;
+        }
     }
 
     .instruction.current-ip {

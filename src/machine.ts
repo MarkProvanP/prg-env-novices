@@ -247,7 +247,7 @@ export class PopEnv extends Instruction {
 }
 
 export class CallFunction extends Instruction {
-  constructor(private func: MachineFunction) {
+  constructor(public func: MachineFunction) {
     super()
   }
 
