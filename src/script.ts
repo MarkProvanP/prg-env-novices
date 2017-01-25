@@ -4,7 +4,6 @@ import * as render from "./render";
 import * as vm from "./machine";
 import * as pegjs from "pegjs"
 import * as reactrender from "./react-render.tsx";
-reactrender.run();
 
 let grammar = require("./grammar/generated.peg");
 
@@ -47,6 +46,7 @@ function renderAll() {
     let rootASTElement = astRoot.render(renderer);
     astDiv.appendChild(rootASTElement);
     vmDiv.appendChild(render.renderMachine(machine));
+    reactrender.renderMachine(machine);
 }
 
 function clearDiv(node) {
