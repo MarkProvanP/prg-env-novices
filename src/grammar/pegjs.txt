@@ -19,13 +19,13 @@ expression
   / multiplicative
 
 additive
-  = left:multiplicative "+" right:additive { return new BinaryExpression(left, right, "+"); }
-  / left:multiplicative "-" right:additive { return new BinaryExpression(left, right, "-"); }
+  = left:multiplicative w "+" w right:additive { return new BinaryExpression(left, right, "+"); }
+  / left:multiplicative w "-" w right:additive { return new BinaryExpression(left, right, "-"); }
   / multiplicative
 
 multiplicative
-  = left:primary "*" right:multiplicative { return new BinaryExpression(left, right, "*"); }
-  / left:primary "/" right:multiplicative { return new BinaryExpression(left, right, "/"); }
+  = left:primary w "*" w right:multiplicative { return new BinaryExpression(left, right, "*"); }
+  / left:primary w "/" w right:multiplicative { return new BinaryExpression(left, right, "/"); }
   / primary
 
 value
@@ -34,7 +34,7 @@ value
 primary
   = value
   / integer
-  / "(" additive:additive ")" { return additive; }
+  / "(" w additive:additive w ")" { return additive; }
 
 integer "integer"
   = digits:[0-9]+ { return new Integer(parseInt(digits.join(""), 10)); }

@@ -201,9 +201,7 @@ export function renderMachine(machine: vm.Machine) {
   envElement.classList.add("env");
   envElement.textContent = "Environment";
   machine.envStack.forEach((element) => {
-    let e = document.createElement("div");
-    e.classList.add("element");
-    e.textContent = element;
+    let e = renderEnvFrame(element);
     envElement.appendChild(e);
   })
   rootElement.appendChild(envElement);
@@ -225,5 +223,19 @@ function renderInstruction(instruction, index) {
   opcodeElement.textContent = instruction.constructor.name + JSON.stringify(instruction)
   rootElement.appendChild(opcodeElement);
   
+  return rootElement;
+}
+
+function renderEnvFrame(envElement: vm.EnvElement) {
+  let rootElement = document.createElement("div");
+  rootElement.classList.add("env-frame");
+
+  for (let key of envElement.keys()) {
+    let value = envElement.get(key);
+    let mapping = document.createElement("div");
+    mapping.textContent = `${key} -> ${JSON.stringify(value)}`
+    rootElement.appendChild(mapping);
+  }
+
   return rootElement;
 }

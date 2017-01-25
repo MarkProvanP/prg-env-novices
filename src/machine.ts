@@ -5,7 +5,11 @@ import * as lang from "./lang";
 export type StackElement = any;
 
 export class EnvElement {
-  mapping = {};
+  private mapping = {};
+
+  public keys() {
+    return Object.keys(this.mapping)
+  }
 
   public get(key: string) {
     return this.mapping[key];
@@ -96,7 +100,7 @@ export class Machine {
       let envChanged = machineChange.envChanged;
       let changedEnv = this.envStack[envChanged.envNo];
       let key = envChanged.key;
-      changedEnv[key] = envChanged.after;
+      changedEnv.set(key, envChanged.after)
       console.log(`Setting: ${key} to val: `, envChanged.after);
     }
     console.log(`instruction pointer changing by ${machineChange.ipChange}`)
