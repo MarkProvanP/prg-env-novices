@@ -1,11 +1,14 @@
 #!/bin/bash
 
-LANG_FILE="src/lang"
+LANG_FILE="lang"
+SRC_FOLDER="src"
+TEMP_FOLDER="tmp"
 GRAMMAR_FILE="src/grammar/pegjs.txt"
 GENERATED_GRAMMAR_FILE="src/grammar/generated.peg"
-tsc "${LANG_FILE}.ts"
+mkdir -p $TEMP_FOLDER
+tsc "${SRC_FOLDER}/${LANG_FILE}.ts" --outDir $TEMP_FOLDER
 echo "{" > $GENERATED_GRAMMAR_FILE
-cat "${LANG_FILE}.js" >> $GENERATED_GRAMMAR_FILE
+cat "${TEMP_FOLDER}/${LANG_FILE}.js" >> $GENERATED_GRAMMAR_FILE
 echo "}" >> $GENERATED_GRAMMAR_FILE
 cat $GRAMMAR_FILE >> $GENERATED_GRAMMAR_FILE
-rm "${LANG_FILE}.js"
+rm -r $TEMP_FOLDER
