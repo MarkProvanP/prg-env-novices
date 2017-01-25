@@ -42,10 +42,8 @@ stepButton.onclick = (event) => {
 
 function renderAll() {
     clearDiv(astDiv);
-    clearDiv(vmDiv);
     let rootASTElement = astRoot.render(renderer);
     astDiv.appendChild(rootASTElement);
-    vmDiv.appendChild(render.renderMachine(machine));
     reactrender.renderMachine(machine);
 }
 

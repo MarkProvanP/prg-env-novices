@@ -22,11 +22,21 @@ body {
         display: flex;
     }
 
+    #react-vm-div {
+        display: flex;
+        flex-direction: column;
+    }
+
     #vm-div > div {
         flex: 1;
         display: flex;
         flex-direction: column;
     }
+}
+
+.vm-state {
+    display: flex;
+    flex-direction: column;
 }
 
 .instructions {
