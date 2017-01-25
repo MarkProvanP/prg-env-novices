@@ -108,6 +108,10 @@ body {
     .instruction.current-ip {
         background-color: lime;
     }
+
+    .instruction.within-range {
+        background-color: mediumaquamarine;
+    }
 }
 
 .stack {
@@ -142,6 +146,10 @@ body {
         border: 1px solid grey;
         align-items: center;
     }
+}
+
+.ast-node.clicked {
+    border-color: yellow;
 }
 
 .ast-node.AssignmentStatement {

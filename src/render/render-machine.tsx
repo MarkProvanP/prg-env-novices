@@ -2,10 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import * as vm from "../machine";
+import * as lang from "../lang";
 
-export function renderMachine(machine: vm.Machine) {
+
+export function renderMachine(machine: vm.Machine, selectedAST: lang.ASTNode) {
+    console.log('renderMachine', machine, selectedAST);
     ReactDOM.render(
-        <VMStateComponent machine={machine} />,
+        <VMStateComponent machine={machine} selectedAST={selectedAST}/>,
         document.getElementById('react-vm-div')
     )
 
@@ -13,7 +16,8 @@ export function renderMachine(machine: vm.Machine) {
 }
 
 interface VMStateProps {
-    machine: vm.Machine
+    machine: vm.Machine,
+    selectedAST: lang.ASTNode
 }
 
 interface VMStateState {
@@ -22,24 +26,38 @@ interface VMStateState {
 
 export class VMStateComponent extends React.Component<VMStateProps, VMStateState> {
     render() {
+        console.log('VMStateComponent', this.props.selectedAST)
         return <div className='vm-state'>
             <h2>Machine State</h2>
             <div className='ip'>
             IP: {this.props.machine.instructionPointer}
             Count: {this.props.machine.instructionCount}
             </div>
-            <VMInstructionsComponent machine={this.props.machine} />
+            <VMInstructionsComponent machine={this.props.machine} selectedAST={this.props.selectedAST}/>
             <VMStackComponent machine={this.props.machine} />
             <VMEnvComponent machine={this.props.machine} />
         </div>;
     }
 }
 
-export class VMInstructionsComponent extends React.Component<VMStateProps, VMStateState> {
+interface VMInstructionsComponentProps {
+    machine: vm.Machine
+    selectedAST: lang.ASTNode
+}
+
+export class VMInstructionsComponent extends React.Component<VMInstructionsComponentProps, VMStateState> {
     render() {
         const instructions = this.props.machine.instructions;
+        const instructionRange = this.props.machine.astInstructionRangeMap.get(this.props.selectedAST);
+        console.log(this.props.selectedAST, 'range', instructionRange);
         const instructionComponents = instructions.map((instruction, index) => {
-            return <InstructionComponent key={index} instruction={instruction} index={index} currentIp={this.props.machine.instructionPointer} />
+            return <InstructionComponent
+            key={index}
+            instruction={instruction}
+            index={index}
+            currentIp={this.props.machine.instructionPointer}
+            insideRange={instructionRange ? instructionRange.withinRange(index) : false}
+            />
         })
         return <div className='instructions'>
             <h3>Instructions</h3>
@@ -51,13 +69,22 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, VMSta
 interface InstructionProps {
     index: number,
     instruction: vm.Instruction,
-    currentIp: number
+    currentIp: number,
+    insideRange: boolean
 }
 interface InstructionState {}
 
 export class InstructionComponent extends React.Component<InstructionProps, InstructionState> {
+    getClassName() {
+        return [
+            'instruction',
+            (this.props.currentIp == this.props.index) ? 'current-ip' : '',
+            this.props.insideRange ? 'within-range' : ''
+        ].filter(s => s).join(" ")
+    }
+
     render() {
-        return <div className={'instruction ' + ((this.props.currentIp == this.props.index) ? 'current-ip' : '')}>
+        return <div className={this.getClassName()}>
             <div className='index'>{this.props.index}</div>
             <div className='opcode'>{this.props.instruction.constructor.name}</div>
             {getComponentForInstruction(this.props.instruction)}
@@ -85,7 +112,11 @@ function getComponentForInstruction(instruction: vm.Instruction) {
     }
 }
 
-export class VMStackComponent extends React.Component<VMStateProps, VMStateState> {
+interface VMStackComponentProps {
+    machine: vm.Machine
+}
+
+export class VMStackComponent extends React.Component<VMStackComponentProps, VMStateState> {
     render() {
         const stackElements = this.props.machine.stack;
         const stackComponents = stackElements.map((element, index) => {
@@ -111,7 +142,11 @@ export class StackElementComponent extends React.Component<StackElementProps, St
     }
 }
 
-export class VMEnvComponent extends React.Component<VMStateProps, VMStateState> {
+interface VMEnvComponentProps {
+    machine: vm.Machine
+}
+
+export class VMEnvComponent extends React.Component<VMEnvComponentProps, VMStateState> {
     render() {
         const stackElements = this.props.machine.envStack;
         const stackComponents = stackElements.map((element, index) => {

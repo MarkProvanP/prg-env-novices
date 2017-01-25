@@ -10,12 +10,18 @@ let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HT
 let parseButton: HTMLButtonElement = document.getElementById("parse-button") as HTMLButtonElement;
 let stepButton: HTMLButtonElement = document.getElementById("step-button") as HTMLButtonElement;
 
-let parser = pegjs.generate(grammar, {trace: true})
+let parser = pegjs.generate(grammar, {trace: false})
 console.log(`Generated parser!`)
 
 let machine;
 let astRoot;
-let renderer;
+let selectedASTNode
+
+function selectASTNode(astNode: lang.ASTNode) {
+    console.log('Selecting', astNode);
+    selectedASTNode = astNode;
+    renderAll();
+}
 
 parseButton.onclick = (event) => {
     let input = langInput.value;
@@ -37,6 +43,6 @@ stepButton.onclick = (event) => {
 }
 
 function renderAll() {
-    reactrender.renderAST(astRoot);
-    reactrender.renderMachine(machine);
+    reactrender.renderAST(astRoot, selectASTNode);
+    reactrender.renderMachine(machine, selectedASTNode);
 }

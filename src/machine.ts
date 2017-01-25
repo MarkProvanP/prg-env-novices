@@ -34,6 +34,18 @@ export class EnvChange {
   ) {}
 }
 
+export class InstructionRange {
+    constructor(
+      public start: number,
+      public end: number
+    ) {}
+
+    withinRange(index: number) {
+      if (this.end == null) return false;
+      return index >= this.start && index <= this.end;
+    }
+}
+
 export class Machine {
   public stack = [];
   public envStack = []
@@ -43,13 +55,21 @@ export class Machine {
 
   public changeHistory: MachineChange[] = [];
 
+  public astInstructionRangeMap = new WeakMap<lang.ASTNode, InstructionRange>();
+
   constructor(public instructions: Instruction[]) {
     this.instructions.forEach((instruction, index) => {
       if (instruction instanceof Label) {
-        let labelInstruction = <Label> instruction;
+        let labelInstruction = instruction;
         this.labelMap[labelInstruction.label] = index;
+      } else if (instruction instanceof ASTBegin) {
+        this.astInstructionRangeMap.set(instruction.ast, new InstructionRange(index, null));
+      } else if (instruction instanceof ASTEnd) {
+        let range = this.astInstructionRangeMap.get(instruction.ast);
+        range.end = index;
       }
     })
+    
   }
 
   peek(n?: number) {
@@ -264,7 +284,7 @@ export class CallFunction extends Instruction {
 }
 
 export class IfGoto extends Instruction {
-  constructor(public label) {
+  constructor(public label: string) {
     super();
   }
 
@@ -288,7 +308,7 @@ export class IfGoto extends Instruction {
 }
 
 export class Label extends Instruction {
-  constructor(public label) {
+  constructor(public label: string) {
     super()
   }
 
@@ -298,7 +318,7 @@ export class Label extends Instruction {
 }
 
 export class Set extends Instruction {
-  constructor(public key) {
+  constructor(public key: string) {
     super();
   }
 
@@ -316,7 +336,7 @@ export class Set extends Instruction {
 }
 
 export class Get extends Instruction {
-  constructor(public key) {
+  constructor(public key: string) {
     super();
   }
 
@@ -330,7 +350,7 @@ export class Get extends Instruction {
 }
 
 export class ASTBegin extends Instruction {
-  constructor(public ast) {
+  constructor(public ast: lang.ASTNode) {
     super()
   }
 
@@ -340,7 +360,7 @@ export class ASTBegin extends Instruction {
 }
 
 export class ASTEnd extends Instruction {
-  constructor(public ast) {
+  constructor(public ast: lang.ASTNode) {
     super();
   }
 
@@ -361,8 +381,6 @@ export function generateInstructions(ast) {
 function callCodegen(thing, instructions) {
   if (Array.isArray(thing)) {
     thing.forEach(thing => callCodegen(thing, instructions))
-  } else if (thing.constructor.name == 'Statements') {
-    thing.statements.forEach(statement => callCodegen(statement, instructions))
   } else {
     codegens[thing.constructor.name](thing, instructions)
   }
@@ -406,5 +424,10 @@ let codegens = {
     instructions.push(new ASTBegin(e));
     instructions.push(new Get(e.ident.name))
     instructions.push(new ASTEnd(e));
+  },
+  Statements: function(s, instructions) {
+    instructions.push(new ASTBegin(s));
+    s.statements.forEach(statement => callCodegen(statement, instructions))
+    instructions.push(new ASTEnd(s))
   }
 }

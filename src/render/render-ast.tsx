@@ -3,11 +3,13 @@ import ReactDOM from "react-dom";
 
 import * as lang from "../lang";
 
-export function renderAST(ast: lang.ASTNode) {
+let selectFunction;
+export function renderAST(ast: lang.ASTNode, selectASTNode) {
     ReactDOM.render(
         <ASTNodeComponent node={ast} />,
         document.getElementById("react-ast-div")
     )
+    selectFunction = selectASTNode;
 }
 
 interface ASTComponentProps {
@@ -15,11 +17,40 @@ interface ASTComponentProps {
 }
 interface NoState {}
 
-class ASTNodeComponent extends React.Component<ASTComponentProps, NoState> {
+interface ASTNodeComponentState {
+    clicked: boolean;
+}
+
+class ASTNodeComponent extends React.Component<ASTComponentProps, ASTNodeComponentState> {
+    onClick(e) {
+        selectFunction(!this.state.clicked ? this.props.node : null);
+        this.setState(prevState => ({
+            clicked: !prevState.clicked
+        }))
+        e.stopPropagation();
+        return null;
+    }
+
+    getClassName() {
+        return [
+            'ast-node',
+            this.props.node.constructor.name,
+            this.state.clicked ? 'clicked' : ''
+        ].filter(s => s).join(" ");
+    }
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            clicked: false
+        }
+        this.onClick = this.onClick.bind(this);
+    }
+
     render() {
         const astNode = this.props.node;
         const innerElement = getComponentForNode(astNode);
-        return <div className={'ast-node ' + this.props.node.constructor.name}>
+        return <div className={this.getClassName()} onClick={this.onClick}>
             <div className='title'>{astNode.constructor.name}</div>
             <div className='content'>
                 {innerElement}
@@ -36,6 +67,7 @@ function getComponentForNode(astNode: lang.ASTNode) {
         case "AssignmentStatement": return <AssignmentStatementComponent assignmentStatement={astNode as lang.AssignmentStatement} />
         case "WhileStatement": return <WhileStatementComponent whileStatement={astNode as lang.WhileStatement} />
         case "Statements": return <StatementsComponent statements={astNode as lang.Statements} />
+        case "Ident": return <IdentComponent ident={astNode as lang.Ident} />
         default: return <UnspecifiedComponent node={astNode} />
     }
 }
@@ -152,6 +184,16 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
         return <div className='ast-statements-list'>
             {elementsList}
         </div>
+    }
+}
+
+interface IdentComponentProps {
+    ident: lang.Ident
+}
+
+class IdentComponent extends React.Component<IdentComponentProps, NoState> {
+    render() {
+        return <div className='ast-row'>{this.props.ident.name}</div>
     }
 }
 
