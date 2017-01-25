@@ -39,7 +39,7 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, VMSta
     render() {
         const instructions = this.props.machine.instructions;
         const instructionComponents = instructions.map((instruction, index) => {
-            return <InstructionComponent key={index} instruction={instruction} index={index} />
+            return <InstructionComponent key={index} instruction={instruction} index={index} currentIp={this.props.machine.instructionPointer} />
         })
         return <div className='instructions'>
             <h3>Instructions</h3>
@@ -50,13 +50,14 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, VMSta
 
 interface InstructionProps {
     index: number,
-    instruction: vm.Instruction
+    instruction: vm.Instruction,
+    currentIp: number
 }
 interface InstructionState {}
 
 export class InstructionComponent extends React.Component<InstructionProps, InstructionState> {
     render() {
-        return <div className='instruction'>
+        return <div className={'instruction ' + ((this.props.currentIp == this.props.index) ? 'current-ip' : '')}>
             <div className='index'>{this.props.index}</div>
             <div className='opcode'>{this.props.instruction.constructor.name}</div>
         </div>
