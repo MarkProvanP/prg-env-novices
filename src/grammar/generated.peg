@@ -1,10 +1,12 @@
 {
+var require = function(nop) {};
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var vm = require("./machine");
 (function (Operator) {
     Operator[Operator["Add"] = 0] = "Add";
     Operator[Operator["Subtract"] = 1] = "Subtract";
@@ -45,6 +47,10 @@ exports.OperatorUtils = OperatorUtils;
 var ASTNode = (function () {
     function ASTNode() {
     }
+    ASTNode.prototype.fixPrototype = function (langModule) {
+        var className = this.constructor.name;
+        this.__proto__ = langModule[className].prototype;
+    };
     return ASTNode;
 }());
 exports.ASTNode = ASTNode;
@@ -62,6 +68,11 @@ var Integer = (function (_super) {
         _super.call(this);
         this.value = value;
     }
+    Integer.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        machine.addInstruction(new vm.Push(this.value));
+        machine.endASTRange(this);
+    };
     return Integer;
 }(Expression));
 exports.Integer = Integer;
@@ -71,6 +82,15 @@ var ValueExpression = (function (_super) {
         _super.call(this);
         this.ident = ident;
     }
+    ValueExpression.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        machine.addInstruction(new vm.Get(this.ident.name));
+        machine.endASTRange(this);
+    };
+    ValueExpression.prototype.fixPrototype = function (langModule) {
+        _super.prototype.fixPrototype.call(this, langModule);
+        this.ident.fixPrototype(langModule);
+    };
     return ValueExpression;
 }(Expression));
 exports.ValueExpression = ValueExpression;
@@ -82,6 +102,18 @@ var BinaryExpression = (function (_super) {
         this.right = right;
         this.op = op;
     }
+    BinaryExpression.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        this.left.codegen(machine);
+        this.right.codegen(machine);
+        machine.addInstruction(new vm.CallFunction(vm.builtInFunctions[this.op]));
+        machine.endASTRange(this);
+    };
+    BinaryExpression.prototype.fixPrototype = function (langModule) {
+        _super.prototype.fixPrototype.call(this, langModule);
+        this.left.fixPrototype(langModule);
+        this.right.fixPrototype(langModule);
+    };
     return BinaryExpression;
 }(Expression));
 exports.BinaryExpression = BinaryExpression;
@@ -90,6 +122,10 @@ var EmptyExpression = (function (_super) {
     function EmptyExpression() {
         _super.call(this);
     }
+    EmptyExpression.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        machine.endASTRange(this);
+    };
     return EmptyExpression;
 }(Expression));
 exports.EmptyExpression = EmptyExpression;
@@ -99,6 +135,15 @@ var Statements = (function (_super) {
         _super.call(this);
         this.statements = statements;
     }
+    Statements.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        this.statements.forEach(function (statement) { return statement.codegen(machine); });
+        machine.endASTRange(this);
+    };
+    Statements.prototype.fixPrototype = function (langModule) {
+        _super.prototype.fixPrototype.call(this, langModule);
+        this.statements.forEach(function (statement) { return statement.fixPrototype(langModule); });
+    };
     return Statements;
 }(ASTNode));
 exports.Statements = Statements;
@@ -117,6 +162,17 @@ var AssignmentStatement = (function (_super) {
         this.ident = ident;
         this.expression = expression;
     }
+    AssignmentStatement.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        this.expression.codegen(machine);
+        machine.addInstruction(new vm.Set(this.ident.name));
+        machine.endASTRange(this);
+    };
+    AssignmentStatement.prototype.fixPrototype = function (langModule) {
+        _super.prototype.fixPrototype.call(this, langModule);
+        this.ident.fixPrototype(langModule);
+        this.expression.fixPrototype(langModule);
+    };
     return AssignmentStatement;
 }(Statement));
 exports.AssignmentStatement = AssignmentStatement;
@@ -127,6 +183,25 @@ var WhileStatement = (function (_super) {
         this.condition = condition;
         this.statements = statements;
     }
+    WhileStatement.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        var whileBeginLabel = "whileBegin";
+        var whileEndLabel = "whileEnd";
+        machine.addLabel(whileBeginLabel);
+        this.condition.codegen(machine);
+        machine.addInstruction(new vm.CallFunction(vm.builtInFunctions['!']));
+        machine.addInstruction(new vm.IfGoto(whileEndLabel));
+        this.statements.codegen(machine);
+        machine.addInstruction(new vm.Push(1));
+        machine.addInstruction(new vm.IfGoto(whileBeginLabel));
+        machine.addLabel(whileEndLabel);
+        machine.endASTRange(this);
+    };
+    WhileStatement.prototype.fixPrototype = function (langModule) {
+        _super.prototype.fixPrototype.call(this, langModule);
+        this.condition.fixPrototype(langModule);
+        this.statements.fixPrototype(langModule);
+    };
     return WhileStatement;
 }(Statement));
 exports.WhileStatement = WhileStatement;
@@ -135,6 +210,10 @@ var EmptyStatement = (function (_super) {
     function EmptyStatement() {
         _super.call(this);
     }
+    EmptyStatement.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        machine.endASTRange(this);
+    };
     return EmptyStatement;
 }(Statement));
 exports.EmptyStatement = EmptyStatement;
@@ -144,6 +223,10 @@ var Ident = (function (_super) {
         _super.call(this);
         this.name = name;
     }
+    Ident.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        machine.endASTRange(this);
+    };
     return Ident;
 }(ASTNode));
 exports.Ident = Ident;

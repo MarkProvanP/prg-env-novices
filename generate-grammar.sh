@@ -8,6 +8,7 @@ GENERATED_GRAMMAR_FILE="src/grammar/generated.peg"
 mkdir -p $TEMP_FOLDER
 tsc "${SRC_FOLDER}/${LANG_FILE}.ts" --outDir $TEMP_FOLDER
 echo "{" > $GENERATED_GRAMMAR_FILE
+echo "var require = function(nop) {};" >> $GENERATED_GRAMMAR_FILE
 cat "${TEMP_FOLDER}/${LANG_FILE}.js" >> $GENERATED_GRAMMAR_FILE
 echo "}" >> $GENERATED_GRAMMAR_FILE
 cat $GRAMMAR_FILE >> $GENERATED_GRAMMAR_FILE

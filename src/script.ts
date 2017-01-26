@@ -12,14 +12,15 @@ let stepButton: HTMLButtonElement = document.getElementById("step-button") as HT
 
 let parser = pegjs.generate(grammar, {trace: false})
 console.log(`Generated parser!`)
-
+console.log(vm);
 let app = new App();
 
 parseButton.onclick = (event) => {
     let input = langInput.value;
     let parsed = parser.parse(input);
-    console.log(parsed);
+    
     let astRoot = parsed[1];
+    astRoot.fixPrototype(lang)
 
     let machine = new vm.Machine(astRoot);
     app.setup(astRoot, machine)

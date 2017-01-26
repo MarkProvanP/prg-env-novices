@@ -1,3 +1,5 @@
+import * as vm from "./machine"
+
 export enum Operator {
   Add,
   Subtract,
@@ -35,6 +37,12 @@ export class OperatorUtils {
 }
 
 export abstract class ASTNode {
+  abstract codegen(machine: vm.Machine)
+
+  fixPrototype(langModule) {
+    let className = this.constructor.name
+    this.__proto__ = langModule[className].prototype
+  }
 }
 
 export abstract class Expression extends ASTNode {
@@ -43,35 +51,72 @@ export abstract class Expression extends ASTNode {
 
 export class Integer extends Expression {
   constructor(
-    public value
+    public value: number
   ) {
     super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    machine.addInstruction(new vm.Push(this.value))
+    machine.endASTRange(this)
   }
 }
 
 export class ValueExpression extends Expression {
   constructor(
-    public ident
+    public ident: Ident
   ) {
     super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    machine.addInstruction(new vm.Get(this.ident.name))
+    machine.endASTRange(this)
+  }
+
+  fixPrototype(langModule) {
+    super.fixPrototype(langModule)
+    this.ident.fixPrototype(langModule)
   }
 }
 
 export class BinaryExpression extends Expression {
   constructor(
-    public left,
-    public right,
+    public left: Expression,
+    public right: Expression,
     public op
   ) {
     super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    this.left.codegen(machine)
+    this.right.codegen(machine)
+    machine.addInstruction(new vm.CallFunction(vm.builtInFunctions[this.op]))
+    machine.endASTRange(this)
+  }
+
+  fixPrototype(langModule) {
+    super.fixPrototype(langModule)
+    this.left.fixPrototype(langModule)
+    this.right.fixPrototype(langModule)
   }
 }
 
 export class EmptyExpression extends Expression {
   constructor(
-    
+
   ) {
     super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    
+    machine.endASTRange(this)
   }
 }
 
@@ -80,6 +125,17 @@ export class Statements extends ASTNode {
     public statements: Statement[]
   ) {
     super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    this.statements.forEach(statement => statement.codegen(machine))
+    machine.endASTRange(this)
+  }
+
+  fixPrototype(langModule) {
+    super.fixPrototype(langModule)
+    this.statements.forEach(statement => statement.fixPrototype(langModule))
   }
 }
 
@@ -94,6 +150,19 @@ export class AssignmentStatement extends Statement {
   ) {
     super()
   }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    this.expression.codegen(machine)
+    machine.addInstruction(new vm.Set(this.ident.name))
+    machine.endASTRange(this)
+  }
+
+  fixPrototype(langModule) {
+    super.fixPrototype(langModule)
+    this.ident.fixPrototype(langModule)
+    this.expression.fixPrototype(langModule)
+  }
 }
 
 export class WhileStatement extends Statement {
@@ -103,6 +172,27 @@ export class WhileStatement extends Statement {
   ) {
     super()
   }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    let whileBeginLabel = "whileBegin";
+    let whileEndLabel = "whileEnd";
+    machine.addLabel(whileBeginLabel)
+    this.condition.codegen(machine)
+    machine.addInstruction(new vm.CallFunction(vm.builtInFunctions['!']))
+    machine.addInstruction(new vm.IfGoto(whileEndLabel))
+    this.statements.codegen(machine)
+    machine.addInstruction(new vm.Push(1))
+    machine.addInstruction(new vm.IfGoto(whileBeginLabel))
+    machine.addLabel(whileEndLabel);
+    machine.endASTRange(this)
+  }
+
+  fixPrototype(langModule) {
+    super.fixPrototype(langModule)
+    this.condition.fixPrototype(langModule)
+    this.statements.fixPrototype(langModule)
+  }
 }
 
 export class EmptyStatement extends Statement {
@@ -111,12 +201,24 @@ export class EmptyStatement extends Statement {
   ) {
     super()
   }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    
+    machine.endASTRange(this)
+  }
 }
 
 export class Ident extends ASTNode {
   constructor(
-    public name
+    public name: string
   ) {
     super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    
+    machine.endASTRange(this)
   }
 }

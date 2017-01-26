@@ -17,6 +17,10 @@ export class App {
         render.renderApp(this)
     }
 
+    changeAST() {
+        this.machine.setAST(this.ast)
+    }
+
     selectASTNode(node: lang.ASTNode) {
         this.selectedASTNode = node
         this.renderApp()
@@ -24,16 +28,19 @@ export class App {
 
     replaceElement(node: lang.ASTNode, element: string, replacement: lang.ASTNode) {
         node[element] = replacement
+        this.changeAST();
         this.renderApp();
     }
 
     deleteFromArray(node: lang.ASTNode, array: string, index: number) {
         node[array].splice(index, 1)
+        this.changeAST()
         this.renderApp();
     }
 
     insertIntoArray(node: lang.ASTNode, array: string, index: number, insert: lang.ASTNode) {
         node[array].splice(index, 0, insert)
+        this.changeAST()
         this.renderApp();
     }
 }
