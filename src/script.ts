@@ -2,7 +2,7 @@ require("./styles.scss");
 import * as lang from "./lang";
 import * as vm from "./machine";
 import * as pegjs from "pegjs"
-import * as reactrender from "./render/render";
+import { App } from "./app";
 
 let grammar = require("./grammar/generated.peg");
 
@@ -13,36 +13,24 @@ let stepButton: HTMLButtonElement = document.getElementById("step-button") as HT
 let parser = pegjs.generate(grammar, {trace: false})
 console.log(`Generated parser!`)
 
-let machine;
-let astRoot;
-let selectedASTNode
-
-function selectASTNode(astNode: lang.ASTNode) {
-    console.log('Selecting', astNode);
-    selectedASTNode = astNode;
-    renderAll();
-}
+let app = new App();
 
 parseButton.onclick = (event) => {
     let input = langInput.value;
     let parsed = parser.parse(input);
     console.log(parsed);
-    astRoot = parsed[1];
+    let astRoot = parsed[1];
 
     let instructions = vm.generateInstructions(astRoot);
-    machine = new vm.Machine(instructions);
-    renderAll();
+    let machine = new vm.Machine(instructions);
+    app.setup(astRoot, machine)
+    app.renderApp();
 }
 
 stepButton.onclick = (event) => {
-    if (!machine) {
+    if (!app.machine) {
         console.log('No machine yet!');
     }
-    machine.oneStepExecute();
-    renderAll();
-}
-
-function renderAll() {
-    reactrender.renderAST(astRoot, selectASTNode);
-    reactrender.renderMachine(machine, selectedASTNode);
+    app.machine.oneStepExecute();
+    app.renderApp();
 }

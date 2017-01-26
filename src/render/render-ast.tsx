@@ -2,40 +2,35 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import * as lang from "../lang";
+import { App } from "../app";
 
-let selectFunction;
-export function renderAST(ast: lang.ASTNode, selectASTNode) {
+export function renderAST(app: App) {
     ReactDOM.render(
-        <ASTNodeComponent node={ast} />,
+        <ASTNodeComponent node={app.ast} app={app} />,
         document.getElementById("react-ast-div")
     )
-    selectFunction = selectASTNode;
 }
 
 interface ASTComponentProps {
-    node: lang.ASTNode
+    node: lang.ASTNode,
+    app: App
 }
 interface NoState {}
 
-interface ASTNodeComponentState {
-    clicked: boolean;
-}
-
-class ASTNodeComponent extends React.Component<ASTComponentProps, ASTNodeComponentState> {
+class ASTNodeComponent extends React.Component<ASTComponentProps, NoState> {
     onClick(e) {
-        selectFunction(!this.state.clicked ? this.props.node : null);
-        this.setState(prevState => ({
-            clicked: !prevState.clicked
-        }))
+        let selectedBefore = this.props.app.selectedASTNode == this.props.node
+        this.props.app.selectASTNode(selectedBefore ? null : this.props.node);
         e.stopPropagation();
         return null;
     }
 
     getClassName() {
+        let selected = this.props.app.selectedASTNode == this.props.node
         return [
             'ast-node',
             this.props.node.constructor.name,
-            this.state.clicked ? 'clicked' : ''
+            selected ? 'clicked' : ''
         ].filter(s => s).join(" ");
     }
 
@@ -49,7 +44,7 @@ class ASTNodeComponent extends React.Component<ASTComponentProps, ASTNodeCompone
 
     render() {
         const astNode = this.props.node;
-        const innerElement = getComponentForNode(astNode);
+        const innerElement = getComponentForNode(this.props);
         return <div className={this.getClassName()} onClick={this.onClick}>
             <div className='title'>{astNode.constructor.name}</div>
             <div className='content'>
@@ -59,20 +54,21 @@ class ASTNodeComponent extends React.Component<ASTComponentProps, ASTNodeCompone
     }
 }
 
-function getComponentForNode(astNode: lang.ASTNode) {
+function getComponentForNode(props: ASTComponentProps) {
+    const astNode = props.node
     switch (astNode.constructor.name) {
-        case "Integer": return <IntegerComponent integer={astNode as lang.Integer} />
-        case "ValueExpression": return <ValueExpressionComponent value={astNode as lang.ValueExpression} />
-        case "BinaryExpression": return <BinaryExpressionComponent binaryExpression={astNode as lang.BinaryExpression} />
-        case "AssignmentStatement": return <AssignmentStatementComponent assignmentStatement={astNode as lang.AssignmentStatement} />
-        case "WhileStatement": return <WhileStatementComponent whileStatement={astNode as lang.WhileStatement} />
-        case "Statements": return <StatementsComponent statements={astNode as lang.Statements} />
-        case "Ident": return <IdentComponent ident={astNode as lang.Ident} />
-        default: return <UnspecifiedComponent node={astNode} />
+        case "Integer": return <IntegerComponent {...props} integer={astNode as lang.Integer} />
+        case "ValueExpression": return <ValueExpressionComponent {...props} value={astNode as lang.ValueExpression} />
+        case "BinaryExpression": return <BinaryExpressionComponent {...props} binaryExpression={astNode as lang.BinaryExpression} />
+        case "AssignmentStatement": return <AssignmentStatementComponent {...props} assignmentStatement={astNode as lang.AssignmentStatement} />
+        case "WhileStatement": return <WhileStatementComponent {...props} whileStatement={astNode as lang.WhileStatement} />
+        case "Statements": return <StatementsComponent {...props} statements={astNode as lang.Statements} />
+        case "Ident": return <IdentComponent {...props} ident={astNode as lang.Ident} />
+        default: return <UnspecifiedComponent {...props} node={astNode} />
     }
 }
 
-interface IntegerComponentProps {
+interface IntegerComponentProps extends ASTComponentProps {
     integer: lang.Integer
 }
 
@@ -84,7 +80,7 @@ class IntegerComponent extends React.Component<IntegerComponentProps, NoState> {
     }
 }
 
-interface ValueExpressionComponentProps {
+interface ValueExpressionComponentProps extends ASTComponentProps {
     value: lang.ValueExpression
 }
 class ValueExpressionComponent extends React.Component<ValueExpressionComponentProps, NoState> {
@@ -93,33 +89,33 @@ class ValueExpressionComponent extends React.Component<ValueExpressionComponentP
     }
 }
 
-interface BinaryExpressionComponentProps {
+interface BinaryExpressionComponentProps extends ASTComponentProps {
     binaryExpression: lang.BinaryExpression
 }
 class BinaryExpressionComponent extends React.Component<BinaryExpressionComponentProps, NoState> {
     render() {
         return <div className='ast-row'>
-            <ASTNodeComponent node={this.props.binaryExpression.left} />
+            <ASTNodeComponent {...this.props} node={this.props.binaryExpression.left} />
             <div className='operator'>{this.props.binaryExpression.op}</div>
-            <ASTNodeComponent node={this.props.binaryExpression.right} />
+            <ASTNodeComponent {...this.props} node={this.props.binaryExpression.right} />
         </div>
     }
 }
 
-interface AssignmentStatementComponentProps {
+interface AssignmentStatementComponentProps extends ASTComponentProps {
     assignmentStatement: lang.AssignmentStatement
 }
 class AssignmentStatementComponent extends React.Component<AssignmentStatementComponentProps, NoState> {
     render() {
         return <div className='ast-row'>
-            <ASTNodeComponent node={this.props.assignmentStatement.ident} />
+            <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.ident} />
             <div className='assign'>=</div>
-            <ASTNodeComponent node={this.props.assignmentStatement.expression} />
+            <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.expression} />
         </div>
     }
 }
 
-interface WhileStatementComponentProps {
+interface WhileStatementComponentProps extends ASTComponentProps {
     whileStatement: lang.WhileStatement
 }
 class WhileStatementComponent extends React.Component<WhileStatementComponentProps, NoState> {
@@ -127,17 +123,17 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
         return <div className='ast-row'>
             <div className='while'>while</div>
             <div className='leftparen'>(</div>
-            <ASTNodeComponent node={this.props.whileStatement.condition} />
+            <ASTNodeComponent {...this.props} node={this.props.whileStatement.condition} />
             <div className='rightparen'>)</div>
             <div className='do'>do</div>
             <div className='leftbrace'>&#123;</div>
-            <ASTNodeComponent node={this.props.whileStatement.statements} />
+            <ASTNodeComponent {...this.props} node={this.props.whileStatement.statements} />
             <div className='rightbrace'>&#125;</div>
         </div>
     }
 }
 
-interface StatementsComponentProps {
+interface StatementsComponentProps extends ASTComponentProps {
     statements: lang.Statements
 }
 class StatementsComponent extends React.Component<StatementsComponentProps, NoState> {
@@ -165,7 +161,7 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
             return <div key={(index * 2) + 1} className='ast-statements-list-row'>
                 <div className='ast-statements-list-row-index'>{index}</div>
                 <div className='ast-statements-list-row-content'>
-                    <ASTNodeComponent node={statement} />
+                    <ASTNodeComponent {...this.props} node={statement}  />
                 </div>
                 <div className='ast-statements-list-row-buttons'>
                     <div className='ast-button ast-row-delete' onClick={this.deleteRow}>-</div>
@@ -180,14 +176,14 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
             elementsList.push(statement);
         })
         let plusButton = this.createPlusButton(statements.length);
-            elementsList.push(plusButton);
+        elementsList.push(plusButton);
         return <div className='ast-statements-list'>
             {elementsList}
         </div>
     }
 }
 
-interface IdentComponentProps {
+interface IdentComponentProps extends ASTComponentProps {
     ident: lang.Ident
 }
 
