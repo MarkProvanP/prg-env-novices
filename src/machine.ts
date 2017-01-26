@@ -42,7 +42,7 @@ export class InstructionRange {
 
     withinRange(index: number) {
       if (this.end == null) return false;
-      return index >= this.start && index <= this.end;
+      return index >= this.start && index < this.end;
     }
 }
 
