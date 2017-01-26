@@ -97,6 +97,14 @@ export class WhileStatement extends Statement {
   }
 }
 
+export class EmptyStatement extends Statement {
+  constructor(
+
+  ) {
+    super()
+  }
+}
+
 export class Ident extends ASTNode {
   constructor(
     public name

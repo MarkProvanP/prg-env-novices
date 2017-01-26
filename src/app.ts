@@ -21,4 +21,14 @@ export class App {
         this.selectedASTNode = node
         this.renderApp()
     }
+
+    deleteFromArray(node: lang.ASTNode, array: string, index: number) {
+        node[array].splice(index, 1)
+        this.renderApp();
+    }
+
+    insertIntoArray(node: lang.ASTNode, array: string, index: number, insert: lang.ASTNode) {
+        node[array].splice(index, 0, insert)
+        this.renderApp();
+    }
 }

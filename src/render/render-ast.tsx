@@ -64,6 +64,7 @@ function getComponentForNode(props: ASTComponentProps) {
         case "WhileStatement": return <WhileStatementComponent {...props} whileStatement={astNode as lang.WhileStatement} />
         case "Statements": return <StatementsComponent {...props} statements={astNode as lang.Statements} />
         case "Ident": return <IdentComponent {...props} ident={astNode as lang.Ident} />
+        case "EmptyStatement": return <EmptyStatementComponent {...props} emptyStatemnet={astNode as lang.EmptyStatement} />
         default: return <UnspecifiedComponent {...props} node={astNode} />
     }
 }
@@ -137,18 +138,32 @@ interface StatementsComponentProps extends ASTComponentProps {
     statements: lang.Statements
 }
 class StatementsComponent extends React.Component<StatementsComponentProps, NoState> {
-    editRow(e) {
-        console.log('Edit!')
+    editRow(index) {
+        return e => {
+            console.log('Edit at index', index)
+        }
     }
 
-    deleteRow(e) {
-        console.log('Delete!')
+    deleteRow(index) {
+        return e => {
+            console.log('Delete at index', index)
+            this.props.app.deleteFromArray(this.props.statements, "statements", index)
+        }
     }
 
     insertRow(index) {
         return function(e) {
-            console.log('Insert at index', index);
-        }
+            console.log('Insert at index', index, this);
+            let newASTNode = new lang.EmptyStatement();
+            this.props.app.insertIntoArray(this.props.statements, "statements", index, newASTNode)
+        }.bind(this)
+    }
+
+    constructor(props: StatementsComponentProps) {
+        super(props)
+        this.editRow = this.editRow.bind(this)
+        this.deleteRow = this.deleteRow.bind(this)
+        this.insertRow = this.insertRow.bind(this)
     }
 
     private createPlusButton(index) {
@@ -164,8 +179,8 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
                     <ASTNodeComponent {...this.props} node={statement}  />
                 </div>
                 <div className='ast-statements-list-row-buttons'>
-                    <div className='ast-button ast-row-delete' onClick={this.deleteRow}>-</div>
-                    <div className='ast-button ast-row-edit' onClick={this.editRow}>Edit</div>
+                    <div className='ast-button ast-row-delete' onClick={this.deleteRow(index)}>-</div>
+                    <div className='ast-button ast-row-edit' onClick={this.editRow(index)}>Edit</div>
                 </div>
             </div>
         })
@@ -190,6 +205,16 @@ interface IdentComponentProps extends ASTComponentProps {
 class IdentComponent extends React.Component<IdentComponentProps, NoState> {
     render() {
         return <div className='ast-row'>{this.props.ident.name}</div>
+    }
+}
+
+interface EmptyStatementProps extends ASTComponentProps {
+    emptyStatement: lang.EmptyStatement
+}
+
+class EmptyStatementComponent extends React.Component<EmptyStatementProps, NoState> {
+    render() {
+        return <div className='ast-row'>EMPTY_STATEMENT</div>
     }
 }
 
