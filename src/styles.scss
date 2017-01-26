@@ -121,14 +121,6 @@ body {
     }
 }
 
-
-.env {
-    .element {
-        border: 1px solid black;
-        background-color: cornflowerblue
-    }
-}
-
 .ast-node {
     margin: 5px;
     border: 1px solid black;
@@ -172,3 +164,33 @@ body {
     font-weight: bold;
     color: darkblue;
 }
+
+.env {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .element {
+        border: 1px solid black;
+        background-color: cornflowerblue;
+        padding: 5px;
+
+        .mapping {
+            display: flex;
+
+            .key {
+                font-style: italic;
+            }
+
+            .arrow {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
+            .value {
+                font-weight: bold;
+            }
+        }
+    }
+}
+

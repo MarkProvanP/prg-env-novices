@@ -151,8 +151,17 @@ interface EnvElementState {}
 
 export class EnvElementComponent extends React.Component<EnvElementProps, EnvElementState> {
     render() {
+        const keys = this.props.element.keys()
+        const mappings = keys.map((key, index) => {
+            let value = this.props.element.get(key)
+            return <div className='mapping' key={index}>
+                <div className='key'>{key}</div>
+                <div className='arrow'>-></div>
+                <div className='value'>{value}</div>
+            </div>
+        })
         return <div className='element'>
-            {JSON.stringify(this.props.element)}
+            {mappings}
         </div>
     }
 }
