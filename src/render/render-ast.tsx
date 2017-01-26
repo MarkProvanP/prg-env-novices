@@ -119,9 +119,9 @@ interface AssignmentStatementComponentProps extends ASTComponentProps {
 class AssignmentStatementComponent extends React.Component<AssignmentStatementComponentProps, NoState> {
     render() {
         return <div className='ast-row'>
-            <div className='keyword let'>let</div>
+            <KeywordComponent keyword='let' />
             <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.ident} />
-            <div className='syntax assign'>:=</div>
+            <SyntaxComponent syntax=':=' />
             <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.expression} />
         </div>
     }
@@ -142,16 +142,52 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
     }
     render() {
         return <div className='ast-row'>
-            <div className='keyword while'>while</div>
-            <div className='syntax leftparen'>(</div>
+            <KeywordComponent keyword='while' />
+            <SyntaxComponent syntax='(' />
             <ASTNodeComponent {...this.props} node={this.props.whileStatement.condition} />
             <div className='ast-button ast-element-delete' onClick={this.removeCondition}>-</div>
-            <div className='syntax rightparen'>)</div>
-            <div className='keyword do'>do</div>
-            <div className='syntax leftbrace'>&#123;</div>
+            <SyntaxComponent syntax=')' />
+            <KeywordComponent keyword='do' />
+            <SyntaxComponent syntax='{' />
             <ASTNodeComponent {...this.props} node={this.props.whileStatement.statements} />
-            <div className='syntax rightbrace'>&#125;</div>
+            <SyntaxComponent syntax='}' />
         </div>
+    }
+}
+
+interface KeywordComponentProps {
+    keyword: string
+}
+
+let classNames = (...classes) => classes.filter(s => s).join(" ")
+
+class KeywordComponent extends React.Component<KeywordComponentProps, NoState> {
+    getClassName() {
+        return classNames(
+            'keyword',
+            this.props.keyword
+        )
+    }
+
+    render() {
+        return <div className={this.getClassName()}>{this.props.keyword}</div>
+    }
+}
+
+interface SyntaxComponentProps {
+    syntax: string
+}
+
+class SyntaxComponent extends React.Component<SyntaxComponentProps, NoState> {
+    getClassName() {
+        return classNames(
+            'syntax',
+            this.props.syntax
+        )
+    }
+
+    render() {
+        return <div className={this.getClassName()}>{this.props.syntax}</div>
     }
 }
 
