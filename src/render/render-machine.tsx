@@ -72,8 +72,15 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
         ].filter(s => s).join(" ")
     }
 
+    getLabels() {
+        let labels = this.props.app.machine.indexToLabelsMap[this.props.index];
+        if (!labels) return;
+        return labels.join(" ")
+    }
+
     render() {
         return <div className={this.getClassName()}>
+            <div className='labels'>{this.getLabels()}</div>
             <div className='index'>{this.props.index}</div>
             <div className='opcode'>{this.props.instruction.constructor.name}</div>
             {getComponentForInstruction(this.props.instruction)}
@@ -88,8 +95,6 @@ function getComponentForInstruction(instruction: vm.Instruction) {
         return <div className='args machine-call-function'>{instruction.func.name}</div>
     } else if (instruction instanceof vm.IfGoto) {
         return <div className='args machine-if-goto'>{instruction.label}</div>
-    } else if (instruction instanceof vm.Label) {
-        return <div className='args machine-label'>{instruction.label}</div>
     } else if (instruction instanceof vm.Set) {
         return <div className='args machine-set'>{instruction.key}</div>
     } else if (instruction instanceof vm.Get) {

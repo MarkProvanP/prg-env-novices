@@ -53,7 +53,8 @@ export class Machine {
   public envStack = []
 
   public instructionPointer = 0;
-  public labelMap = {};
+  public labelToIndexMap = {};
+  public indexToLabelsMap = {};
 
   public changeHistory: MachineChange[] = [];
 
@@ -62,12 +63,7 @@ export class Machine {
   constructor(ast: lang.ASTNode) {
     this.instructions.push(new NewEnv());
     callCodegen(ast, this.instructions, this);
-    this.instructions.forEach((instruction, index) => {
-      if (instruction instanceof Label) {
-        let labelInstruction = instruction;
-        this.labelMap[labelInstruction.label] = index;
-      }
-    })
+    this.indexToLabelsMap = this.getLabelIndices();
   }
 
   beginASTRange(ast: lang.ASTNode, index: number) {
@@ -77,6 +73,22 @@ export class Machine {
   endASTRange(ast: lang.ASTNode, index: number) {
     let range = this.astInstructionRangeMap.get(ast);
     range.end = index;
+  }
+
+  addLabelIndex(label: string, index: number) {
+    this.labelToIndexMap[label] = index;
+  }
+
+  getLabelIndices() {
+    let indexToLabelMap = {}
+    Object.keys(this.labelToIndexMap).forEach(label => {
+      let index = this.labelToIndexMap[label];
+      if (!indexToLabelMap[index]) {
+        indexToLabelMap[index] = []
+      }
+      indexToLabelMap[index].push(label)
+    })
+    return indexToLabelMap
   }
 
   peek(n?: number) {
@@ -302,7 +314,7 @@ export class IfGoto extends Instruction {
     let isTruthy = Machine.isTruthy(stackTop);
     if (isTruthy) {
       let originalIP = machine.instructionPointer;
-      let newIP = machine.labelMap[this.label];
+      let newIP = machine.labelToIndexMap[this.label];
       let change = newIP - originalIP;
       return new MachineChange()
       .withStackPopped([stackTop])
@@ -311,16 +323,6 @@ export class IfGoto extends Instruction {
       return new MachineChange()
       .withStackPopped([stackTop])
     }
-  }
-}
-
-export class Label extends Instruction {
-  constructor(public label: string) {
-    super()
-  }
-
-  machineChange(machine: Machine) {
-    return new MachineChange();
   }
 }
 
@@ -390,14 +392,14 @@ let codegens = {
     machine.beginASTRange(s, instructions.length)
     let whileBeginLabel = "whileBegin";
     let whileEndLabel = "whileEnd";
-    instructions.push(new Label(whileBeginLabel))
+    machine.addLabelIndex(whileBeginLabel, instructions.length)
     callCodegen(s.condition, instructions, machine);
     instructions.push(new CallFunction(builtInFunctions['!']))
     instructions.push(new IfGoto(whileEndLabel))
     callCodegen(s.statements, instructions, machine);
     instructions.push(new Push(1))
     instructions.push(new IfGoto(whileBeginLabel));
-    instructions.push(new Label(whileEndLabel))
+    machine.addLabelIndex(whileEndLabel, instructions.length);
     machine.endASTRange(s, instructions.length)
   },
   ValueExpression: function(e, instructions, machine: Machine) {
