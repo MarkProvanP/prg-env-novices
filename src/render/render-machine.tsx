@@ -10,8 +10,6 @@ export function renderMachine(app: App) {
         <VMStateComponent app={app}/>,
         document.getElementById('react-vm-div')
     )
-
-    console.log("React Render!");
 }
 
 interface VMStateProps {
@@ -22,7 +20,6 @@ interface NoState {}
 
 export class VMStateComponent extends React.Component<VMStateProps, NoState> {
     render() {
-        console.log('VMStateComponent', this.props.app.selectedASTNode)
         return <div className='vm-state'>
             <h2>Machine State</h2>
             <div className='ip'>
@@ -40,7 +37,6 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, NoSta
     render() {
         const instructions = this.props.app.machine.instructions;
         const instructionRange = this.props.app.machine.astInstructionRangeMap.get(this.props.app.selectedASTNode);
-        console.log(this.props.app.selectedASTNode, 'range', instructionRange);
         const instructionComponents = instructions.map((instruction, index) => {
             return <InstructionComponent
             key={index}
