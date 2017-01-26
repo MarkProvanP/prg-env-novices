@@ -21,12 +21,7 @@ let input = fs.readFileSync(INPUT_FILE, "utf8").trim();
 console.log("Input", input)
 try {
   let r = parser.parse(input);
-
-  console.log(r);
-  console.log(JSON.stringify(r))
-  let instructions = machine.generateInstructions(r);
-
-  let m = new machine.Machine(instructions);
+  let m = new machine.Machine(r);
 
   console.log('Built machine');
   console.log(m);

@@ -21,8 +21,7 @@ parseButton.onclick = (event) => {
     console.log(parsed);
     let astRoot = parsed[1];
 
-    let instructions = vm.generateInstructions(astRoot);
-    let machine = new vm.Machine(instructions);
+    let machine = new vm.Machine(astRoot);
     app.setup(astRoot, machine)
     app.renderApp();
 }

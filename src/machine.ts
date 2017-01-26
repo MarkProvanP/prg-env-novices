@@ -47,6 +47,8 @@ export class InstructionRange {
 }
 
 export class Machine {
+  public instructions: Instruction[] = []
+
   public stack = [];
   public envStack = []
 
@@ -57,19 +59,24 @@ export class Machine {
 
   public astInstructionRangeMap = new WeakMap<lang.ASTNode, InstructionRange>();
 
-  constructor(public instructions: Instruction[]) {
+  constructor(ast: lang.ASTNode) {
+    this.instructions.push(new NewEnv());
+    callCodegen(ast, this.instructions, this);
     this.instructions.forEach((instruction, index) => {
       if (instruction instanceof Label) {
         let labelInstruction = instruction;
         this.labelMap[labelInstruction.label] = index;
-      } else if (instruction instanceof ASTBegin) {
-        this.astInstructionRangeMap.set(instruction.ast, new InstructionRange(index, null));
-      } else if (instruction instanceof ASTEnd) {
-        let range = this.astInstructionRangeMap.get(instruction.ast);
-        range.end = index;
       }
     })
-    
+  }
+
+  beginASTRange(ast: lang.ASTNode, index: number) {
+    this.astInstructionRangeMap.set(ast, new InstructionRange(index, null));
+  }
+
+  endASTRange(ast: lang.ASTNode, index: number) {
+    let range = this.astInstructionRangeMap.get(ast);
+    range.end = index;
   }
 
   peek(n?: number) {
@@ -349,85 +356,58 @@ export class Get extends Instruction {
   }
 }
 
-export class ASTBegin extends Instruction {
-  constructor(public ast: lang.ASTNode) {
-    super()
-  }
-
-  machineChange(machine: Machine) {
-    return new MachineChange();
-  }
-}
-
-export class ASTEnd extends Instruction {
-  constructor(public ast: lang.ASTNode) {
-    super();
-  }
-
-  machineChange(machine: Machine) {
-    return new MachineChange();
-  }
-}
 
 
-export function generateInstructions(ast) {
-  let instructions = []
-  instructions.push(new NewEnv());
-  callCodegen(ast, instructions);
-  return instructions;
-}
-
-
-function callCodegen(thing, instructions) {
+function callCodegen(thing, instructions, machine: Machine) {
   if (Array.isArray(thing)) {
-    thing.forEach(thing => callCodegen(thing, instructions))
+    thing.forEach(thing => callCodegen(thing, instructions, machine))
   } else {
-    codegens[thing.constructor.name](thing, instructions)
+    codegens[thing.constructor.name](thing, instructions, machine)
   }
   return instructions;
 }
 
 let codegens = {
-  Integer: function(i, instructions) {
-    instructions.push(new ASTBegin(i))
+  Integer: function(i, instructions, machine: Machine) {
+    machine.beginASTRange(i, instructions.length)
     instructions.push(new Push(i.value))
-    instructions.push(new ASTEnd(i));
+    machine.endASTRange(i, instructions.length)
   },
-  BinaryExpression: function(e, instructions) {
-    instructions.push(new ASTBegin(e));
-    callCodegen(e.left, instructions);
-    callCodegen(e.right, instructions);
+  BinaryExpression: function(e, instructions, machine: Machine) {
+    machine.beginASTRange(e, instructions.length)
+    callCodegen(e.left, instructions, machine);
+    callCodegen(e.right, instructions, machine);
     instructions.push(new CallFunction(builtInFunctions[e.op]))
-    instructions.push(new ASTEnd(e));
+    machine.endASTRange(e, instructions.length)
   },
-  AssignmentStatement: function(s, instructions) {
-    instructions.push(new ASTBegin(s));
-    callCodegen(s.expression, instructions);
+  AssignmentStatement: function(s, instructions, machine: Machine) {
+    machine.beginASTRange(s, instructions.length)
+    callCodegen(s.expression, instructions, machine);
     instructions.push(new Set(s.ident.name));
-    instructions.push(new ASTEnd(s));
+    machine.endASTRange(s, instructions.length)
   },
-  WhileStatement: function(s, instructions) {
-    instructions.push(new ASTBegin(s));
+  WhileStatement: function(s, instructions, machine: Machine) {
+    machine.beginASTRange(s, instructions.length)
     let whileBeginLabel = "whileBegin";
     let whileEndLabel = "whileEnd";
     instructions.push(new Label(whileBeginLabel))
-    callCodegen(s.condition, instructions);
+    callCodegen(s.condition, instructions, machine);
     instructions.push(new CallFunction(builtInFunctions['!']))
     instructions.push(new IfGoto(whileEndLabel))
-    callCodegen(s.statements, instructions);
+    callCodegen(s.statements, instructions, machine);
     instructions.push(new Push(1))
     instructions.push(new IfGoto(whileBeginLabel));
     instructions.push(new Label(whileEndLabel))
-    instructions.push(new ASTEnd(s));
+    machine.endASTRange(s, instructions.length)
   },
-  ValueExpression: function(e, instructions) {
-    instructions.push(new ASTBegin(e));
+  ValueExpression: function(e, instructions, machine: Machine) {
+    machine.beginASTRange(e, instructions.length)
     instructions.push(new Get(e.ident.name))
-    instructions.push(new ASTEnd(e));
+    machine.endASTRange(e, instructions.length)
   },
-  Statements: function(s, instructions) {
-    instructions.push(new ASTBegin(s));
-    s.statements.forEach(statement => callCodegen(statement, instructions))
-    instructions.push(new ASTEnd(s))
+  Statements: function(s, instructions, machine: Machine) {
+    machine.beginASTRange(s, instructions.length)
+    s.statements.forEach(statement => callCodegen(statement, instructions, machine))
+    machine.endASTRange(s, instructions.length)
   }
 }

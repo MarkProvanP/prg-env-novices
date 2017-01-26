@@ -94,10 +94,6 @@ function getComponentForInstruction(instruction: vm.Instruction) {
         return <div className='args machine-set'>{instruction.key}</div>
     } else if (instruction instanceof vm.Get) {
         return <div className='args machine-get'>{instruction.key}</div>
-    } else if (instruction instanceof vm.ASTBegin) {
-        return <div className='args machine-ast-begin'>{instruction.ast.constructor.name}</div>
-    } else if (instruction instanceof vm.ASTEnd) {
-        return <div className='args machine-ast-end'>{instruction.ast.constructor.name}</div>
     }
 }
 
