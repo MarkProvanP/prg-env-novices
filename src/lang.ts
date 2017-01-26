@@ -1,5 +1,3 @@
-import { Renderer } from "./render";
-
 export enum Operator {
   Add,
   Subtract,
@@ -37,8 +35,6 @@ export class OperatorUtils {
 }
 
 export abstract class ASTNode {
-
-  abstract render(renderer: Renderer);
 }
 
 export abstract class Expression extends ASTNode {
@@ -51,10 +47,6 @@ export class Integer extends Expression {
   ) {
     super()
   }
-
-  render(renderer: Renderer) {
-    return renderer.createIntegerElement(this);
-  }
 }
 
 export class ValueExpression extends Expression {
@@ -62,10 +54,6 @@ export class ValueExpression extends Expression {
     public ident
   ) {
     super()
-  }
-
-  render(renderer: Renderer) {
-    return renderer.createValueExpressionElement(this);
   }
 }
 
@@ -77,10 +65,6 @@ export class BinaryExpression extends Expression {
   ) {
     super()
   }
-
-  render(renderer: Renderer) {
-    return renderer.createBinaryExpressionElement(this);
-  }
 }
 
 export class Statements extends ASTNode {
@@ -88,10 +72,6 @@ export class Statements extends ASTNode {
     public statements: Statement[]
   ) {
     super()
-  }
-
-  render(renderer: Renderer) {
-    return renderer.createStatementsElement(this);
   }
 }
 
@@ -106,10 +86,6 @@ export class AssignmentStatement extends Statement {
   ) {
     super()
   }
-
-  render(renderer: Renderer) {
-      return renderer.createAssignmentStatementElement(this);
-  }
 }
 
 export class WhileStatement extends Statement {
@@ -119,10 +95,6 @@ export class WhileStatement extends Statement {
   ) {
     super()
   }
-
-  render(renderer: Renderer) {
-    return renderer.createWhileStatementElement(this);
-  }
 }
 
 export class Ident extends ASTNode {
@@ -130,9 +102,5 @@ export class Ident extends ASTNode {
     public name
   ) {
     super()
-  }
-
-  render(renderer: Renderer) {
-    return renderer.createIdentElement(this);
   }
 }
