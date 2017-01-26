@@ -9,7 +9,7 @@ statement
   / whileStatement
 
 assignmentStatement
-  = i:ident w "=" w e:expression w { return new AssignmentStatement(i, e); }
+  = "let" w i:ident w ":=" w e:expression w { return new AssignmentStatement(i, e); }
 
 whileStatement
   = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, s); }

@@ -64,7 +64,7 @@ function getComponentForNode(props: ASTComponentProps) {
         case "WhileStatement": return <WhileStatementComponent {...props} whileStatement={astNode as lang.WhileStatement} />
         case "Statements": return <StatementsComponent {...props} statements={astNode as lang.Statements} />
         case "Ident": return <IdentComponent {...props} ident={astNode as lang.Ident} />
-        case "EmptyStatement": return <EmptyStatementComponent {...props} emptyStatemnet={astNode as lang.EmptyStatement} />
+        case "EmptyStatement": return <EmptyStatementComponent {...props} emptyStatement={astNode as lang.EmptyStatement} />
         default: return <UnspecifiedComponent {...props} node={astNode} />
     }
 }
@@ -86,7 +86,7 @@ interface ValueExpressionComponentProps extends ASTComponentProps {
 }
 class ValueExpressionComponent extends React.Component<ValueExpressionComponentProps, NoState> {
     render() {
-        return <div className='ast-row'>{this.props.value.ident}</div>
+        return <div className='ast-row'>{this.props.value.ident.name}</div>
     }
 }
 
@@ -103,14 +103,25 @@ class BinaryExpressionComponent extends React.Component<BinaryExpressionComponen
     }
 }
 
+interface EmptyExpressionProps extends ASTComponentProps {
+    emptyStatement: lang.EmptyExpression
+}
+
+class EmptyExpressionComponent extends React.Component<EmptyExpressionProps, NoState> {
+    render() {
+        return <div className='ast-row'>EMPTY_EXPRESSION</div>
+    }
+}
+
 interface AssignmentStatementComponentProps extends ASTComponentProps {
     assignmentStatement: lang.AssignmentStatement
 }
 class AssignmentStatementComponent extends React.Component<AssignmentStatementComponentProps, NoState> {
     render() {
         return <div className='ast-row'>
+            <div className='keyword let'>let</div>
             <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.ident} />
-            <div className='assign'>=</div>
+            <div className='syntax assign'>:=</div>
             <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.expression} />
         </div>
     }
@@ -120,16 +131,26 @@ interface WhileStatementComponentProps extends ASTComponentProps {
     whileStatement: lang.WhileStatement
 }
 class WhileStatementComponent extends React.Component<WhileStatementComponentProps, NoState> {
+    removeCondition(e) {
+        let newEmptyExpression = new lang.EmptyExpression()
+        this.props.app.replaceElement(this.props.whileStatement, "condition", newEmptyExpression)
+    }
+
+    constructor(props: WhileStatementComponentProps) {
+        super(props)
+        this.removeCondition = this.removeCondition.bind(this)
+    }
     render() {
         return <div className='ast-row'>
-            <div className='while'>while</div>
-            <div className='leftparen'>(</div>
+            <div className='keyword while'>while</div>
+            <div className='syntax leftparen'>(</div>
             <ASTNodeComponent {...this.props} node={this.props.whileStatement.condition} />
-            <div className='rightparen'>)</div>
-            <div className='do'>do</div>
-            <div className='leftbrace'>&#123;</div>
+            <div className='ast-button ast-element-delete' onClick={this.removeCondition}>-</div>
+            <div className='syntax rightparen'>)</div>
+            <div className='keyword do'>do</div>
+            <div className='syntax leftbrace'>&#123;</div>
             <ASTNodeComponent {...this.props} node={this.props.whileStatement.statements} />
-            <div className='rightbrace'>&#125;</div>
+            <div className='syntax rightbrace'>&#125;</div>
         </div>
     }
 }

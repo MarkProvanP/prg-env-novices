@@ -67,6 +67,14 @@ export class BinaryExpression extends Expression {
   }
 }
 
+export class EmptyExpression extends Expression {
+  constructor(
+    
+  ) {
+    super()
+  }
+}
+
 export class Statements extends ASTNode {
   constructor(
     public statements: Statement[]

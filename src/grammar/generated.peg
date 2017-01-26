@@ -62,9 +62,6 @@ var Integer = (function (_super) {
         _super.call(this);
         this.value = value;
     }
-    Integer.prototype.render = function (renderer) {
-        return renderer.createIntegerElement(this);
-    };
     return Integer;
 }(Expression));
 exports.Integer = Integer;
@@ -74,9 +71,6 @@ var ValueExpression = (function (_super) {
         _super.call(this);
         this.ident = ident;
     }
-    ValueExpression.prototype.render = function (renderer) {
-        return renderer.createValueExpressionElement(this);
-    };
     return ValueExpression;
 }(Expression));
 exports.ValueExpression = ValueExpression;
@@ -88,21 +82,23 @@ var BinaryExpression = (function (_super) {
         this.right = right;
         this.op = op;
     }
-    BinaryExpression.prototype.render = function (renderer) {
-        return renderer.createBinaryExpressionElement(this);
-    };
     return BinaryExpression;
 }(Expression));
 exports.BinaryExpression = BinaryExpression;
+var EmptyExpression = (function (_super) {
+    __extends(EmptyExpression, _super);
+    function EmptyExpression() {
+        _super.call(this);
+    }
+    return EmptyExpression;
+}(Expression));
+exports.EmptyExpression = EmptyExpression;
 var Statements = (function (_super) {
     __extends(Statements, _super);
     function Statements(statements) {
         _super.call(this);
         this.statements = statements;
     }
-    Statements.prototype.render = function (renderer) {
-        return renderer.createStatementsElement(this);
-    };
     return Statements;
 }(ASTNode));
 exports.Statements = Statements;
@@ -121,9 +117,6 @@ var AssignmentStatement = (function (_super) {
         this.ident = ident;
         this.expression = expression;
     }
-    AssignmentStatement.prototype.render = function (renderer) {
-        return renderer.createAssignmentStatementElement(this);
-    };
     return AssignmentStatement;
 }(Statement));
 exports.AssignmentStatement = AssignmentStatement;
@@ -134,21 +127,23 @@ var WhileStatement = (function (_super) {
         this.condition = condition;
         this.statements = statements;
     }
-    WhileStatement.prototype.render = function (renderer) {
-        return renderer.createWhileStatementElement(this);
-    };
     return WhileStatement;
 }(Statement));
 exports.WhileStatement = WhileStatement;
+var EmptyStatement = (function (_super) {
+    __extends(EmptyStatement, _super);
+    function EmptyStatement() {
+        _super.call(this);
+    }
+    return EmptyStatement;
+}(Statement));
+exports.EmptyStatement = EmptyStatement;
 var Ident = (function (_super) {
     __extends(Ident, _super);
     function Ident(name) {
         _super.call(this);
         this.name = name;
     }
-    Ident.prototype.render = function (renderer) {
-        return renderer.createIdentElement(this);
-    };
     return Ident;
 }(ASTNode));
 exports.Ident = Ident;
@@ -164,7 +159,7 @@ statement
   / whileStatement
 
 assignmentStatement
-  = i:ident w "=" w e:expression w { return new AssignmentStatement(i, e); }
+  = "let" w i:ident w ":=" w e:expression w { return new AssignmentStatement(i, e); }
 
 whileStatement
   = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new WhileStatement(c, s); }

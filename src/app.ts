@@ -22,6 +22,11 @@ export class App {
         this.renderApp()
     }
 
+    replaceElement(node: lang.ASTNode, element: string, replacement: lang.ASTNode) {
+        node[element] = replacement
+        this.renderApp();
+    }
+
     deleteFromArray(node: lang.ASTNode, array: string, index: number) {
         node[array].splice(index, 1)
         this.renderApp();
