@@ -145,8 +145,8 @@ export abstract class Statement extends ASTNode {
 
 export class AssignmentStatement extends Statement {
   constructor(
-    public ident,
-    public expression
+    public ident = new EmptyIdent(),
+    public expression = new EmptyExpression()
   ) {
     super()
   }
@@ -167,8 +167,8 @@ export class AssignmentStatement extends Statement {
 
 export class WhileStatement extends Statement {
   constructor(
-    public condition,
-    public statements
+    public condition = new EmptyExpression(),
+    public statements = new Statements([])
   ) {
     super()
   }
@@ -209,6 +209,18 @@ export class EmptyStatement extends Statement {
   }
 }
 
+export class EmptyIdent extends ASTNode {
+  constructor() {
+    super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    
+    machine.endASTRange(this)
+  }
+}
+
 export class Ident extends ASTNode {
   constructor(
     public name: string
@@ -221,4 +233,10 @@ export class Ident extends ASTNode {
     
     machine.endASTRange(this)
   }
+}
+
+export function getMatchingStatementTypes(input: string) {
+  return [AssignmentStatement, WhileStatement]
+  .filter(statementType => statementType.name.indexOf(input) != -1)
+  .map(statementType => new statementType())
 }

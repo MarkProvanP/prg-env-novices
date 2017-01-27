@@ -64,6 +64,7 @@ function getComponentForNode(props: ASTComponentProps) {
         case "WhileStatement": return <WhileStatementComponent {...props} whileStatement={astNode as lang.WhileStatement} />
         case "Statements": return <StatementsComponent {...props} statements={astNode as lang.Statements} />
         case "Ident": return <IdentComponent {...props} ident={astNode as lang.Ident} />
+        case "EmptyIdent": return <EmptyIdentComponent {...props} emptyIdent={astNode as lang.EmptyIdent} />
         case "EmptyStatement": return <EmptyStatementComponent {...props} emptyStatement={astNode as lang.EmptyStatement} />
         default: return <UnspecifiedComponent {...props} node={astNode} />
     }
@@ -194,7 +195,14 @@ class SyntaxComponent extends React.Component<SyntaxComponentProps, NoState> {
 interface StatementsComponentProps extends ASTComponentProps {
     statements: lang.Statements
 }
-class StatementsComponent extends React.Component<StatementsComponentProps, NoState> {
+interface StatementsComponentState {
+    searchingForType: boolean,
+    emptyStatementInput: string,
+    matchingStatementTypes: any[],
+    highlightedStatementIndex: number
+}
+
+class StatementsComponent extends React.Component<StatementsComponentProps, StatementsComponentState> {
     editRow(index) {
         return e => {
             console.log('Edit at index', index)
@@ -209,11 +217,14 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
     }
 
     insertRow(index) {
-        return function(e) {
+        return e => {
             console.log('Insert at index', index, this);
             let newASTNode = new lang.EmptyStatement();
             this.props.app.insertIntoArray(this.props.statements, "statements", index, newASTNode)
-        }.bind(this)
+            this.setState(prevState => ({
+                searchingForType: true
+            }))
+        }
     }
 
     constructor(props: StatementsComponentProps) {
@@ -221,19 +232,84 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
         this.editRow = this.editRow.bind(this)
         this.deleteRow = this.deleteRow.bind(this)
         this.insertRow = this.insertRow.bind(this)
+        this.state = {
+            searchingForType: false,
+            emptyStatementInput: "",
+            matchingStatementTypes: [],
+            highlightedStatementIndex: undefined
+        }
+    }
+
+    onKeyDown(e) {
+        let event = e.nativeEvent;
+
+        if (!this.state.searchingForType) {
+            return;
+        }
+
+        const isArrowUp = event.key == "ArrowUp"
+        const isArrowDown = event.key == "ArrowDown"
+
+        if (!(isArrowUp || isArrowDown)) {
+            console.log('not right key', event.key)
+            return
+        }
+
+        let currentIndex = this.state.highlightedStatementIndex;
+        let newIndex
+
+        if (isArrowDown && currentIndex < this.state.matchingStatementTypes.length - 1) {
+            newIndex = currentIndex + 1
+        } else if (isArrowDown && currentIndex > 0) {
+            newIndex = currentIndex - 1
+        }
+
+        this.setState(prevState => ({
+            highlightedStatementIndex: newIndex
+        }))
+
+        console.log(event.key);
     }
 
     private createPlusButton(index: number) {
         return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
     }
 
+    private emptyStatementOnChange(e) {
+        const newInputValue = e.nativeEvent.srcElement.value
+        const types = lang.getMatchingStatementTypes(newInputValue)
+        console.log(types)
+        this.setState(prevState => ({
+            searchingForType: true,
+            emptyStatementInput: newInputValue,
+            matchingStatementTypes: types
+        }))
+    }
+
+    private createEmptyStatementElement() {
+        const possibleTypesElements = this.state.matchingStatementTypes.map((statement, index) => {
+            return <div key={index} className={"possibility " + ((this.state.highlightedStatementIndex == index) ? 'highlighted' : '')}>
+                <ASTNodeComponent {...this.props} node={statement} />
+            </div>
+        })
+        return <div className='empty-statement'>
+            <input type='text' onInput={this.emptyStatementOnChange.bind(this)}/>
+            <div className='possibilities'>
+                {possibleTypesElements}
+            </div>
+        </div>
+    }
+
     render() {
         const statements = this.props.statements.statements;
         const statementsList = statements.map((statement, index) => {
+            let contentElement = statement instanceof lang.EmptyStatement
+            ? this.createEmptyStatementElement()
+            : <ASTNodeComponent {...this.props} node={statement}  />
             return <div key={(index * 2) + 1} className='ast-statements-list-row'>
                 <div className='ast-statements-list-row-index'>{index}</div>
                 <div className='ast-statements-list-row-content'>
-                    <ASTNodeComponent {...this.props} node={statement}  />
+                    {contentElement}
                 </div>
                 <div className='ast-statements-list-row-buttons'>
                     <ButtonComponent name='row-delete' text='-' onClick={this.deleteRow(index)} />
@@ -249,7 +325,7 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
         })
         let plusButton = this.createPlusButton(statements.length);
         elementsList.push(plusButton);
-        return <div className='ast-statements-list'>
+        return <div className='ast-statements-list' onKeyDown={this.onKeyDown.bind(this)}>
             {elementsList}
         </div>
     }
@@ -262,6 +338,16 @@ interface IdentComponentProps extends ASTComponentProps {
 class IdentComponent extends React.Component<IdentComponentProps, NoState> {
     render() {
         return <div className='ast-row'>{this.props.ident.name}</div>
+    }
+}
+
+interface EmptyIdentComponentProps extends ASTComponentProps {
+    emptyIdent: lang.EmptyIdent
+}
+
+class EmptyIdentComponent extends React.Component<EmptyIdentComponentProps, NoState> {
+    render() {
+        return <div className='ast-row'>EMPTY_IDENT</div>
     }
 }
 

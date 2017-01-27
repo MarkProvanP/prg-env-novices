@@ -201,3 +201,23 @@ body {
     }
 }
 
+.empty-statement {
+    input {
+        width: 100%;
+    }
+
+    .possibilities {
+        background-color: red;
+        display: flex;
+        flex-direction: column;
+
+        .possibility {
+            padding: 10px;
+            background-color: blue;
+        }
+
+        .possibility.highlighted {
+            background-color: yellow;
+        }
+    }
+}
