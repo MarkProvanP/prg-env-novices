@@ -223,8 +223,8 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
         this.insertRow = this.insertRow.bind(this)
     }
 
-    private createPlusButton(index) {
-        return <div className='ast-button ast-row-insert' key={index * 2} onClick={this.insertRow(index)}>+</div>
+    private createPlusButton(index: number) {
+        return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
     }
 
     render() {
@@ -236,8 +236,8 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
                     <ASTNodeComponent {...this.props} node={statement}  />
                 </div>
                 <div className='ast-statements-list-row-buttons'>
-                    <div className='ast-button ast-row-delete' onClick={this.deleteRow(index)}>-</div>
-                    <div className='ast-button ast-row-edit' onClick={this.editRow(index)}>Edit</div>
+                    <ButtonComponent name='row-delete' text='-' onClick={this.deleteRow(index)} />
+                    <ButtonComponent name='row-edit' text='Edit' onClick={this.editRow(index)} />
                 </div>
             </div>
         })
@@ -278,5 +278,24 @@ class EmptyStatementComponent extends React.Component<EmptyStatementProps, NoSta
 class UnspecifiedComponent extends React.Component<ASTComponentProps, NoState> {
     render() {
         return <div className='ast-row'>{this.props.node.constructor.name}</div>
+    }
+}
+
+interface ButtonComponentProps {
+    text: string,
+    name: string,
+    onClick: (e) => void
+}
+
+class ButtonComponent extends React.Component<ButtonComponentProps, NoState> {
+    getClassName() {
+        return classNames(
+            'ast-button',
+            this.props.name
+        )
+    }
+
+    render() {
+        return <div className={this.getClassName()} onClick={this.props.onClick} >{this.props.text}</div>
     }
 }
