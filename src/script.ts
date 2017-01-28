@@ -20,6 +20,7 @@ parseButton.onclick = (event) => {
     let parsed = parser.parse(input);
     
     let astRoot = parsed[1];
+    console.log(astRoot)
     astRoot.fixPrototype(lang)
 
     let machine = new vm.Machine(astRoot);

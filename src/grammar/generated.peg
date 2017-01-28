@@ -305,7 +305,14 @@ start
   = w method w
 
 method
-  = "method" w i:ident w "(" w args:ident* w ")" w "{" w s:statements w "}" { return new Method(i, args, s)}
+  = "method" w i:ident w "(" w a:args w ")" w "{" w s:statements w "}" { return new Method(i, a, s)}
+
+args
+  = list:argListElement* w single:ident { return [].concat(list).concat(single).filter(function(s) { return s})}
+  / "" { return []}
+
+argListElement
+  = w i:ident w "," w { return i }
 
 statements
   = s:statement* { return new Statements(s)}

@@ -518,10 +518,6 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
             console.log('Insert at index', index, this);
             let newASTNode = new lang.EmptyStatement();
             this.props.app.insertIntoArray(this.props.statements, "statements", index, newASTNode)
-            this.setState(prevState => ({
-                emptyStatementIndex: index,
-                searchingForType: true
-            }))
         }
     }
 
@@ -627,14 +623,39 @@ class MethodComponent extends React.Component<MethodComponentProps, NoState> {
     editIdent(replacement) {
         this.props.app.replaceElement(this.props.method, "name", replacement)
     }
+    deleteArg(index) {
+        return () => {
+            this.props.app.deleteFromArray(this.props.method, "args", index)
+        }
+    }
+    editArg(index) {
+        return (replacement) => {
+            this.props.app.replaceElementInArray(this.props.method, "args", index, replacement)
+        }
+    }
+    insertArg(index) {
+        return () => {
+            console.log('insert at index', index)
+            let newArg = new lang.EmptyIdent()
+            this.props.app.insertIntoArray(this.props.method, "args", index, newArg)
+        }
+    }
     render() {
         const argElements = []
         this.props.method.args.forEach((ident, index) => {
-            argElements.push(<ASTNodeComponent key={index} {...this.props} node={ident} />)
+            argElements.push(<ButtonComponent key={index * 3} name='add' text='+' onClick={this.insertArg(index).bind(this)}/>)
+            argElements.push(
+                <IdentWrapperComponent key={index * 3 + 1}
+                {...this.props} ident={ident}
+                onIdentDelete={this.deleteArg(index).bind(this)}
+                onIdentEdit={this.editArg(index).bind(this)}
+                />
+                )
             if (index != this.props.method.args.length - 1) {
-                argElements.push(<SyntaxComponent syntax=',' />)
+                argElements.push(<SyntaxComponent key={index * 3 + 2} syntax=',' />)
             }
         })
+        argElements.push(<ButtonComponent key={argElements.length} name='add' text='+' onClick={this.insertArg(this.props.method.args.length).bind(this)}/>)
         return <div>
             <div className='ast-row'>
                 <KeywordComponent keyword='method'/>
