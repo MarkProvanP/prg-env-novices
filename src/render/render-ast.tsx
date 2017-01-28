@@ -186,15 +186,21 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
         this.removeCondition = this.removeCondition.bind(this)
     }
     render() {
-        return <div className='ast-row'>
-            <KeywordComponent keyword='while' />
-            <SyntaxComponent syntax='(' />
-            <ExpressionWrapperComponent {...this.props} expression={this.props.whileStatement.condition} onExpressionDelete={this.removeCondition}/>
-            <SyntaxComponent syntax=')' />
-            <KeywordComponent keyword='do' />
-            <SyntaxComponent syntax='{' />
-            <ASTNodeComponent {...this.props} node={this.props.whileStatement.statements} />
-            <SyntaxComponent syntax='}' />
+        return <div>
+            <div className='ast-row'>
+                <KeywordComponent keyword='while' />
+                <SyntaxComponent syntax='(' />
+                <ExpressionWrapperComponent {...this.props} expression={this.props.whileStatement.condition} onExpressionDelete={this.removeCondition}/>
+                <SyntaxComponent syntax=')' />
+                <KeywordComponent keyword='do' />
+                <SyntaxComponent syntax='{' />
+            </div>
+            <div className='ast-row'>
+                <ASTNodeComponent {...this.props} node={this.props.whileStatement.statements} />
+            </div>
+            <div className='ast-row'>
+                <SyntaxComponent syntax='}' />
+            </div>
         </div>
     }
 }
