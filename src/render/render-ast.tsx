@@ -246,6 +246,22 @@ interface StatementsComponentState {
     highlightedStatementIndex: number
 }
 
+interface StatementWrapperComponentProps extends ASTComponentProps {
+    statement: lang.Statement,
+    onStatementDelete: (e) => void
+    onStatementEdit: (e) => void
+}
+
+class StatementWrapperComponent extends React.Component<StatementWrapperComponentProps, NoState> {
+    render() {
+        return <div className={classNames('statement-wrapper', 'ast-row')}>
+            <ASTNodeComponent {...this.props} node={this.props.statement} />
+            <ButtonComponent name='element-delete' text='-' onClick={this.props.onStatementDelete} />
+            <ButtonComponent name='row-edit' text='Edit' onClick={this.props.onStatementEdit} />
+        </div>
+    }
+}
+
 class StatementsComponent extends React.Component<StatementsComponentProps, StatementsComponentState> {
     editRow(index) {
         return e => {
@@ -358,15 +374,11 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
         const statementsList = statements.map((statement, index) => {
             let contentElement = statement instanceof lang.EmptyStatement
             ? this.createEmptyStatementElement(index)
-            : <ASTNodeComponent {...this.props} node={statement}  />
+            : <StatementWrapperComponent {...this.props} statement={statement} onStatementDelete={this.deleteRow(index)} onStatementEdit={this.editRow(index)}/>
             return <div key={(index * 2) + 1} className='ast-statements-list-row'>
                 <div className='ast-statements-list-row-index'>{index}</div>
                 <div className='ast-statements-list-row-content'>
                     {contentElement}
-                </div>
-                <div className='ast-statements-list-row-buttons'>
-                    <ButtonComponent name='row-delete' text='-' onClick={this.deleteRow(index)} />
-                    <ButtonComponent name='row-edit' text='Edit' onClick={this.editRow(index)} />
                 </div>
             </div>
         })
