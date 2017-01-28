@@ -1,5 +1,8 @@
 start
-  = w statements w
+  = w method w
+
+method
+  = "method" w i:ident w "(" w args:ident* w ")" w "{" w s:statements w "}" { return new Method(i, args, s)}
 
 statements
   = s:statement* { return new Statements(s)}

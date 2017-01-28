@@ -66,6 +66,7 @@ function getComponentForNode(props: ASTComponentProps) {
         case "Ident": return <IdentComponent {...props} ident={astNode as lang.Ident} />
         case "EmptyIdent": return <EmptyIdentComponent {...props} emptyIdent={astNode as lang.EmptyIdent} />
         case "EmptyStatement": return <EmptyStatementComponent {...props} emptyStatement={astNode as lang.EmptyStatement} />
+        case "Method": return <MethodComponent {...props} method={astNode as lang.Method} />
         default: return <UnspecifiedComponent {...props} node={astNode} />
     }
 }
@@ -393,5 +394,33 @@ class ButtonComponent extends React.Component<ButtonComponentProps, NoState> {
 
     render() {
         return <div className={this.getClassName()} onClick={this.props.onClick} >{this.props.text}</div>
+    }
+}
+
+interface MethodComponentProps extends ASTComponentProps {
+    method: lang.Method
+}
+
+class MethodComponent extends React.Component<MethodComponentProps, NoState> {
+    render() {
+        const argElements = []
+        this.props.method.args.forEach((ident, index) => {
+            argElements.push(<ASTNodeComponent key={index} {...this.props} node={ident} />)
+            if (index != this.props.method.args.length - 1) {
+                argElements.push(<SyntaxComponent syntax=',' />)
+            }
+        })
+        return <div>
+            <div className='ast-row'>
+                <KeywordComponent keyword='method'/>
+                <ASTNodeComponent {...this.props} node={this.props.method.name} />
+                <SyntaxComponent syntax='(' />
+                {argElements}
+                <SyntaxComponent syntax=')' />
+            </div>
+            <div className='ast-row'>
+                <ASTNodeComponent {...this.props} node={this.props.method.statements} />
+            </div>
+        </div>
     }
 }

@@ -240,3 +240,26 @@ export function getMatchingStatementTypes(input: string) {
   .filter(statementType => statementType.name.indexOf(input) != -1)
   .map(statementType => new statementType())
 }
+
+export class Method extends ASTNode {
+  constructor(
+    public name: Ident,
+    public args: Ident[],
+    public statements: Statements
+  ) {
+    super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+    this.statements.codegen(machine)
+    machine.endASTRange(this)
+  }
+
+  fixPrototype(langModule) {
+    super.fixPrototype(langModule)
+    this.name.fixPrototype(langModule)
+    this.args.forEach(arg => arg.fixPrototype(langModule))
+    this.statements.fixPrototype(langModule)
+  }
+}

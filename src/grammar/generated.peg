@@ -158,6 +158,8 @@ exports.Statement = Statement;
 var AssignmentStatement = (function (_super) {
     __extends(AssignmentStatement, _super);
     function AssignmentStatement(ident, expression) {
+        if (ident === void 0) { ident = new EmptyIdent(); }
+        if (expression === void 0) { expression = new EmptyExpression(); }
         _super.call(this);
         this.ident = ident;
         this.expression = expression;
@@ -179,6 +181,8 @@ exports.AssignmentStatement = AssignmentStatement;
 var WhileStatement = (function (_super) {
     __extends(WhileStatement, _super);
     function WhileStatement(condition, statements) {
+        if (condition === void 0) { condition = new EmptyExpression(); }
+        if (statements === void 0) { statements = new Statements([]); }
         _super.call(this);
         this.condition = condition;
         this.statements = statements;
@@ -217,6 +221,18 @@ var EmptyStatement = (function (_super) {
     return EmptyStatement;
 }(Statement));
 exports.EmptyStatement = EmptyStatement;
+var EmptyIdent = (function (_super) {
+    __extends(EmptyIdent, _super);
+    function EmptyIdent() {
+        _super.call(this);
+    }
+    EmptyIdent.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        machine.endASTRange(this);
+    };
+    return EmptyIdent;
+}(ASTNode));
+exports.EmptyIdent = EmptyIdent;
 var Ident = (function (_super) {
     __extends(Ident, _super);
     function Ident(name) {
@@ -230,9 +246,40 @@ var Ident = (function (_super) {
     return Ident;
 }(ASTNode));
 exports.Ident = Ident;
+function getMatchingStatementTypes(input) {
+    return [AssignmentStatement, WhileStatement]
+        .filter(function (statementType) { return statementType.name.indexOf(input) != -1; })
+        .map(function (statementType) { return new statementType(); });
+}
+exports.getMatchingStatementTypes = getMatchingStatementTypes;
+var Method = (function (_super) {
+    __extends(Method, _super);
+    function Method(name, args, statements) {
+        _super.call(this);
+        this.name = name;
+        this.args = args;
+        this.statements = statements;
+    }
+    Method.prototype.codegen = function (machine) {
+        machine.beginASTRange(this);
+        this.statements.codegen(machine);
+        machine.endASTRange(this);
+    };
+    Method.prototype.fixPrototype = function (langModule) {
+        _super.prototype.fixPrototype.call(this, langModule);
+        this.name.fixPrototype(langModule);
+        this.args.forEach(function (arg) { return arg.fixPrototype(langModule); });
+        this.statements.fixPrototype(langModule);
+    };
+    return Method;
+}(ASTNode));
+exports.Method = Method;
 }
 start
-  = w statements w
+  = w method w
+
+method
+  = "method" w i:ident w "(" w args:ident* w ")" w "{" w s:statements w "}" { return new Method(i, args, s)}
 
 statements
   = s:statement* { return new Statements(s)}
