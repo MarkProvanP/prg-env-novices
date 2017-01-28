@@ -209,7 +209,11 @@ export class EmptyStatement extends Statement {
   }
 }
 
-export class EmptyIdent extends ASTNode {
+export abstract class AbstractIdent extends ASTNode {
+
+}
+
+export class EmptyIdent extends AbstractIdent {
   constructor() {
     super()
   }
@@ -221,7 +225,7 @@ export class EmptyIdent extends ASTNode {
   }
 }
 
-export class Ident extends ASTNode {
+export class Ident extends AbstractIdent {
   constructor(
     public name: string
   ) {

@@ -85,6 +85,20 @@ class ExpressionWrapperComponent extends React.Component<ExpressionWrapperCompon
     }
 }
 
+interface IdentWrapperComponentProps extends ASTComponentProps {
+    ident: lang.AbstractIdent,
+    onIdentDelete: (e) => void
+}
+
+class IdentWrapperComponent extends React.Component<IdentWrapperComponentProps, NoState> {
+    render() {
+        return <div className={classNames('ident-wrapper', 'ast-row')}>
+            <ASTNodeComponent {...this.props} node={this.props.ident}/>
+            <ButtonComponent name='element-delete' text='-' onClick={this.props.onIdentDelete} />
+        </div>
+    }
+}
+
 interface IntegerComponentProps extends ASTComponentProps {
     integer: lang.Integer
 }
@@ -140,6 +154,10 @@ interface AssignmentStatementComponentProps extends ASTComponentProps {
     assignmentStatement: lang.AssignmentStatement
 }
 class AssignmentStatementComponent extends React.Component<AssignmentStatementComponentProps, NoState> {
+    removeIdent(e) {
+        let newEmptyIdent = new lang.EmptyIdent()
+        this.props.app.replaceElement(this.props.assignmentStatement, "ident", newEmptyIdent)
+    }
     removeExpression(e) {
         let newEmptyExpression = new lang.EmptyExpression()
         this.props.app.replaceElement(this.props.assignmentStatement, "expression", newEmptyExpression)
@@ -147,7 +165,7 @@ class AssignmentStatementComponent extends React.Component<AssignmentStatementCo
     render() {
         return <div className='ast-row'>
             <KeywordComponent keyword='let' />
-            <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.ident} />
+            <IdentWrapperComponent {...this.props} ident={this.props.assignmentStatement.ident} onIdentDelete={this.removeIdent.bind(this)}/>
             <SyntaxComponent syntax=':=' />
             <ExpressionWrapperComponent {...this.props} expression={this.props.assignmentStatement.expression} onExpressionDelete={this.removeExpression.bind(this)}/>
         </div>
@@ -426,6 +444,11 @@ interface MethodComponentProps extends ASTComponentProps {
 }
 
 class MethodComponent extends React.Component<MethodComponentProps, NoState> {
+    removeIdent(e) {
+        let newEmptyIdent = new lang.EmptyIdent()
+        this.props.app.replaceElement(this.props.method, "name", newEmptyIdent)
+    }
+
     render() {
         const argElements = []
         this.props.method.args.forEach((ident, index) => {
@@ -437,7 +460,7 @@ class MethodComponent extends React.Component<MethodComponentProps, NoState> {
         return <div>
             <div className='ast-row'>
                 <KeywordComponent keyword='method'/>
-                <ASTNodeComponent {...this.props} node={this.props.method.name} />
+                <IdentWrapperComponent {...this.props} ident={this.props.method.name} onIdentDelete={this.removeIdent.bind(this)}/>
                 <SyntaxComponent syntax='(' />
                 {argElements}
                 <SyntaxComponent syntax=')' />
