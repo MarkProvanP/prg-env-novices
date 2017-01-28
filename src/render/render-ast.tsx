@@ -197,6 +197,7 @@ interface StatementsComponentProps extends ASTComponentProps {
 }
 interface StatementsComponentState {
     searchingForType: boolean,
+    emptyStatementIndex: number,
     emptyStatementInput: string,
     matchingStatementTypes: any[],
     highlightedStatementIndex: number
@@ -222,6 +223,7 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
             let newASTNode = new lang.EmptyStatement();
             this.props.app.insertIntoArray(this.props.statements, "statements", index, newASTNode)
             this.setState(prevState => ({
+                emptyStatementIndex: index,
                 searchingForType: true
             }))
         }
@@ -236,7 +238,8 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
             searchingForType: false,
             emptyStatementInput: "",
             matchingStatementTypes: [],
-            highlightedStatementIndex: undefined
+            highlightedStatementIndex: 0,
+            emptyStatementIndex: 0
         }
     }
 
@@ -249,26 +252,32 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
 
         const isArrowUp = event.key == "ArrowUp"
         const isArrowDown = event.key == "ArrowDown"
+        const isEnterKey = event.key == "Enter"
 
-        if (!(isArrowUp || isArrowDown)) {
+        if (!(isArrowUp || isArrowDown || isEnterKey)) {
             console.log('not right key', event.key)
             return
         }
 
-        let currentIndex = this.state.highlightedStatementIndex;
-        let newIndex
+        let index = this.state.highlightedStatementIndex;
 
-        if (isArrowDown && currentIndex < this.state.matchingStatementTypes.length - 1) {
-            newIndex = currentIndex + 1
-        } else if (isArrowDown && currentIndex > 0) {
-            newIndex = currentIndex - 1
+        if (isEnterKey) {
+            let selected = this.state.matchingStatementTypes[index];
+            let emptyStatementIndex = this.state.emptyStatementIndex;
+            this.props.app.replaceElementInArray(this.props.statements, "statements", emptyStatementIndex, selected)
+            console.log('Replaced element')
+            return
+        }
+
+        if (isArrowDown && index < this.state.matchingStatementTypes.length - 1) {
+            index++
+        } else if (isArrowUp && index > 0) {
+            index--
         }
 
         this.setState(prevState => ({
-            highlightedStatementIndex: newIndex
+            highlightedStatementIndex: index
         }))
-
-        console.log(event.key);
     }
 
     private createPlusButton(index: number) {
@@ -286,9 +295,10 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
         }))
     }
 
-    private createEmptyStatementElement() {
+    private createEmptyStatementElement(index) {
         const possibleTypesElements = this.state.matchingStatementTypes.map((statement, index) => {
-            return <div key={index} className={"possibility " + ((this.state.highlightedStatementIndex == index) ? 'highlighted' : '')}>
+            let classes = classNames('possibility', (this.state.highlightedStatementIndex == index) ? 'highlighted' : '')
+            return <div key={index} className={classes}>
                 <ASTNodeComponent {...this.props} node={statement} />
             </div>
         })
@@ -304,7 +314,7 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
         const statements = this.props.statements.statements;
         const statementsList = statements.map((statement, index) => {
             let contentElement = statement instanceof lang.EmptyStatement
-            ? this.createEmptyStatementElement()
+            ? this.createEmptyStatementElement(index)
             : <ASTNodeComponent {...this.props} node={statement}  />
             return <div key={(index * 2) + 1} className='ast-statements-list-row'>
                 <div className='ast-statements-list-row-index'>{index}</div>

@@ -43,4 +43,10 @@ export class App {
         this.changeAST()
         this.renderApp();
     }
+
+    replaceElementInArray(node: lang.ASTNode, array: string, index: number, insert: lang.ASTNode) {
+        node[array][index] = insert;
+        this.changeAST()
+        this.renderApp()
+    }
 }
