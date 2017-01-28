@@ -72,6 +72,7 @@ function getComponentForNode(props: ASTComponentProps) {
 }
 
 interface ASTWrapperComponentState<T extends lang.ASTNode> {
+    showingSuggestions: boolean,
     matchingASTTypes: T[],
     highlightedASTIndex: number,
     emptyASTInput: string,
@@ -81,6 +82,7 @@ abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.A
     constructor(props: ExpressionWrapperComponentProps) {
         super(props)
         this.state = {
+            showingSuggestions: false,
             matchingASTTypes: [],
             highlightedASTIndex: 0,
             emptyASTInput: ""
@@ -111,8 +113,7 @@ abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.A
         let index = this.state.highlightedASTIndex;
 
         if (isEnterKey) {
-            let selected = this.state.matchingASTTypes[index];
-            this.editAST(selected)
+            this.pickPossibility(index)
             return
         }
 
@@ -127,28 +128,68 @@ abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.A
         }))
     }
 
-    private emptyASTOnChange(e) {
+    private pickPossibility(index) {
+        let selected = this.state.matchingASTTypes[index];
+            this.editAST(selected)
+    }
+
+    private textOnInput(e) {
         const newInputValue = e.nativeEvent.srcElement.value
         const types = this.getMatchingASTTypes(newInputValue)
 
         this.setState(prevState => ({
+            showingSuggestions: true,
             emptyASTInput: newInputValue,
             matchingASTTypes: types
         }))
     }
 
+    private textOnClick(e) {
+        this.setState(prevState => ({
+            showingSuggestions: true
+        }))
+    }
+
+    private textOnBlur(e) {
+        this.setState(prevState => ({
+            showingSuggestions: false
+        }))
+    }
+
+    private possibilityOnClick(index) {
+        return e => {
+            console.log('Click', index);
+            this.pickPossibility(index)
+        }
+    }
+
+    private possibilityOnMouseOver(index) {
+        return e => {
+            console.log("mouseover", index);
+        }
+    }
+
     emptyASTElement() {
         const possibleTypesElements = this.state.matchingASTTypes.map((statement, index) => {
             let classes = classNames('possibility', (this.state.highlightedASTIndex == index) ? 'highlighted' : '')
-            return <div key={index} className={classes}>
+            return <div key={index} className={classes} onMouseOver={this.possibilityOnMouseOver(index).bind(this)} onClick={this.possibilityOnClick.bind(this)(index)}>
                 <ASTNodeComponent {...this.props} node={statement} />
             </div>
         })
-        return <div className={classNames('empty-ast')}>
-            <input type='text' onInput={this.emptyASTOnChange.bind(this)}/>
-            <div className='possibilities'>
+        let possibilitiesElement = this.state.showingSuggestions
+        ?   <div className='possibilities'>
+                <div className='title'>Possibilities</div>
                 {possibleTypesElements}
             </div>
+        : undefined
+        return <div className={classNames('empty-ast')}>
+            <input type='text'
+            placeholder={this.getASTType().name}
+            onInput={this.textOnInput.bind(this)}
+            onClick={this.textOnClick.bind(this)}
+            onBlur={this.textOnBlur.bind(this)}
+            />
+            {possibilitiesElement}
         </div>
     }
 
