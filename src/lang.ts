@@ -65,14 +65,14 @@ export class Integer extends Expression {
 
 export class ValueExpression extends Expression {
   constructor(
-    public ident: AbstractIdent = new EmptyIdent()
+    public ident: Ident = new EmptyIdent()
   ) {
     super()
   }
 
   codegen(machine: vm.Machine) {
     machine.beginASTRange(this)
-    if (this.ident instanceof Ident) {
+    if (this.ident instanceof ConcreteIdent) {
       machine.addInstruction(new vm.Get(this.ident.name))
     }
     machine.endASTRange(this)
@@ -147,7 +147,7 @@ export abstract class Statement extends ASTNode {
 
 export class AssignmentStatement extends Statement {
   constructor(
-    public ident: AbstractIdent = new EmptyIdent(),
+    public ident: Ident = new EmptyIdent(),
     public expression: Expression = new EmptyExpression()
   ) {
     super()
@@ -156,7 +156,7 @@ export class AssignmentStatement extends Statement {
   codegen(machine: vm.Machine) {
     machine.beginASTRange(this)
     this.expression.codegen(machine)
-    if (this.ident instanceof Ident) {
+    if (this.ident instanceof ConcreteIdent) {
       machine.addInstruction(new vm.Set(this.ident.name))
     }
     machine.endASTRange(this)
@@ -213,11 +213,9 @@ export class EmptyStatement extends Statement {
   }
 }
 
-export abstract class AbstractIdent extends ASTNode {
+export abstract class Ident extends ASTNode {}
 
-}
-
-export class EmptyIdent extends AbstractIdent {
+export class EmptyIdent extends Ident {
   constructor() {
     super()
   }
@@ -229,7 +227,7 @@ export class EmptyIdent extends AbstractIdent {
   }
 }
 
-export class Ident extends AbstractIdent {
+export class ConcreteIdent extends Ident {
   constructor(
     public name: string
   ) {
@@ -255,10 +253,14 @@ export function getMatchingExpressionTypes(input: string) {
   .map(expressionType => new expressionType())
 }
 
+export function getMatchingIdentTypes(input: string) {
+  return [new ConcreteIdent(input)]
+}
+
 export class Method extends ASTNode {
   constructor(
-    public name: Ident,
-    public args: Ident[],
+    public name: ConcreteIdent,
+    public args: ConcreteIdent[],
     public statements: Statements
   ) {
     super()

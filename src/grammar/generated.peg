@@ -65,6 +65,7 @@ exports.Expression = Expression;
 var Integer = (function (_super) {
     __extends(Integer, _super);
     function Integer(value) {
+        if (value === void 0) { value = 0; }
         _super.call(this);
         this.value = value;
     }
@@ -79,12 +80,15 @@ exports.Integer = Integer;
 var ValueExpression = (function (_super) {
     __extends(ValueExpression, _super);
     function ValueExpression(ident) {
+        if (ident === void 0) { ident = new EmptyIdent(); }
         _super.call(this);
         this.ident = ident;
     }
     ValueExpression.prototype.codegen = function (machine) {
         machine.beginASTRange(this);
-        machine.addInstruction(new vm.Get(this.ident.name));
+        if (this.ident instanceof ConcreteIdent) {
+            machine.addInstruction(new vm.Get(this.ident.name));
+        }
         machine.endASTRange(this);
     };
     ValueExpression.prototype.fixPrototype = function (langModule) {
@@ -97,6 +101,8 @@ exports.ValueExpression = ValueExpression;
 var BinaryExpression = (function (_super) {
     __extends(BinaryExpression, _super);
     function BinaryExpression(left, right, op) {
+        if (left === void 0) { left = new EmptyExpression(); }
+        if (right === void 0) { right = new EmptyExpression(); }
         _super.call(this);
         this.left = left;
         this.right = right;
@@ -167,7 +173,9 @@ var AssignmentStatement = (function (_super) {
     AssignmentStatement.prototype.codegen = function (machine) {
         machine.beginASTRange(this);
         this.expression.codegen(machine);
-        machine.addInstruction(new vm.Set(this.ident.name));
+        if (this.ident instanceof ConcreteIdent) {
+            machine.addInstruction(new vm.Set(this.ident.name));
+        }
         machine.endASTRange(this);
     };
     AssignmentStatement.prototype.fixPrototype = function (langModule) {
@@ -221,6 +229,14 @@ var EmptyStatement = (function (_super) {
     return EmptyStatement;
 }(Statement));
 exports.EmptyStatement = EmptyStatement;
+var Ident = (function (_super) {
+    __extends(Ident, _super);
+    function Ident() {
+        _super.apply(this, arguments);
+    }
+    return Ident;
+}(ASTNode));
+exports.Ident = Ident;
 var EmptyIdent = (function (_super) {
     __extends(EmptyIdent, _super);
     function EmptyIdent() {
@@ -231,27 +247,37 @@ var EmptyIdent = (function (_super) {
         machine.endASTRange(this);
     };
     return EmptyIdent;
-}(ASTNode));
+}(Ident));
 exports.EmptyIdent = EmptyIdent;
-var Ident = (function (_super) {
-    __extends(Ident, _super);
-    function Ident(name) {
+var ConcreteIdent = (function (_super) {
+    __extends(ConcreteIdent, _super);
+    function ConcreteIdent(name) {
         _super.call(this);
         this.name = name;
     }
-    Ident.prototype.codegen = function (machine) {
+    ConcreteIdent.prototype.codegen = function (machine) {
         machine.beginASTRange(this);
         machine.endASTRange(this);
     };
-    return Ident;
-}(ASTNode));
-exports.Ident = Ident;
+    return ConcreteIdent;
+}(Ident));
+exports.ConcreteIdent = ConcreteIdent;
 function getMatchingStatementTypes(input) {
     return [AssignmentStatement, WhileStatement]
         .filter(function (statementType) { return statementType.name.indexOf(input) != -1; })
         .map(function (statementType) { return new statementType(); });
 }
 exports.getMatchingStatementTypes = getMatchingStatementTypes;
+function getMatchingExpressionTypes(input) {
+    return [BinaryExpression, ValueExpression, Integer]
+        .filter(function (expressionType) { return expressionType.name.indexOf(input) != -1; })
+        .map(function (expressionType) { return new expressionType(); });
+}
+exports.getMatchingExpressionTypes = getMatchingExpressionTypes;
+function getMatchingIdentTypes(input) {
+    return [new ConcreteIdent(input)];
+}
+exports.getMatchingIdentTypes = getMatchingIdentTypes;
 var Method = (function (_super) {
     __extends(Method, _super);
     function Method(name, args, statements) {
@@ -320,7 +346,7 @@ integer "integer"
   = digits:[0-9]+ { return new Integer(parseInt(digits.join(""), 10)); }
 
 ident
-  = name:[a-z]+ { return new Ident(name.join("")) }
+  = name:[a-z]+ { return new ConcreteIdent(name.join("")) }
 
 w
   = [ \t\n\r]*

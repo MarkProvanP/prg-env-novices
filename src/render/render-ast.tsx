@@ -63,7 +63,7 @@ function getComponentForNode(props: ASTComponentProps) {
         case "AssignmentStatement": return <AssignmentStatementComponent {...props} assignmentStatement={astNode as lang.AssignmentStatement} />
         case "WhileStatement": return <WhileStatementComponent {...props} whileStatement={astNode as lang.WhileStatement} />
         case "Statements": return <StatementsComponent {...props} statements={astNode as lang.Statements} />
-        case "Ident": return <IdentComponent {...props} ident={astNode as lang.Ident} />
+        case "ConcreteIdent": return <IdentComponent {...props} ident={astNode as lang.ConcreteIdent} />
         case "EmptyIdent": return <EmptyIdentComponent {...props} emptyIdent={astNode as lang.EmptyIdent} />
         case "EmptyStatement": return <EmptyStatementComponent {...props} emptyStatement={astNode as lang.EmptyStatement} />
         case "Method": return <MethodComponent {...props} method={astNode as lang.Method} />
@@ -287,16 +287,34 @@ class StatementWrapperComponent extends ASTWrapperComponent<StatementWrapperComp
 }
 
 interface IdentWrapperComponentProps extends ASTComponentProps {
-    ident: lang.AbstractIdent,
-    onIdentDelete: () => void
+    ident: lang.Ident,
+    onIdentDelete: () => void,
+    onIdentEdit: (replacement: lang.Ident) => void
 }
 
-class IdentWrapperComponent extends React.Component<IdentWrapperComponentProps, NoState> {
-    render() {
-        return <div className={classNames('ast-wrapper', 'ident-wrapper', 'ast-row')}>
-            <ASTNodeComponent {...this.props} node={this.props.ident}/>
-            <ButtonComponent name='element-delete' text='-' onClick={this.props.onIdentDelete} />
-        </div>
+class IdentWrapperComponent extends ASTWrapperComponent<IdentWrapperComponentProps, lang.Ident> {
+    isEmptyAST() {
+        return this.props.ident instanceof lang.EmptyIdent;
+    }
+
+    getASTNode() {
+        return this.props.ident
+    }
+
+    getASTType() {
+        return lang.Ident
+    }
+
+    deleteAST() {
+        this.props.onIdentDelete()
+    }
+
+    editAST(replacement: lang.Ident) {
+        this.props.onIdentEdit(replacement)
+    }
+
+    getMatchingASTTypes(input: string) {
+        return lang.getMatchingIdentTypes(input)
     }
 }
 
@@ -375,6 +393,9 @@ class AssignmentStatementComponent extends React.Component<AssignmentStatementCo
         let newEmptyIdent = new lang.EmptyIdent()
         this.props.app.replaceElement(this.props.assignmentStatement, "ident", newEmptyIdent)
     }
+    editIdent(replacement) {
+        this.props.app.replaceElement(this.props.assignmentStatement, "ident", replacement)
+    }
     removeExpression(e) {
         let newEmptyExpression = new lang.EmptyExpression()
         this.props.app.replaceElement(this.props.assignmentStatement, "expression", newEmptyExpression)
@@ -385,7 +406,11 @@ class AssignmentStatementComponent extends React.Component<AssignmentStatementCo
     render() {
         return <div className='ast-row'>
             <KeywordComponent keyword='let' />
-            <IdentWrapperComponent {...this.props} ident={this.props.assignmentStatement.ident} onIdentDelete={this.removeIdent.bind(this)}/>
+            <IdentWrapperComponent {...this.props}
+            ident={this.props.assignmentStatement.ident}
+            onIdentDelete={this.removeIdent.bind(this)}
+            onIdentEdit={this.editIdent.bind(this)}
+            />
             <SyntaxComponent syntax=':=' />
             <ExpressionWrapperComponent {...this.props}
             expression={this.props.assignmentStatement.expression}
@@ -536,7 +561,7 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
 }
 
 interface IdentComponentProps extends ASTComponentProps {
-    ident: lang.Ident
+    ident: lang.ConcreteIdent
 }
 
 class IdentComponent extends React.Component<IdentComponentProps, NoState> {
@@ -595,11 +620,13 @@ interface MethodComponentProps extends ASTComponentProps {
 }
 
 class MethodComponent extends React.Component<MethodComponentProps, NoState> {
-    removeIdent(e) {
+    removeIdent() {
         let newEmptyIdent = new lang.EmptyIdent()
         this.props.app.replaceElement(this.props.method, "name", newEmptyIdent)
     }
-
+    editIdent(replacement) {
+        this.props.app.replaceElement(this.props.method, "name", replacement)
+    }
     render() {
         const argElements = []
         this.props.method.args.forEach((ident, index) => {
@@ -611,7 +638,11 @@ class MethodComponent extends React.Component<MethodComponentProps, NoState> {
         return <div>
             <div className='ast-row'>
                 <KeywordComponent keyword='method'/>
-                <IdentWrapperComponent {...this.props} ident={this.props.method.name} onIdentDelete={this.removeIdent.bind(this)}/>
+                <IdentWrapperComponent
+                {...this.props} ident={this.props.method.name}
+                onIdentDelete={this.removeIdent.bind(this)}
+                onIdentEdit={this.editIdent.bind(this)}
+                />
                 <SyntaxComponent syntax='(' />
                 {argElements}
                 <SyntaxComponent syntax=')' />
