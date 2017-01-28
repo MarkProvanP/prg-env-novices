@@ -71,6 +71,20 @@ function getComponentForNode(props: ASTComponentProps) {
     }
 }
 
+interface ExpressionWrapperComponentProps extends ASTComponentProps {
+    expression: lang.Expression,
+    onExpressionDelete: (e) => void
+}
+
+class ExpressionWrapperComponent extends React.Component<ExpressionWrapperComponentProps, NoState> {
+    render() {
+        return <div className={classNames('expression-wrapper', 'ast-row')}>
+            <ASTNodeComponent {...this.props} node={this.props.expression}/>
+            <ButtonComponent name='element-delete' text='-' onClick={this.props.onExpressionDelete} />
+        </div>
+    }
+}
+
 interface IntegerComponentProps extends ASTComponentProps {
     integer: lang.Integer
 }
@@ -96,11 +110,18 @@ interface BinaryExpressionComponentProps extends ASTComponentProps {
     binaryExpression: lang.BinaryExpression
 }
 class BinaryExpressionComponent extends React.Component<BinaryExpressionComponentProps, NoState> {
+    private removeExpression(expressionName) {
+        return e => {
+            let newEmptyExpression = new lang.EmptyExpression()
+            this.props.app.replaceElement(this.props.binaryExpression, expressionName, newEmptyExpression)
+        }
+    }
+
     render() {
         return <div className='ast-row'>
-            <ASTNodeComponent {...this.props} node={this.props.binaryExpression.left} />
+            <ExpressionWrapperComponent {...this.props} expression={this.props.binaryExpression.left} onExpressionDelete={this.removeExpression("left").bind(this)}/>
             <div className='operator'>{this.props.binaryExpression.op}</div>
-            <ASTNodeComponent {...this.props} node={this.props.binaryExpression.right} />
+            <ExpressionWrapperComponent {...this.props} expression={this.props.binaryExpression.right} onExpressionDelete={this.removeExpression("right").bind(this)}/>
         </div>
     }
 }
@@ -119,12 +140,16 @@ interface AssignmentStatementComponentProps extends ASTComponentProps {
     assignmentStatement: lang.AssignmentStatement
 }
 class AssignmentStatementComponent extends React.Component<AssignmentStatementComponentProps, NoState> {
+    removeExpression(e) {
+        let newEmptyExpression = new lang.EmptyExpression()
+        this.props.app.replaceElement(this.props.assignmentStatement, "expression", newEmptyExpression)
+    }
     render() {
         return <div className='ast-row'>
             <KeywordComponent keyword='let' />
             <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.ident} />
             <SyntaxComponent syntax=':=' />
-            <ASTNodeComponent {...this.props} node={this.props.assignmentStatement.expression} />
+            <ExpressionWrapperComponent {...this.props} expression={this.props.assignmentStatement.expression} onExpressionDelete={this.removeExpression.bind(this)}/>
         </div>
     }
 }
@@ -146,8 +171,7 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
         return <div className='ast-row'>
             <KeywordComponent keyword='while' />
             <SyntaxComponent syntax='(' />
-            <ASTNodeComponent {...this.props} node={this.props.whileStatement.condition} />
-            <div className='ast-button ast-element-delete' onClick={this.removeCondition}>-</div>
+            <ExpressionWrapperComponent {...this.props} expression={this.props.whileStatement.condition} onExpressionDelete={this.removeCondition}/>
             <SyntaxComponent syntax=')' />
             <KeywordComponent keyword='do' />
             <SyntaxComponent syntax='{' />
