@@ -71,18 +71,11 @@ function getComponentForNode(props: ASTComponentProps) {
     }
 }
 
-interface ExpressionWrapperComponentProps extends ASTComponentProps {
-    expression: lang.Expression,
-    onExpressionDelete: () => void,
-    onExpressionEdit: (replacement: lang.Expression) => void
-}
-
 interface ASTWrapperComponentState<T extends lang.ASTNode> {
     matchingASTTypes: T[],
     highlightedASTIndex: number,
     emptyASTInput: string,
 }
-
 
 abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
     constructor(props: ExpressionWrapperComponentProps) {
@@ -164,6 +157,7 @@ abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.A
     editASTButton(e) {
         this.editAST(this.getASTNode())
     }
+    abstract getASTType();
     abstract getASTNode();
     abstract getMatchingASTTypes(input: string)
 
@@ -181,10 +175,16 @@ abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.A
 
     render() {
         return <div className={classNames('ast-wrapper', this.constructor.name)} onKeyDown={this.onKeyDown.bind(this)}>
-            <div className='title'>Expression</div>
+            <div className='title'>{this.getASTType().name}</div>
             {this.getASTContent()}
         </div>
     }
+}
+
+interface ExpressionWrapperComponentProps extends ASTComponentProps {
+    expression: lang.Expression,
+    onExpressionDelete: () => void,
+    onExpressionEdit: (replacement: lang.Expression) => void
 }
 
 class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperComponentProps, lang.Expression> {
@@ -194,6 +194,10 @@ class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperCo
     
     getASTNode() {
         return this.props.expression
+    }
+
+    getASTType() {
+        return lang.Expression
     }
 
     deleteAST() {
@@ -209,6 +213,38 @@ class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperCo
     }
 }
 
+interface StatementWrapperComponentProps extends ASTComponentProps {
+    statement: lang.Statement,
+    onStatementDelete: () => void,
+    onStatementEdit: (replacement: lang.Statement) => void
+}
+
+class StatementWrapperComponent extends ASTWrapperComponent<StatementWrapperComponentProps, lang.Statement> {
+    isEmptyAST() {
+        return this.props.statement instanceof lang.EmptyStatement
+    }
+
+    getASTNode() {
+        return this.props.statement
+    }
+
+    getASTType() {
+        return lang.Statement
+    }
+
+    deleteAST() {
+        this.props.onStatementDelete()
+    }
+
+    editAST(replacement: lang.Statement) {
+        this.props.onStatementEdit(replacement)
+    }
+
+    getMatchingASTTypes(input: string) {
+        return lang.getMatchingStatementTypes(input)
+    }
+}
+
 interface IdentWrapperComponentProps extends ASTComponentProps {
     ident: lang.AbstractIdent,
     onIdentDelete: () => void
@@ -219,122 +255,6 @@ class IdentWrapperComponent extends React.Component<IdentWrapperComponentProps, 
         return <div className={classNames('ast-wrapper', 'ident-wrapper', 'ast-row')}>
             <ASTNodeComponent {...this.props} node={this.props.ident}/>
             <ButtonComponent name='element-delete' text='-' onClick={this.props.onIdentDelete} />
-        </div>
-    }
-}
-
-interface StatementWrapperComponentProps extends ASTComponentProps {
-    statement: lang.Statement,
-    onStatementDelete: () => void,
-    onStatementEdit: (replacement: lang.Statement) => void
-}
-
-interface StatementWrapperComponentState {
-    matchingStatementTypes: lang.Statement[],
-    highlightedStatementIndex: number,
-    emptyStatementInput: string,
-}
-
-class StatementWrapperComponent extends React.Component<StatementWrapperComponentProps, StatementWrapperComponentState> {
-    constructor(props: StatementWrapperComponentProps) {
-        super(props)
-        this.state = {
-            matchingStatementTypes: [],
-            highlightedStatementIndex: 0,
-            emptyStatementInput: ""
-        }
-    }
-
-    isEmptyStatement() {
-        return this.props.statement instanceof lang.EmptyStatement
-    }
-
-    onKeyDown(e) {
-        let event = e.nativeEvent;
-
-        if (!this.isEmptyStatement()) {
-            return;
-        }
-
-        const isArrowUp = event.key == "ArrowUp"
-        const isArrowDown = event.key == "ArrowDown"
-        const isEnterKey = event.key == "Enter"
-
-        if (!(isArrowUp || isArrowDown || isEnterKey)) {
-            console.log('not right key', event.key)
-            return
-        }
-
-        let index = this.state.highlightedStatementIndex;
-
-        if (isEnterKey) {
-            let selected = this.state.matchingStatementTypes[index];
-            this.props.onStatementEdit(selected)
-            return
-        }
-
-        if (isArrowDown && index < this.state.matchingStatementTypes.length - 1) {
-            index++
-        } else if (isArrowUp && index > 0) {
-            index--
-        }
-
-        this.setState(prevState => ({
-            highlightedStatementIndex: index
-        }))
-    }
-
-    private emptyStatementOnChange(e) {
-        const newInputValue = e.nativeEvent.srcElement.value
-        const types = lang.getMatchingStatementTypes(newInputValue)
-        console.log(types)
-        this.setState(prevState => ({
-            searchingForType: true,
-            emptyStatementInput: newInputValue,
-            matchingStatementTypes: types
-        }))
-    }
-
-    emptyStatementElement() {
-        const possibleTypesElements = this.state.matchingStatementTypes.map((statement, index) => {
-            let classes = classNames('possibility', (this.state.highlightedStatementIndex == index) ? 'highlighted' : '')
-            return <div key={index} className={classes}>
-                <ASTNodeComponent {...this.props} node={statement} />
-            </div>
-        })
-        return <div className={classNames('empty-ast', 'empty-statement')}>
-            <input type='text' onInput={this.emptyStatementOnChange.bind(this)}/>
-            <div className='possibilities'>
-                {possibleTypesElements}
-            </div>
-        </div>
-    }
-
-
-    deleteStatement(e) {
-        this.props.onStatementDelete()
-    }
-
-    editExpression(e) {
-        this.props.onStatementEdit(this.props.statement)
-    }
-    
-    existentStatementElement() {
-        return <div className={classNames('ast-row', 'existent-statement')}>
-            <ASTNodeComponent {...this.props} node={this.props.statement} />
-            <ButtonComponent name='element-delete' text='-' onClick={this.deleteStatement.bind(this)} />
-            <ButtonComponent name='row-edit' text='Edit' onClick={this.editExpression.bind(this)} />
-        </div>
-    }
-
-    getStatementContent() {
-        return this.isEmptyStatement() ? this.emptyStatementElement() : this.existentStatementElement()
-    }
-
-    render() {
-        return <div className={classNames('ast-wrapper', 'statement-wrapper')} onKeyDown={this.onKeyDown.bind(this)}>
-            <div className='title'>Statement</div>
-            {this.getStatementContent()}
         </div>
     }
 }
