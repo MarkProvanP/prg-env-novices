@@ -151,6 +151,10 @@ body {
     border-color: yellow;
 }
 
+.ast-node.Statements {
+    background-color: peru;
+}
+
 .ast-node.AssignmentStatement {
     background-color: aliceblue;
 }
@@ -161,6 +165,18 @@ body {
 
 .ast-node.Integer {
     background-color: palegreen;
+}
+
+.ast-node.ValueExpression {
+    background-color: peachpuff;
+}
+
+.ast-node.BinaryExpression {
+    background-color: chocolate
+}
+
+.ast-node.Ident {
+    background-color: springgreen
 }
 
 .syntax {
