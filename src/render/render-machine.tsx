@@ -63,13 +63,15 @@ interface InstructionProps {
 }
 interface InstructionState {}
 
+let classNames = (...classes) => classes.filter(s => s).join(" ")
+
 export class InstructionComponent extends React.Component<InstructionProps, InstructionState> {
     getClassName() {
-        return [
+        return classNames(
             'instruction',
             (this.props.currentIp == this.props.index) ? 'current-ip' : '',
             this.props.insideRange ? 'within-range' : ''
-        ].filter(s => s).join(" ")
+        )
     }
 
     getLabels() {
@@ -78,12 +80,26 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
         return labels.join(" ")
     }
 
+    getActiveASTNodesAtIndex(index: number) {
+        const nodes = this.props.app.machine.activeASTNodesAtIndices[index];
+        let className = node => classNames('active-node', node.constructor.name)
+        let selectNode = (node) => {
+            return (e) => {
+                this.props.app.selectASTNode(node)
+            }
+        }
+        return nodes.map((node, index) => {
+            return <div key={index} className={className(node)} onClick={selectNode(node).bind(this)}>{node.constructor.name}</div>
+        })
+    }
+
     render() {
         return <div className={this.getClassName()}>
             <div className='labels'>{this.getLabels()}</div>
             <div className='index'>{this.props.index}</div>
             <div className='opcode'>{this.props.instruction.constructor.name}</div>
             {getComponentForInstruction(this.props.instruction)}
+            {this.getActiveASTNodesAtIndex(this.props.index)}
         </div>
     }
 }

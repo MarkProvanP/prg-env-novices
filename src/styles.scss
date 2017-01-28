@@ -93,6 +93,7 @@ body {
         border: 1px solid black;
         margin: 5px;
         display: flex;
+        align-items: center;
 
         .labels {
             width: 100px;
@@ -151,32 +152,41 @@ body {
     border-color: yellow;
 }
 
-.ast-node.Statements {
+.active-node {
+    border: 1px solid black;
+    margin: 5px;
+}
+
+.Statements {
     background-color: peru;
 }
 
-.ast-node.AssignmentStatement {
+.AssignmentStatement {
     background-color: aliceblue;
 }
 
-.ast-node.WhileStatement {
+.WhileStatement {
     background-color: lightsalmon;
 }
 
-.ast-node.Integer {
+.Integer {
     background-color: palegreen;
 }
 
-.ast-node.ValueExpression {
+.ValueExpression {
     background-color: peachpuff;
 }
 
-.ast-node.BinaryExpression {
+.BinaryExpression {
     background-color: chocolate
 }
 
-.ast-node.ConcreteIdent {
+.ConcreteIdent {
     background-color: springgreen
+}
+
+.Method {
+    background-color: tomato
 }
 
 .syntax {

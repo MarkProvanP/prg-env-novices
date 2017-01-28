@@ -268,6 +268,7 @@ export class Method extends ASTNode {
 
   codegen(machine: vm.Machine) {
     machine.beginASTRange(this)
+    machine.addInstruction(new vm.NewEnv())
     this.statements.codegen(machine)
     machine.endASTRange(this)
   }

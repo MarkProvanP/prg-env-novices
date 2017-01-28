@@ -59,6 +59,8 @@ export class Machine {
   public changeHistory: MachineChange[] = [];
 
   public astInstructionRangeMap = new WeakMap<lang.ASTNode, InstructionRange>();
+  public activeASTNodesAtIndices = []
+  private currentlyActiveASTNodes = []
 
   constructor(ast: lang.ASTNode) {
     this.setAST(ast);
@@ -66,24 +68,31 @@ export class Machine {
 
   setAST(ast: lang.ASTNode) {
     this.instructions = [];
-    this.instructions.push(new NewEnv());
     ast.codegen(this)
     this.indexToLabelsMap = this.getLabelIndices();
   }
 
   addInstruction(instruction: Instruction) {
+    let index = this.instructions.length
     this.instructions.push(instruction)
+    this.activeASTNodesAtIndices.push(this.currentlyActiveASTNodes.slice(0))
+    console.log('instruction', instruction, 'currently active', this.currentlyActiveASTNodes)
+    console.log('all', this.activeASTNodesAtIndices)
   }
 
   beginASTRange(ast: lang.ASTNode) {
     let index = this.instructions.length;
     this.astInstructionRangeMap.set(ast, new InstructionRange(index, null));
+    this.currentlyActiveASTNodes.push(ast)
+    console.log('Added node', ast, 'now', this.currentlyActiveASTNodes)
   }
 
   endASTRange(ast: lang.ASTNode) {
     let index = this.instructions.length;
     let range = this.astInstructionRangeMap.get(ast);
     range.end = index;
+    this.currentlyActiveASTNodes.pop()
+    console.log('Removed node', ast, 'now', this.currentlyActiveASTNodes)
   }
 
   addLabel(label: string) {
