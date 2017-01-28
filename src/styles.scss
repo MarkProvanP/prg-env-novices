@@ -221,6 +221,13 @@ body {
     & > .title {
         text-align: center;
         font-style: italic;
+        display: none;
+    }
+}
+
+.ast-wrapper:hover {
+    & > .title {
+        display: inherit
     }
 }
 
