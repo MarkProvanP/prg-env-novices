@@ -51,7 +51,7 @@ export abstract class Expression extends ASTNode {
 
 export class Integer extends Expression {
   constructor(
-    public value: number
+    public value: number = 0
   ) {
     super()
   }
@@ -65,14 +65,16 @@ export class Integer extends Expression {
 
 export class ValueExpression extends Expression {
   constructor(
-    public ident: Ident
+    public ident: AbstractIdent = new EmptyIdent()
   ) {
     super()
   }
 
   codegen(machine: vm.Machine) {
     machine.beginASTRange(this)
-    machine.addInstruction(new vm.Get(this.ident.name))
+    if (this.ident instanceof Ident) {
+      machine.addInstruction(new vm.Get(this.ident.name))
+    }
     machine.endASTRange(this)
   }
 
@@ -84,8 +86,8 @@ export class ValueExpression extends Expression {
 
 export class BinaryExpression extends Expression {
   constructor(
-    public left: Expression,
-    public right: Expression,
+    public left: Expression = new EmptyExpression(),
+    public right: Expression = new EmptyExpression(),
     public op
   ) {
     super()
@@ -245,6 +247,12 @@ export function getMatchingStatementTypes(input: string) {
   return [AssignmentStatement, WhileStatement]
   .filter(statementType => statementType.name.indexOf(input) != -1)
   .map(statementType => new statementType())
+}
+
+export function getMatchingExpressionTypes(input: string) {
+  return [BinaryExpression, ValueExpression, Integer]
+  .filter(expressionType => expressionType.name.indexOf(input) != -1)
+  .map(expressionType => new expressionType())
 }
 
 export class Method extends ASTNode {
