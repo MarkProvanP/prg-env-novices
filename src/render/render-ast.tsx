@@ -77,33 +77,32 @@ interface ExpressionWrapperComponentProps extends ASTComponentProps {
     onExpressionEdit: (replacement: lang.Expression) => void
 }
 
-interface ExpressionWrapperComponentState {
-    matchingExpressionTypes: lang.Expression[],
-    highlightedExpressionIndex: number,
-    emptyExpressionInput: string,
+interface ASTWrapperComponentState<T extends lang.ASTNode> {
+    matchingASTTypes: T[],
+    highlightedASTIndex: number,
+    emptyASTInput: string,
 }
 
-class ExpressionWrapperComponent extends React.Component<ExpressionWrapperComponentProps, ExpressionWrapperComponentState> {
+
+abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
     constructor(props: ExpressionWrapperComponentProps) {
         super(props)
         this.state = {
-            matchingExpressionTypes: [],
-            highlightedExpressionIndex: 0,
-            emptyExpressionInput: ""
+            matchingASTTypes: [],
+            highlightedASTIndex: 0,
+            emptyASTInput: ""
         }
     }
     
-    isEmptyExpression() {
-        return this.props.expression instanceof lang.EmptyExpression
-    }
+    abstract isEmptyAST()
 
     onKeyDown(e) {
         let event = e.nativeEvent;
 
-        console.log('EmptyExpression KeyDown', event, this);
+        console.log('EmptyAST KeyDown', event, this);
 
-        if (!this.isEmptyExpression()) {
-            console.log('not empty expression')
+        if (!this.isEmptyAST()) {
+            console.log('not empty ast')
             return;
         }
 
@@ -116,75 +115,97 @@ class ExpressionWrapperComponent extends React.Component<ExpressionWrapperCompon
             return
         }
 
-        let index = this.state.highlightedExpressionIndex;
+        let index = this.state.highlightedASTIndex;
 
         if (isEnterKey) {
-            let selected = this.state.matchingExpressionTypes[index];
-            this.props.onExpressionEdit(selected)
+            let selected = this.state.matchingASTTypes[index];
+            this.editAST(selected)
             return
         }
 
-        if (isArrowDown && index < this.state.matchingExpressionTypes.length - 1) {
+        if (isArrowDown && index < this.state.matchingASTTypes.length - 1) {
             index++
         } else if (isArrowUp && index > 0) {
             index--
         }
 
         this.setState(prevState => ({
-            highlightedExpressionIndex: index
+            highlightedASTIndex: index
         }))
     }
 
-    private emptyExpressionOnChange(e) {
+    private emptyASTOnChange(e) {
         const newInputValue = e.nativeEvent.srcElement.value
-        const types = lang.getMatchingExpressionTypes(newInputValue)
-        console.log(types)
+        const types = this.getMatchingASTTypes(newInputValue)
+
         this.setState(prevState => ({
-            emptyExpressionInput: newInputValue,
-            matchingExpressionTypes: types
+            emptyASTInput: newInputValue,
+            matchingASTTypes: types
         }))
     }
 
-    emptyExpressionElement() {
-        const possibleTypesElements = this.state.matchingExpressionTypes.map((statement, index) => {
-            let classes = classNames('possibility', (this.state.highlightedExpressionIndex == index) ? 'highlighted' : '')
+    emptyASTElement() {
+        const possibleTypesElements = this.state.matchingASTTypes.map((statement, index) => {
+            let classes = classNames('possibility', (this.state.highlightedASTIndex == index) ? 'highlighted' : '')
             return <div key={index} className={classes}>
                 <ASTNodeComponent {...this.props} node={statement} />
             </div>
         })
-        return <div className={classNames('empty-ast', 'empty-expression')}>
-            <input type='text' onInput={this.emptyExpressionOnChange.bind(this)}/>
+        return <div className={classNames('empty-ast')}>
+            <input type='text' onInput={this.emptyASTOnChange.bind(this)}/>
             <div className='possibilities'>
                 {possibleTypesElements}
             </div>
         </div>
     }
 
-    deleteExpression(e) {
-        this.props.onExpressionDelete()
+    abstract deleteAST();
+    abstract editAST(replacement: T);
+    editASTButton(e) {
+        this.editAST(this.getASTNode())
     }
+    abstract getASTNode();
+    abstract getMatchingASTTypes(input: string)
 
-    editExpression(e) {
-        this.props.onExpressionEdit(this.props.expression)
-    }
-    
-    existentExpressionElement() {
-        return <div className={classNames('ast-row', 'existent-expression')}>
-            <ASTNodeComponent {...this.props} node={this.props.expression} />
-            <ButtonComponent name='element-delete' text='-' onClick={this.deleteExpression.bind(this)} />
-            <ButtonComponent name='row-edit' text='Edit' onClick={this.editExpression.bind(this)} />
+    existentASTElement() {
+        return <div className={classNames('ast-row')}>
+            <ASTNodeComponent {...this.props} node={this.getASTNode()} />
+            <ButtonComponent name='element-delete' text='-' onClick={this.deleteAST.bind(this)} />
+            <ButtonComponent name='row-edit' text='Edit' onClick={this.editASTButton.bind(this)} />
         </div>
     }
 
-    getExpressionContent() {
-        return this.isEmptyExpression() ? this.emptyExpressionElement() : this.existentExpressionElement()
+    getASTContent() {
+        return this.isEmptyAST() ? this.emptyASTElement() : this.existentASTElement()
     }
 
     render() {
-        return <div className={classNames('ast-wrapper', 'expression-wrapper')} onKeyDown={this.onKeyDown.bind(this)}>
+        return <div className={classNames('ast-wrapper', this.constructor.name)} onKeyDown={this.onKeyDown.bind(this)}>
             <div className='title'>Expression</div>
-            {this.getExpressionContent()}
+            {this.getASTContent()}
         </div>
+    }
+}
+
+class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperComponentProps, lang.Expression> {
+    isEmptyAST() {
+        return this.props.expression instanceof lang.EmptyExpression
+    }
+    
+    getASTNode() {
+        return this.props.expression
+    }
+
+    deleteAST() {
+        this.props.onExpressionDelete()
+    }
+
+    editAST(replacement: lang.Expression) {
+        this.props.onExpressionEdit(replacement)
+    }
+
+    getMatchingASTTypes(input: string) {
+        return lang.getMatchingExpressionTypes(input)
     }
 }
 
