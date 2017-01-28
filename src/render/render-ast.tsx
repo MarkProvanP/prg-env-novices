@@ -235,42 +235,128 @@ class SyntaxComponent extends React.Component<SyntaxComponentProps, NoState> {
     }
 }
 
-interface StatementsComponentProps extends ASTComponentProps {
-    statements: lang.Statements
-}
-interface StatementsComponentState {
-    searchingForType: boolean,
-    emptyStatementIndex: number,
-    emptyStatementInput: string,
-    matchingStatementTypes: any[],
-    highlightedStatementIndex: number
-}
 
 interface StatementWrapperComponentProps extends ASTComponentProps {
     statement: lang.Statement,
-    onStatementDelete: (e) => void
-    onStatementEdit: (e) => void
+    onStatementDelete: () => void,
+    onStatementEdit: (replacement: lang.Statement) => void
 }
 
-class StatementWrapperComponent extends React.Component<StatementWrapperComponentProps, NoState> {
-    render() {
-        return <div className={classNames('statement-wrapper', 'ast-row')}>
+interface StatementWrapperComponentState {
+    matchingStatementTypes: lang.Statement[],
+    highlightedStatementIndex: number,
+    emptyStatementInput: string,
+}
+
+class StatementWrapperComponent extends React.Component<StatementWrapperComponentProps, StatementWrapperComponentState> {
+    constructor(props: StatementWrapperComponentProps) {
+        super(props)
+        this.state = {
+            matchingStatementTypes: [],
+            highlightedStatementIndex: 0,
+            emptyStatementInput: ""
+        }
+    }
+
+    isEmptyStatement() {
+        return this.props.statement instanceof lang.EmptyStatement
+    }
+
+    onKeyDown(e) {
+        let event = e.nativeEvent;
+
+        if (!this.isEmptyStatement()) {
+            return;
+        }
+
+        const isArrowUp = event.key == "ArrowUp"
+        const isArrowDown = event.key == "ArrowDown"
+        const isEnterKey = event.key == "Enter"
+
+        if (!(isArrowUp || isArrowDown || isEnterKey)) {
+            console.log('not right key', event.key)
+            return
+        }
+
+        let index = this.state.highlightedStatementIndex;
+
+        if (isEnterKey) {
+            let selected = this.state.matchingStatementTypes[index];
+            this.props.onStatementEdit(selected)
+            return
+        }
+
+        if (isArrowDown && index < this.state.matchingStatementTypes.length - 1) {
+            index++
+        } else if (isArrowUp && index > 0) {
+            index--
+        }
+
+        this.setState(prevState => ({
+            highlightedStatementIndex: index
+        }))
+    }
+
+    private emptyStatementOnChange(e) {
+        const newInputValue = e.nativeEvent.srcElement.value
+        const types = lang.getMatchingStatementTypes(newInputValue)
+        console.log(types)
+        this.setState(prevState => ({
+            searchingForType: true,
+            emptyStatementInput: newInputValue,
+            matchingStatementTypes: types
+        }))
+    }
+
+    emptyStatementElement() {
+        const possibleTypesElements = this.state.matchingStatementTypes.map((statement, index) => {
+            let classes = classNames('possibility', (this.state.highlightedStatementIndex == index) ? 'highlighted' : '')
+            return <div key={index} className={classes}>
+                <ASTNodeComponent {...this.props} node={statement} />
+            </div>
+        })
+        return <div className={classNames('empty-statement')}>
+            <input type='text' onInput={this.emptyStatementOnChange.bind(this)}/>
+            <div className='possibilities'>
+                {possibleTypesElements}
+            </div>
+        </div>
+    }
+    
+    existentStatementElement() {
+        return <div className={classNames('ast-row', 'existent-statement')}>
             <ASTNodeComponent {...this.props} node={this.props.statement} />
             <ButtonComponent name='element-delete' text='-' onClick={this.props.onStatementDelete} />
             <ButtonComponent name='row-edit' text='Edit' onClick={this.props.onStatementEdit} />
         </div>
     }
+
+    getStatementContent() {
+        return this.isEmptyStatement() ? this.emptyStatementElement() : this.existentStatementElement()
+    }
+
+    render() {
+        return <div className={classNames('statement-wrapper')} onKeyDown={this.onKeyDown.bind(this)}>
+            <div className='title'>Statement</div>
+            {this.getStatementContent()}
+        </div>
+    }
 }
 
-class StatementsComponent extends React.Component<StatementsComponentProps, StatementsComponentState> {
+interface StatementsComponentProps extends ASTComponentProps {
+    statements: lang.Statements
+}
+
+class StatementsComponent extends React.Component<StatementsComponentProps, NoState> {
     editRow(index) {
-        return e => {
+        return replacement => {
             console.log('Edit at index', index)
+            this.props.app.replaceElementInArray(this.props.statements, "statements", index, replacement)
         }
     }
 
     deleteRow(index) {
-        return e => {
+        return () => {
             console.log('Delete at index', index)
             this.props.app.deleteFromArray(this.props.statements, "statements", index)
         }
@@ -293,92 +379,19 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
         this.editRow = this.editRow.bind(this)
         this.deleteRow = this.deleteRow.bind(this)
         this.insertRow = this.insertRow.bind(this)
-        this.state = {
-            searchingForType: false,
-            emptyStatementInput: "",
-            matchingStatementTypes: [],
-            highlightedStatementIndex: 0,
-            emptyStatementIndex: 0
-        }
-    }
-
-    onKeyDown(e) {
-        let event = e.nativeEvent;
-
-        if (!this.state.searchingForType) {
-            return;
-        }
-
-        const isArrowUp = event.key == "ArrowUp"
-        const isArrowDown = event.key == "ArrowDown"
-        const isEnterKey = event.key == "Enter"
-
-        if (!(isArrowUp || isArrowDown || isEnterKey)) {
-            console.log('not right key', event.key)
-            return
-        }
-
-        let index = this.state.highlightedStatementIndex;
-
-        if (isEnterKey) {
-            let selected = this.state.matchingStatementTypes[index];
-            let emptyStatementIndex = this.state.emptyStatementIndex;
-            this.props.app.replaceElementInArray(this.props.statements, "statements", emptyStatementIndex, selected)
-            console.log('Replaced element')
-            return
-        }
-
-        if (isArrowDown && index < this.state.matchingStatementTypes.length - 1) {
-            index++
-        } else if (isArrowUp && index > 0) {
-            index--
-        }
-
-        this.setState(prevState => ({
-            highlightedStatementIndex: index
-        }))
     }
 
     private createPlusButton(index: number) {
         return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
     }
 
-    private emptyStatementOnChange(e) {
-        const newInputValue = e.nativeEvent.srcElement.value
-        const types = lang.getMatchingStatementTypes(newInputValue)
-        console.log(types)
-        this.setState(prevState => ({
-            searchingForType: true,
-            emptyStatementInput: newInputValue,
-            matchingStatementTypes: types
-        }))
-    }
-
-    private createEmptyStatementElement(index) {
-        const possibleTypesElements = this.state.matchingStatementTypes.map((statement, index) => {
-            let classes = classNames('possibility', (this.state.highlightedStatementIndex == index) ? 'highlighted' : '')
-            return <div key={index} className={classes}>
-                <ASTNodeComponent {...this.props} node={statement} />
-            </div>
-        })
-        return <div className='empty-statement'>
-            <input type='text' onInput={this.emptyStatementOnChange.bind(this)}/>
-            <div className='possibilities'>
-                {possibleTypesElements}
-            </div>
-        </div>
-    }
-
     render() {
         const statements = this.props.statements.statements;
         const statementsList = statements.map((statement, index) => {
-            let contentElement = statement instanceof lang.EmptyStatement
-            ? this.createEmptyStatementElement(index)
-            : <StatementWrapperComponent {...this.props} statement={statement} onStatementDelete={this.deleteRow(index)} onStatementEdit={this.editRow(index)}/>
             return <div key={(index * 2) + 1} className='ast-statements-list-row'>
                 <div className='ast-statements-list-row-index'>{index}</div>
                 <div className='ast-statements-list-row-content'>
-                    {contentElement}
+                    <StatementWrapperComponent {...this.props} statement={statement} onStatementDelete={this.deleteRow(index)} onStatementEdit={this.editRow(index)}/>
                 </div>
             </div>
         })
@@ -390,7 +403,7 @@ class StatementsComponent extends React.Component<StatementsComponentProps, Stat
         })
         let plusButton = this.createPlusButton(statements.length);
         elementsList.push(plusButton);
-        return <div className='ast-statements-list' onKeyDown={this.onKeyDown.bind(this)}>
+        return <div className='ast-statements-list'>
             {elementsList}
         </div>
     }

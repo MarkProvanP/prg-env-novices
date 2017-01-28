@@ -145,8 +145,8 @@ export abstract class Statement extends ASTNode {
 
 export class AssignmentStatement extends Statement {
   constructor(
-    public ident = new EmptyIdent(),
-    public expression = new EmptyExpression()
+    public ident: AbstractIdent = new EmptyIdent(),
+    public expression: Expression = new EmptyExpression()
   ) {
     super()
   }
@@ -154,7 +154,9 @@ export class AssignmentStatement extends Statement {
   codegen(machine: vm.Machine) {
     machine.beginASTRange(this)
     this.expression.codegen(machine)
-    machine.addInstruction(new vm.Set(this.ident.name))
+    if (this.ident instanceof Ident) {
+      machine.addInstruction(new vm.Set(this.ident.name))
+    }
     machine.endASTRange(this)
   }
 
