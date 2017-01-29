@@ -99,7 +99,9 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
             <div className='index'>{this.props.index}</div>
             <div className='opcode'>{this.props.instruction.constructor.name}</div>
             {getComponentForInstruction(this.props.instruction)}
-            {this.getActiveASTNodesAtIndex(this.props.index)}
+            <div className='active-ast-nodes'>
+                {this.getActiveASTNodesAtIndex(this.props.index)}
+            </div>
         </div>
     }
 }

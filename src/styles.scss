@@ -40,8 +40,8 @@ body {
 .ast-button {
     padding-left: 5px;
     padding-right: 5px;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: 2px;
+    margin-right: 2px;
     height: 20px;
     border: 1px solid black;
     border-radius: 5px;
@@ -111,6 +111,16 @@ body {
         .args {
             font-style: italic;
         }
+
+        .active-ast-nodes {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+
+            .active-node {
+                font-size: smaller;
+            }
+        }
     }
 
     .instruction.current-ip {
@@ -130,8 +140,9 @@ body {
 }
 
 .ast-node {
-    margin: 5px;
+    margin: 1px;
     border: 1px solid black;
+    font-size: small;
 
     & > .title {
         font-style: italic;
@@ -154,7 +165,7 @@ body {
 
 .active-node {
     border: 1px solid black;
-    margin: 5px;
+    margin: 1px;
 }
 
 .Statements {
