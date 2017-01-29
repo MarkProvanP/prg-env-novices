@@ -4,12 +4,13 @@ import * as vm from "./machine";
 import * as pegjs from "pegjs"
 import { App } from "./app";
 
-let grammar = require("./grammar/generated.peg");
+let grammar = require("./grammar/lang.peg");
 
 let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HTMLTextAreaElement;
 let parseButton: HTMLButtonElement = document.getElementById("parse-button") as HTMLButtonElement;
 let stepButton: HTMLButtonElement = document.getElementById("step-button") as HTMLButtonElement;
 
+window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {lang}
 let parser = pegjs.generate(grammar, {trace: false})
 console.log(`Generated parser!`)
 console.log(vm);
@@ -21,7 +22,6 @@ parseButton.onclick = (event) => {
     
     let astRoot = parsed[1];
     console.log(astRoot)
-    astRoot.fixPrototype(lang)
 
     let machine = new vm.Machine(astRoot);
     app.setup(astRoot, machine)
