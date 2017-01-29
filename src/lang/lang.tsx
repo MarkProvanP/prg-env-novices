@@ -253,7 +253,7 @@ export class ConcreteIdent extends Ident {
 }
 
 export function getMatchingStatementTypes(input: string) {
-  return [AssignmentStatement, WhileStatement]
+  return [AssignmentStatement, WhileStatement, MethodCallStatement]
   .filter(statementType => statementType.name.indexOf(input) != -1)
   .map(statementType => new statementType())
 }
@@ -286,5 +286,24 @@ export class Method extends ASTNode {
 
   render(props) {
     return <render.MethodComponent {...props} method={this} />
+  }
+}
+
+export class MethodCallStatement extends Statement {
+  constructor(
+    public ident: Ident = new EmptyIdent(),
+    public args: Expression[] = [],
+  ) {
+    super()
+  }
+
+  codegen(machine: vm.Machine) {
+    machine.beginASTRange(this)
+
+    machine.endASTRange(this)
+  }
+
+  render(props) {
+    return <render.MethodCallStatementComponent {...props} methodCallStatement={this} />
   }
 }

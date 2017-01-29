@@ -6,13 +6,13 @@ start
   = w method w
 
 method
-  = "method" w i:ident w "(" w a:args w ")" w "{" w s:statements w "}" { return new lang.Method(i, a, s)}
+  = "method" w i:ident w "(" w a:methodArgs w ")" w "{" w s:statements w "}" { return new lang.Method(i, a, s)}
 
-args
-  = list:argListElement* w single:ident { return [].concat(list).concat(single).filter(function(s) { return s })}
+methodArgs
+  = list:methodArgListElement* w single:ident { return [].concat(list).concat(single).filter(function(s) { return s })}
   / "" { return []}
 
-argListElement
+methodArgListElement
   = w i:ident w "," w { return i }
 
 statements
@@ -21,12 +21,23 @@ statements
 statement
   = assignmentStatement
   / whileStatement
+  / methodCallStatement
 
 assignmentStatement
   = "let" w i:ident w ":=" w e:expression w { return new lang.AssignmentStatement(i, e); }
 
 whileStatement
   = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new lang.WhileStatement(c, s); }
+
+methodCallStatement
+  = "call" w i:ident w "(" w a:methodCallArgs w ")" { return new lang.MethodCallStatement(i, a)}
+
+methodCallArgs
+  = list:methodCallArgListElement* w single:expression { return [].concat(list).concat(single).filter(function(s) { return s })}
+  / "" { return []}
+
+methodCallArgListElement
+  = w e:expression w "," w { return e }
 
 expression
   = additive

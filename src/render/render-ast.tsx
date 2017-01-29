@@ -98,14 +98,12 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
     abstract isEmptyAST()
 
     onMouseOver(e) {
-        console.log('onMouseOver', e)
         this.props.app.mouseOverASTNode(this.getASTNode())
         e.nativeEvent.stopPropagation();
         return false;
     }
 
     onMouseOut(e) {
-        console.log('onMouseOut', e)
         this.setState(prevState => ({
             mousedOver: false
         }))

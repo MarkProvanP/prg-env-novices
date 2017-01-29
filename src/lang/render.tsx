@@ -452,3 +452,70 @@ export class MethodComponent extends ASTNodeComponent<MethodComponentProps, NoSt
         </div>
     }
 }
+
+export interface MethodCallStatementProps extends ASTComponentProps {
+    methodCallStatement: lang.MethodCallStatement
+}
+
+export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallStatementProps, NoState> {
+    getASTNode() {
+        return this.props.methodCallStatement
+    }
+
+    removeIdent() {
+        let newEmptyIdent = new lang.EmptyIdent()
+        this.props.app.replaceElement(this.props.methodCallStatement, "ident", newEmptyIdent)
+    }
+    editIdent(replacement) {
+        this.props.app.replaceElement(this.props.methodCallStatement, "ident", replacement)
+    }
+    deleteArg(index) {
+        return () => {
+            this.props.app.deleteFromArray(this.props.methodCallStatement, "args", index)
+        }
+    }
+    editArg(index) {
+        return (replacement) => {
+            this.props.app.replaceElementInArray(this.props.methodCallStatement, "args", index, replacement)
+        }
+    }
+    insertArg(index) {
+        return () => {
+            let newArg = new lang.EmptyIdent()
+            this.props.app.insertIntoArray(this.props.methodCallStatement, "args", index, newArg)
+        }
+    }
+
+    getInnerElement() {
+        const argElements = []
+        this.props.methodCallStatement.args.forEach((expression, index) => {
+            argElements.push(<ButtonComponent key={index * 3} name='add' text='+' onClick={this.insertArg(index).bind(this)}/>)
+            argElements.push(
+                <ExpressionWrapperComponent key={index * 3 + 1}
+                {...this.props} expression={expression}
+                onExpressionDelete={this.deleteArg(index).bind(this)}
+                onExpressionEdit={this.editArg(index).bind(this)}
+                />
+                )
+            if (index != this.props.methodCallStatement.args.length - 1) {
+                argElements.push(<SyntaxComponent key={index * 3 + 2} syntax=',' />)
+            }
+        })
+        argElements.push(
+            <ButtonComponent key={argElements.length} name='add' text='+'
+            onClick={this.insertArg(this.props.methodCallStatement.args.length).bind(this)}
+            />
+        )
+        return <div className='ast-row'>
+            <KeywordComponent keyword='call' />
+            <IdentWrapperComponent {...this.props}
+            ident={this.props.methodCallStatement.ident}
+            onIdentDelete={this.removeIdent.bind(this)}
+            onIdentEdit={this.editIdent.bind(this)}
+            />
+            <SyntaxComponent syntax='(' />
+            {argElements}
+            <SyntaxComponent syntax=')' />
+        </div>
+    }
+}
