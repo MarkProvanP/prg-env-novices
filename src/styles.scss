@@ -214,9 +214,9 @@ body {
     }
 }
 
-.ast-wrapper:hover {
+.ast-wrapper.mouseover {
     & > .title {
-        display: inherit
+        display: inherit;
     }
 }
 

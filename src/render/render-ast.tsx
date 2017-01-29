@@ -80,6 +80,7 @@ export interface ASTWrapperComponentState<T extends ast.ASTNode> {
     matchingASTTypes: T[],
     highlightedASTIndex: number,
     emptyASTInput: string,
+    mousedOver: boolean
 }
 
 export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends ast.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
@@ -89,11 +90,28 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
             showingSuggestions: false,
             matchingASTTypes: [],
             highlightedASTIndex: 0,
-            emptyASTInput: ""
+            emptyASTInput: "",
+            mousedOver: false
         }
     }
     
     abstract isEmptyAST()
+
+    onMouseOver(e) {
+        console.log('onMouseOver', e)
+        this.props.app.mouseOverASTNode(this.getASTNode())
+        e.nativeEvent.stopPropagation();
+        return false;
+    }
+
+    onMouseOut(e) {
+        console.log('onMouseOut', e)
+        this.setState(prevState => ({
+            mousedOver: false
+        }))
+        e.nativeEvent.stopPropagation();
+        return false;
+    }
 
     onKeyDown(e) {
         let event = e.nativeEvent;
@@ -218,8 +236,20 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
         return this.isEmptyAST() ? this.emptyASTElement() : this.existentASTElement()
     }
 
+    getClassName() {
+        return classNames(
+            'ast-wrapper',
+            this.constructor.name,
+            (this.props.app.mousedOverASTNode == this.getASTNode()) ? 'mouseover' : ''
+        )
+    }
+
     render() {
-        return <div className={classNames('ast-wrapper', this.constructor.name)} onKeyDown={this.onKeyDown.bind(this)}>
+        return <div className={this.getClassName()}
+        onKeyDown={this.onKeyDown.bind(this)}
+        onMouseOver={this.onMouseOver.bind(this)}
+        onMouseOut={this.onMouseOut.bind(this)}
+        >
             <div className='title'>{this.getASTType().name}</div>
             {this.getASTContent()}
         </div>

@@ -7,6 +7,7 @@ export class App {
     machine: vm.Machine
 
     selectedASTNode: ast.ASTNode
+    mousedOverASTNode: ast.ASTNode
 
     setup(ast: ast.ASTNode, machine: vm.Machine) {
         this.ast = ast;
@@ -23,6 +24,11 @@ export class App {
 
     selectASTNode(node: ast.ASTNode) {
         this.selectedASTNode = node
+        this.renderApp()
+    }
+
+    mouseOverASTNode(node: ast.ASTNode) {
+        this.mousedOverASTNode = node;
         this.renderApp()
     }
 
