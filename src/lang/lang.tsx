@@ -1,6 +1,11 @@
-import * as vm from "./machine"
+import * as vm from "../machine"
 
-import { ASTNode } from "./ast"
+import React from "react";
+import ReactDOM from "react-dom";
+
+import { ASTNode } from "../ast"
+
+import * as render from "./render-lang"
 
 export enum Operator {
   Add,
@@ -54,6 +59,10 @@ export class Integer extends Expression {
     machine.addInstruction(new vm.Push(this.value))
     machine.endASTRange(this)
   }
+
+  render(props) {
+    return <render.IntegerComponent {...props} integer={this} />
+  }
 }
 
 export class ValueExpression extends Expression {
@@ -69,6 +78,10 @@ export class ValueExpression extends Expression {
       machine.addInstruction(new vm.Get(this.ident.name))
     }
     machine.endASTRange(this)
+  }
+
+  render(props) {
+    return <render.ValueExpressionComponent {...props} value={this} />
   }
 }
 
@@ -88,6 +101,10 @@ export class BinaryExpression extends Expression {
     machine.addInstruction(new vm.CallFunction(vm.builtInFunctions[this.op]))
     machine.endASTRange(this)
   }
+
+  render(props) {
+    return <render.BinaryExpressionComponent {...props} binaryExpression={this} />
+  }
 }
 
 export class EmptyExpression extends Expression {
@@ -102,6 +119,10 @@ export class EmptyExpression extends Expression {
     
     machine.endASTRange(this)
   }
+
+  render(props) {
+    return <render.EmptyExpressionComponent {...props} emptyExpression={this} />
+  }
 }
 
 export class Statements extends ASTNode {
@@ -115,6 +136,10 @@ export class Statements extends ASTNode {
     machine.beginASTRange(this)
     this.statements.forEach(statement => statement.codegen(machine))
     machine.endASTRange(this)
+  }
+
+  render(props) {
+    return <render.StatementsComponent {...props} statements={this} />
   }
 }
 
@@ -137,6 +162,10 @@ export class AssignmentStatement extends Statement {
       machine.addInstruction(new vm.Set(this.ident.name))
     }
     machine.endASTRange(this)
+  }
+
+  render(props) {
+    return <render.AssignmentStatementComponent {...props} assignmentStatement={this} />
   }
 }
 
@@ -162,6 +191,10 @@ export class WhileStatement extends Statement {
     machine.addLabel(whileEndLabel);
     machine.endASTRange(this)
   }
+
+  render(props) {
+    return <render.WhileStatementComponent {...props} whileStatement={this} />
+  }
 }
 
 export class EmptyStatement extends Statement {
@@ -175,6 +208,10 @@ export class EmptyStatement extends Statement {
     machine.beginASTRange(this)
     
     machine.endASTRange(this)
+  }
+
+  render(props) {
+    return <render.EmptyStatementComponent {...props} emptyStatement={this} />
   }
 }
 
@@ -190,6 +227,10 @@ export class EmptyIdent extends Ident {
     
     machine.endASTRange(this)
   }
+
+  render(props) {
+    return <render.EmptyIdentComponent {...props} emptyIdent={this} />
+  }
 }
 
 export class ConcreteIdent extends Ident {
@@ -203,6 +244,10 @@ export class ConcreteIdent extends Ident {
     machine.beginASTRange(this)
     
     machine.endASTRange(this)
+  }
+
+  render(props) {
+    return <render.IdentComponent {...props} ident={this} />
   }
 }
 
@@ -236,5 +281,9 @@ export class Method extends ASTNode {
     machine.addInstruction(new vm.NewEnv())
     this.statements.codegen(machine)
     machine.endASTRange(this)
+  }
+
+  render(props) {
+    return <render.MethodComponent {...props} method={this} />
   }
 }

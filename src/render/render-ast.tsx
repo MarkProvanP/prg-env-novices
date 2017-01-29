@@ -3,13 +3,29 @@ import ReactDOM from "react-dom";
 import * as ast from "../ast";
 import { App } from "../app";
 
-import { getComponentForNode } from "./render-lang";
-
 export function renderAST(app: App) {
     ReactDOM.render(
-        <ASTNodeComponent node={app.ast} app={app} />,
+        <WholeASTComponent node={app.ast} app={app} />,
         document.getElementById("react-ast-div")
     )
+}
+
+interface WholeASTProps {
+    node: ast.ASTNode,
+    app: App
+}
+
+interface WholeASTState {
+
+}
+
+export class WholeASTComponent extends React.Component<WholeASTProps, WholeASTState> {
+    render() {
+        const rootNode = this.props.node;
+        return <div className='whole-ast'>
+            {rootNode.render(this.props)}
+        </div>
+    }
 }
 
 export interface ASTComponentProps {
@@ -18,38 +34,42 @@ export interface ASTComponentProps {
 }
 export interface NoState {}
 
-export class ASTNodeComponent extends React.Component<ASTComponentProps, NoState> {
+export abstract class ASTNodeComponent<P extends ASTComponentProps, S> extends React.Component<P, S> {
     onClick(e) {
-        let selectedBefore = this.props.app.selectedASTNode == this.props.node
-        this.props.app.selectASTNode(selectedBefore ? null : this.props.node);
+        const astNode = this.getASTNode()
+        let selectedBefore = this.props.app.selectedASTNode == astNode
+        this.props.app.selectASTNode(selectedBefore ? null : astNode);
         e.stopPropagation();
         return null;
     }
 
     getClassName() {
-        let selected = this.props.app.selectedASTNode == this.props.node
+        const astNode = this.getASTNode()
+        let selected = this.props.app.selectedASTNode == astNode
         return [
             'ast-node',
-            this.props.node.constructor.name,
+            astNode.constructor.name,
             selected ? 'clicked' : ''
         ].filter(s => s).join(" ");
     }
 
     constructor(props) {
         super(props);
-        this.state = {
-            clicked: false
-        }
         this.onClick = this.onClick.bind(this);
     }
 
+    abstract getASTNode()
+    abstract getInnerElement()
+
     render() {
-        const astNode = this.props.node;
-        const innerElement = getComponentForNode(this.props);
+        if (!this.getInnerElement) {
+            debugger;
+        }
+        const astNode = this.getASTNode();
         return <div className={this.getClassName()} onClick={this.onClick}>
             <div className='title'>{astNode.constructor.name}</div>
             <div className='content'>
-                {innerElement}
+                {this.getInnerElement()}
             </div>
         </div>
     }
@@ -157,7 +177,7 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
         const possibleTypesElements = this.state.matchingASTTypes.map((ast, index) => {
             let classes = classNames('possibility', (this.state.highlightedASTIndex == index) ? 'highlighted' : '')
             return <div key={index} className={classes} onMouseOver={this.possibilityOnMouseOver(index).bind(this)} onClick={this.possibilityOnClick.bind(this)(index)}>
-                <ASTNodeComponent {...this.props} node={ast} />
+                {ast.render(this.props)}
             </div>
         })
         let possibilitiesElement = this.state.showingSuggestions
@@ -188,7 +208,7 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
 
     existentASTElement() {
         return <div className={classNames('ast-row')}>
-            <ASTNodeComponent {...this.props} node={this.getASTNode()} />
+            {this.getASTNode().render(this.props)}
             <ButtonComponent name='element-delete' text='-' onClick={this.deleteAST.bind(this)} />
             <ButtonComponent name='row-edit' text='Edit' onClick={this.editASTButton.bind(this)} />
         </div>

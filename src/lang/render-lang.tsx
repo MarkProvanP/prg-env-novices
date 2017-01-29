@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import * as lang from "../lang";
+import * as lang from "./lang";
 
 import {
     NoState,
@@ -15,24 +15,8 @@ import {
     KeywordComponentProps,
     SyntaxComponent,
     SyntaxComponentProps
-} from "./render-ast";
+} from "../render/render-ast";
 
-export function getComponentForNode(props: ASTComponentProps) {
-    const astNode = props.node
-    switch (astNode.constructor.name) {
-        case "Integer": return <IntegerComponent {...props} integer={astNode as lang.Integer} />
-        case "ValueExpression": return <ValueExpressionComponent {...props} value={astNode as lang.ValueExpression} />
-        case "BinaryExpression": return <BinaryExpressionComponent {...props} binaryExpression={astNode as lang.BinaryExpression} />
-        case "AssignmentStatement": return <AssignmentStatementComponent {...props} assignmentStatement={astNode as lang.AssignmentStatement} />
-        case "WhileStatement": return <WhileStatementComponent {...props} whileStatement={astNode as lang.WhileStatement} />
-        case "Statements": return <StatementsComponent {...props} statements={astNode as lang.Statements} />
-        case "ConcreteIdent": return <IdentComponent {...props} ident={astNode as lang.ConcreteIdent} />
-        case "EmptyIdent": return <EmptyIdentComponent {...props} emptyIdent={astNode as lang.EmptyIdent} />
-        case "EmptyStatement": return <EmptyStatementComponent {...props} emptyStatement={astNode as lang.EmptyStatement} />
-        case "Method": return <MethodComponent {...props} method={astNode as lang.Method} />
-        default: return <UnspecifiedComponent {...props} node={astNode} />
-    }
-}
 
 interface ExpressionWrapperComponentProps extends ASTComponentProps {
     expression: lang.Expression,
@@ -130,33 +114,45 @@ class IdentWrapperComponent extends ASTWrapperComponent<IdentWrapperComponentPro
     }
 }
 
-interface IntegerComponentProps extends ASTComponentProps {
+export interface IntegerComponentProps extends ASTComponentProps {
     integer: lang.Integer
 }
 
-class IntegerComponent extends React.Component<IntegerComponentProps, NoState> {
-    render() {
+export class IntegerComponent extends ASTNodeComponent<IntegerComponentProps, NoState> {
+    getASTNode() {
+        return this.props.integer;
+    }
+    
+    getInnerElement() {
         return <div className='ast-row'>
             {this.props.integer.value}
         </div>
     }
 }
 
-interface ValueExpressionComponentProps extends ASTComponentProps {
+export interface ValueExpressionComponentProps extends ASTComponentProps {
     value: lang.ValueExpression
 }
-class ValueExpressionComponent extends React.Component<ValueExpressionComponentProps, NoState> {
-    render() {
+export class ValueExpressionComponent extends ASTNodeComponent<ValueExpressionComponentProps, NoState> {
+    getASTNode() {
+        return this.props.value;
+    }
+    
+    getInnerElement() {
         return <div className='ast-row'>
-            <ASTNodeComponent {...this.props} node={this.props.value.ident}/>
+            {this.props.value.ident.render(this.props)}
         </div>
     }
 }
 
-interface BinaryExpressionComponentProps extends ASTComponentProps {
+export interface BinaryExpressionComponentProps extends ASTComponentProps {
     binaryExpression: lang.BinaryExpression
 }
-class BinaryExpressionComponent extends React.Component<BinaryExpressionComponentProps, NoState> {
+export class BinaryExpressionComponent extends ASTNodeComponent<BinaryExpressionComponentProps, NoState> {
+    getASTNode() {
+        return this.props.binaryExpression
+    }
+    
     private removeExpression(expressionName) {
         return () => {
             let newEmptyExpression = new lang.EmptyExpression()
@@ -170,7 +166,7 @@ class BinaryExpressionComponent extends React.Component<BinaryExpressionComponen
         }
     }
 
-    render() {
+    getInnerElement() {
         return <div className='ast-row'>
             <ExpressionWrapperComponent {...this.props}
             expression={this.props.binaryExpression.left}
@@ -187,20 +183,28 @@ class BinaryExpressionComponent extends React.Component<BinaryExpressionComponen
     }
 }
 
-interface EmptyExpressionProps extends ASTComponentProps {
-    emptyStatement: lang.EmptyExpression
+export interface EmptyExpressionProps extends ASTComponentProps {
+    emptyExpression: lang.EmptyExpression
 }
 
-class EmptyExpressionComponent extends React.Component<EmptyExpressionProps, NoState> {
-    render() {
+export class EmptyExpressionComponent extends ASTNodeComponent<EmptyExpressionProps, NoState> {
+    getASTNode() {
+        return this.props.emptyExpression
+    }
+    
+    getInnerElement() {
         return <div className='ast-row'>EMPTY_EXPRESSION</div>
     }
 }
 
-interface AssignmentStatementComponentProps extends ASTComponentProps {
+export interface AssignmentStatementComponentProps extends ASTComponentProps {
     assignmentStatement: lang.AssignmentStatement
 }
-class AssignmentStatementComponent extends React.Component<AssignmentStatementComponentProps, NoState> {
+export class AssignmentStatementComponent extends ASTNodeComponent<AssignmentStatementComponentProps, NoState> {
+    getASTNode() {
+        return this.props.assignmentStatement
+    }
+    
     removeIdent() {
         let newEmptyIdent = new lang.EmptyIdent()
         this.props.app.replaceElement(this.props.assignmentStatement, "ident", newEmptyIdent)
@@ -215,7 +219,7 @@ class AssignmentStatementComponent extends React.Component<AssignmentStatementCo
     editExpression(replacement) {
         this.props.app.replaceElement(this.props.assignmentStatement, "expression", replacement)
     }
-    render() {
+    getInnerElement() {
         return <div className='ast-row'>
             <KeywordComponent keyword='let' />
             <IdentWrapperComponent {...this.props}
@@ -233,10 +237,14 @@ class AssignmentStatementComponent extends React.Component<AssignmentStatementCo
     }
 }
 
-interface WhileStatementComponentProps extends ASTComponentProps {
+export interface WhileStatementComponentProps extends ASTComponentProps {
     whileStatement: lang.WhileStatement
 }
-class WhileStatementComponent extends React.Component<WhileStatementComponentProps, NoState> {
+export class WhileStatementComponent extends ASTNodeComponent<WhileStatementComponentProps, NoState> {
+    getASTNode() {
+        return this.props.whileStatement
+    }
+    
     removeCondition() {
         let newEmptyExpression = new lang.EmptyExpression()
         this.props.app.replaceElement(this.props.whileStatement, "condition", newEmptyExpression)
@@ -245,7 +253,7 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
         this.props.app.replaceElement(this.props.whileStatement, "condition", replacement)
     }
 
-    render() {
+    getInnerElement() {
         return <div>
             <div className='ast-row'>
                 <KeywordComponent keyword='while' />
@@ -260,7 +268,7 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
                 <SyntaxComponent syntax='{' />
             </div>
             <div className='ast-row'>
-                <ASTNodeComponent {...this.props} node={this.props.whileStatement.statements} />
+                {this.props.whileStatement.statements.render(this.props)}
             </div>
             <div className='ast-row'>
                 <SyntaxComponent syntax='}' />
@@ -269,11 +277,15 @@ class WhileStatementComponent extends React.Component<WhileStatementComponentPro
     }
 }
 
-interface StatementsComponentProps extends ASTComponentProps {
+export interface StatementsComponentProps extends ASTComponentProps {
     statements: lang.Statements
 }
 
-class StatementsComponent extends React.Component<StatementsComponentProps, NoState> {
+export class StatementsComponent extends ASTNodeComponent<StatementsComponentProps, NoState> {
+    getASTNode() {
+        return this.props.statements
+    }
+    
     editRow(index) {
         return replacement => {
             console.log('Edit at index', index)
@@ -307,7 +319,7 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
         return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
     }
 
-    render() {
+    getInnerElement() {
         const statements = this.props.statements.statements;
         const statementsList = statements.map((statement, index) => {
             return <div key={(index * 2) + 1} className='ast-statements-list-row'>
@@ -331,47 +343,57 @@ class StatementsComponent extends React.Component<StatementsComponentProps, NoSt
     }
 }
 
-interface IdentComponentProps extends ASTComponentProps {
+export interface IdentComponentProps extends ASTComponentProps {
     ident: lang.ConcreteIdent
 }
 
-class IdentComponent extends React.Component<IdentComponentProps, NoState> {
-    render() {
+export class IdentComponent extends ASTNodeComponent<IdentComponentProps, NoState> {
+    getASTNode() {
+        return this.props.ident
+    }
+    
+    getInnerElement() {
         return <div className='ast-row'>{this.props.ident.name}</div>
     }
 }
 
-interface EmptyIdentComponentProps extends ASTComponentProps {
+export interface EmptyIdentComponentProps extends ASTComponentProps {
     emptyIdent: lang.EmptyIdent
 }
 
-class EmptyIdentComponent extends React.Component<EmptyIdentComponentProps, NoState> {
-    render() {
+export class EmptyIdentComponent extends ASTNodeComponent<EmptyIdentComponentProps, NoState> {
+    getASTNode() {
+        return this.props.emptyIdent
+    }
+    
+    getInnerElement() {
         return <div className='ast-row'>EMPTY_IDENT</div>
     }
 }
 
-interface EmptyStatementProps extends ASTComponentProps {
+export interface EmptyStatementProps extends ASTComponentProps {
     emptyStatement: lang.EmptyStatement
 }
 
-class EmptyStatementComponent extends React.Component<EmptyStatementProps, NoState> {
-    render() {
+export class EmptyStatementComponent extends ASTNodeComponent<EmptyStatementProps, NoState> {
+    getASTNode() {
+        return this.props.emptyStatement
+    }
+    
+    getInnerElement() {
         return <div className='ast-row'>EMPTY_STATEMENT</div>
     }
 }
 
-class UnspecifiedComponent extends React.Component<ASTComponentProps, NoState> {
-    render() {
-        return <div className='ast-row'>{this.props.node.constructor.name}</div>
-    }
-}
-
-interface MethodComponentProps extends ASTComponentProps {
+export interface MethodComponentProps extends ASTComponentProps {
     method: lang.Method
 }
 
-class MethodComponent extends React.Component<MethodComponentProps, NoState> {
+export class MethodComponent extends ASTNodeComponent<MethodComponentProps, NoState> {
+    getASTNode() {
+        return this.props.method
+    }
+    
     removeIdent() {
         let newEmptyIdent = new lang.EmptyIdent()
         this.props.app.replaceElement(this.props.method, "name", newEmptyIdent)
@@ -396,7 +418,7 @@ class MethodComponent extends React.Component<MethodComponentProps, NoState> {
             this.props.app.insertIntoArray(this.props.method, "args", index, newArg)
         }
     }
-    render() {
+    getInnerElement() {
         const argElements = []
         this.props.method.args.forEach((ident, index) => {
             argElements.push(<ButtonComponent key={index * 3} name='add' text='+' onClick={this.insertArg(index).bind(this)}/>)
@@ -425,7 +447,7 @@ class MethodComponent extends React.Component<MethodComponentProps, NoState> {
                 <SyntaxComponent syntax=')' />
             </div>
             <div className='ast-row'>
-                <ASTNodeComponent {...this.props} node={this.props.method.statements} />
+                {this.props.method.statements.render(this.props)}
             </div>
         </div>
     }

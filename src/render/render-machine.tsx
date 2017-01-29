@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import * as vm from "../machine";
-import * as lang from "../lang";
 import { App } from "../app";
 
 export function renderMachine(app: App) {

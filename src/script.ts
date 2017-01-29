@@ -1,10 +1,10 @@
 require("./styles.scss");
-import * as lang from "./lang";
+import * as lang from "./lang/lang";
 import * as vm from "./machine";
 import * as pegjs from "pegjs"
 import { App } from "./app";
 
-let grammar = require("./grammar/lang.peg");
+let grammar = require("./lang/grammar.peg");
 
 let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HTMLTextAreaElement;
 let parseButton: HTMLButtonElement = document.getElementById("parse-button") as HTMLButtonElement;
