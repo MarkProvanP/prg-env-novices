@@ -1,5 +1,7 @@
 import * as vm from "./machine"
 
+import { ASTNode } from "./ast"
+
 export enum Operator {
   Add,
   Subtract,
@@ -34,10 +36,6 @@ export class OperatorUtils {
       case Operator.Divide: return (l, r) => l / r;
     }
   }
-}
-
-export abstract class ASTNode {
-  abstract codegen(machine: vm.Machine)
 }
 
 export abstract class Expression extends ASTNode {

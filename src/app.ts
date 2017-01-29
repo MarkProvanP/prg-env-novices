@@ -1,14 +1,14 @@
-import * as lang from "./lang"
+import * as ast from "./ast"
 import * as render from "./render/render"
 import * as vm from "./machine"
 
 export class App {
-    ast: lang.ASTNode
+    ast: ast.ASTNode
     machine: vm.Machine
 
-    selectedASTNode: lang.ASTNode
+    selectedASTNode: ast.ASTNode
 
-    setup(ast: lang.ASTNode, machine: vm.Machine) {
+    setup(ast: ast.ASTNode, machine: vm.Machine) {
         this.ast = ast;
         this.machine = machine;
     }
@@ -21,30 +21,30 @@ export class App {
         this.machine.setAST(this.ast)
     }
 
-    selectASTNode(node: lang.ASTNode) {
+    selectASTNode(node: ast.ASTNode) {
         this.selectedASTNode = node
         this.renderApp()
     }
 
-    replaceElement(node: lang.ASTNode, element: string, replacement: lang.ASTNode) {
+    replaceElement(node: ast.ASTNode, element: string, replacement: ast.ASTNode) {
         node[element] = replacement
         this.changeAST();
         this.renderApp();
     }
 
-    deleteFromArray(node: lang.ASTNode, array: string, index: number) {
+    deleteFromArray(node: ast.ASTNode, array: string, index: number) {
         node[array].splice(index, 1)
         this.changeAST()
         this.renderApp();
     }
 
-    insertIntoArray(node: lang.ASTNode, array: string, index: number, insert: lang.ASTNode) {
+    insertIntoArray(node: ast.ASTNode, array: string, index: number, insert: ast.ASTNode) {
         node[array].splice(index, 0, insert)
         this.changeAST()
         this.renderApp();
     }
 
-    replaceElementInArray(node: lang.ASTNode, array: string, index: number, insert: lang.ASTNode) {
+    replaceElementInArray(node: ast.ASTNode, array: string, index: number, insert: ast.ASTNode) {
         node[array][index] = insert;
         this.changeAST()
         this.renderApp()

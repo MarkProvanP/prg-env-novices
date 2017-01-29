@@ -1,6 +1,6 @@
 "use strict"
 
-import * as lang from "./lang";
+import * as ast from "./ast";
 
 export type StackElement = any;
 
@@ -58,15 +58,15 @@ export class Machine {
 
   public changeHistory: MachineChange[] = [];
 
-  public astInstructionRangeMap = new WeakMap<lang.ASTNode, InstructionRange>();
+  public astInstructionRangeMap = new WeakMap<ast.ASTNode, InstructionRange>();
   public activeASTNodesAtIndices = []
   private currentlyActiveASTNodes = []
 
-  constructor(ast: lang.ASTNode) {
+  constructor(ast: ast.ASTNode) {
     this.setAST(ast);
   }
 
-  setAST(ast: lang.ASTNode) {
+  setAST(ast: ast.ASTNode) {
     this.instructions = [];
     ast.codegen(this)
     this.indexToLabelsMap = this.getLabelIndices();
@@ -80,14 +80,14 @@ export class Machine {
     console.log('all', this.activeASTNodesAtIndices)
   }
 
-  beginASTRange(ast: lang.ASTNode) {
+  beginASTRange(ast: ast.ASTNode) {
     let index = this.instructions.length;
     this.astInstructionRangeMap.set(ast, new InstructionRange(index, null));
     this.currentlyActiveASTNodes.push(ast)
     console.log('Added node', ast, 'now', this.currentlyActiveASTNodes)
   }
 
-  endASTRange(ast: lang.ASTNode) {
+  endASTRange(ast: ast.ASTNode) {
     let index = this.instructions.length;
     let range = this.astInstructionRangeMap.get(ast);
     range.end = index;

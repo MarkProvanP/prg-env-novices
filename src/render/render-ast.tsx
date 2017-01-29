@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import * as lang from "../lang";
+import * as ast from "../ast";
 import { App } from "../app";
 
 import { getComponentForNode } from "./render-lang";
@@ -13,7 +13,7 @@ export function renderAST(app: App) {
 }
 
 export interface ASTComponentProps {
-    node: lang.ASTNode,
+    node: ast.ASTNode,
     app: App
 }
 export interface NoState {}
@@ -55,14 +55,14 @@ export class ASTNodeComponent extends React.Component<ASTComponentProps, NoState
     }
 }
 
-export interface ASTWrapperComponentState<T extends lang.ASTNode> {
+export interface ASTWrapperComponentState<T extends ast.ASTNode> {
     showingSuggestions: boolean,
     matchingASTTypes: T[],
     highlightedASTIndex: number,
     emptyASTInput: string,
 }
 
-export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends lang.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
+export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends ast.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
     constructor(props: ASTComponentProps) {
         super(props)
         this.state = {
