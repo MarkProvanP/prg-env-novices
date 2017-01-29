@@ -13,3 +13,5 @@ export function renderApp(app: App) {
     renderast.renderAST(app)
     rendermachine.renderMachine(app)
 }
+
+require("./style.scss")
