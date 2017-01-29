@@ -44,9 +44,7 @@ export class OperatorUtils {
   }
 }
 
-export abstract class Expression extends ASTNode {
-  
-}
+export abstract class Expression extends ASTNode {}
 
 export class Integer extends Expression {
   constructor(
@@ -55,10 +53,8 @@ export class Integer extends Expression {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
+  internalCodegen(machine: vm.Machine) {
     machine.addInstruction(new vm.Push(this.value))
-    machine.endASTRange(this)
   }
 
   render(props) {
@@ -73,12 +69,10 @@ export class ValueExpression extends Expression {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
+  internalCodegen(machine: vm.Machine) {
     if (this.ident instanceof ConcreteIdent) {
       machine.addInstruction(new vm.Get(this.ident.name))
     }
-    machine.endASTRange(this)
   }
 
   render(props) {
@@ -95,12 +89,10 @@ export class BinaryExpression extends Expression {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
+  internalCodegen(machine: vm.Machine) {
     this.left.codegen(machine)
     this.right.codegen(machine)
     machine.addInstruction(new vm.CallFunction(vm.builtInFunctions[this.op]))
-    machine.endASTRange(this)
   }
 
   render(props) {
@@ -115,10 +107,7 @@ export class EmptyExpression extends Expression {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
-    
-    machine.endASTRange(this)
+  internalCodegen(machine: vm.Machine) {
   }
 
   render(props) {
@@ -133,10 +122,8 @@ export class Statements extends ASTNode {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
+  internalCodegen(machine: vm.Machine) {
     this.statements.forEach(statement => statement.codegen(machine))
-    machine.endASTRange(this)
   }
 
   render(props) {
@@ -156,13 +143,11 @@ export class AssignmentStatement extends Statement {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
+  internalCodegen(machine: vm.Machine) {
     this.expression.codegen(machine)
     if (this.ident instanceof ConcreteIdent) {
       machine.addInstruction(new vm.Set(this.ident.name))
     }
-    machine.endASTRange(this)
   }
 
   render(props) {
@@ -178,8 +163,7 @@ export class WhileStatement extends Statement {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
+  internalCodegen(machine: vm.Machine) {
     let whileBeginLabel = "whileBegin";
     let whileEndLabel = "whileEnd";
     machine.addLabel(whileBeginLabel)
@@ -190,7 +174,6 @@ export class WhileStatement extends Statement {
     machine.addInstruction(new vm.Push(1))
     machine.addInstruction(new vm.IfGoto(whileBeginLabel))
     machine.addLabel(whileEndLabel);
-    machine.endASTRange(this)
   }
 
   render(props) {
@@ -205,10 +188,7 @@ export class EmptyStatement extends Statement {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
-    
-    machine.endASTRange(this)
+  internalCodegen(machine: vm.Machine) {
   }
 
   render(props) {
@@ -223,10 +203,7 @@ export class EmptyIdent extends Ident {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
-    
-    machine.endASTRange(this)
+  internalCodegen(machine: vm.Machine) {
   }
 
   render(props) {
@@ -241,10 +218,7 @@ export class ConcreteIdent extends Ident {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
-    
-    machine.endASTRange(this)
+  internalCodegen(machine: vm.Machine) {
   }
 
   render(props) {
@@ -277,11 +251,9 @@ export class Method extends ASTNode {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
+  internalCodegen(machine: vm.Machine) {
     machine.addInstruction(new vm.NewEnv())
     this.statements.codegen(machine)
-    machine.endASTRange(this)
   }
 
   render(props) {
@@ -297,10 +269,7 @@ export class MethodCallStatement extends Statement {
     super()
   }
 
-  codegen(machine: vm.Machine) {
-    machine.beginASTRange(this)
-
-    machine.endASTRange(this)
+  internalCodegen(machine: vm.Machine) {
   }
 
   render(props) {
