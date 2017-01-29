@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 
 import { ASTNode } from "../ast"
 
-import * as render from "./render-lang"
+import * as render from "./render"
 
 export enum Operator {
   Add,
