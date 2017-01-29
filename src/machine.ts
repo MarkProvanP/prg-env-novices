@@ -76,15 +76,12 @@ export class Machine {
     let index = this.instructions.length
     this.instructions.push(instruction)
     this.activeASTNodesAtIndices.push(this.currentlyActiveASTNodes.slice(0))
-    console.log('instruction', instruction, 'currently active', this.currentlyActiveASTNodes)
-    console.log('all', this.activeASTNodesAtIndices)
   }
 
   beginASTRange(ast: ast.ASTNode) {
     let index = this.instructions.length;
     this.astInstructionRangeMap.set(ast, new InstructionRange(index, null));
     this.currentlyActiveASTNodes.push(ast)
-    console.log('Added node', ast, 'now', this.currentlyActiveASTNodes)
   }
 
   endASTRange(ast: ast.ASTNode) {
@@ -92,7 +89,6 @@ export class Machine {
     let range = this.astInstructionRangeMap.get(ast);
     range.end = index;
     this.currentlyActiveASTNodes.pop()
-    console.log('Removed node', ast, 'now', this.currentlyActiveASTNodes)
   }
 
   addLabel(label: string) {

@@ -12,8 +12,6 @@ let stepButton: HTMLButtonElement = document.getElementById("step-button") as HT
 
 window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {lang}
 let parser = pegjs.generate(grammar, {trace: false})
-console.log(`Generated parser!`)
-console.log(vm);
 let app = new App();
 
 parseButton.onclick = (event) => {
@@ -21,7 +19,6 @@ parseButton.onclick = (event) => {
     let parsed = parser.parse(input);
     
     let astRoot = parsed[1];
-    console.log(astRoot)
 
     let machine = new vm.Machine(astRoot);
     app.setup(astRoot, machine)
