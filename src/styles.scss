@@ -10,28 +10,28 @@ body {
     background-color: aliceblue;
 }
 
-.ast-statements-list {
+.ast-list {
     display: flex;
     flex-direction: column;
     align-items: center;
 
-    .ast-statements-list-row {
+    .ast-list-row {
         display: flex;
         align-items: center;
         width: 100%;
 
-        .ast-statements-list-row-index {
+        .ast-list-row-index {
             width: 30px;
             text-align: center;
             font-style: italic;
             font-weight: bold;
         }
 
-        .ast-statements-list-row-content {
+        .ast-list-row-content {
             flex: 1;
         }
 
-        .ast-statements-list-row-buttons {
+        .ast-list-row-buttons {
             display: flex;
         }
     }

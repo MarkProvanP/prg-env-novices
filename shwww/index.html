@@ -14,6 +14,11 @@ method test ( derp ) {
     let x := 4
     call hello(x, y) 
 }
+
+method hello (x, y, z) {
+    let x := 5
+    call test(x)
+}
     </textarea>
     <button id="parse-button">Parse</button>
     <button id='step-button'>Step Forward</button>

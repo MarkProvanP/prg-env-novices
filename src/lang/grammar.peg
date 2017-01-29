@@ -3,10 +3,13 @@
 }
 
 start
-  = w method w
+  = w program w
+
+program
+  = m:method* w { return new lang.Program(m)}
 
 method
-  = "method" w i:ident w "(" w a:methodArgs w ")" w "{" w s:statements w "}" { return new lang.Method(i, a, s)}
+  = "method" w i:ident w "(" w a:methodArgs w ")" w "{" w s:statements w "}" w { return new lang.Method(i, a, s)}
 
 methodArgs
   = list:methodArgListElement* w single:ident { return [].concat(list).concat(single).filter(function(s) { return s })}

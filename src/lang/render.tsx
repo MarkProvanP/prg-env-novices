@@ -114,6 +114,38 @@ class IdentWrapperComponent extends ASTWrapperComponent<IdentWrapperComponentPro
     }
 }
 
+interface MethodWrapperComponentProps extends ASTComponentProps {
+    method: lang.Method,
+    onMethodDelete: () => void,
+    onMethodEdit: (replacement: lang.Method) => void
+}
+
+class MethodWrapperComponent extends ASTWrapperComponent<MethodWrapperComponentProps, lang.Method> {
+    isEmptyAST() {
+        return false
+    }
+
+    getASTNode() {
+        return this.props.method
+    }
+
+    getASTType() {
+        return lang.Method
+    }
+
+    deleteAST() {
+        this.props.onMethodDelete()
+    }
+
+    editAST(replacement: lang.Method) {
+        this.props.onMethodEdit(replacement)
+    }
+
+    getMatchingASTTypes(input: string) {
+        return lang.getMatchingMethodTypes(input)
+    }
+}
+
 export interface IntegerComponentProps extends ASTComponentProps {
     integer: lang.Integer
 }
@@ -277,6 +309,72 @@ export class WhileStatementComponent extends ASTNodeComponent<WhileStatementComp
     }
 }
 
+export interface ProgramComponentProps extends ASTComponentProps {
+    program: lang.Program
+}
+
+export class ProgramComponent extends ASTNodeComponent<ProgramComponentProps, NoState> {
+    getASTNode() {
+        return this.props.program
+    }
+    
+    editRow(index) {
+        return replacement => {
+            console.log('Edit at index', index)
+            this.props.app.replaceElementInArray(this.getASTNode(), "methods", index, replacement)
+        }
+    }
+
+    deleteRow(index) {
+        return () => {
+            console.log('Delete at index', index)
+            this.props.app.deleteFromArray(this.getASTNode(), "methods", index)
+        }
+    }
+
+    insertRow(index) {
+        return e => {
+            console.log('Insert at index', index, this);
+            let newASTNode = new lang.Method();
+            this.props.app.insertIntoArray(this.getASTNode(), "methods", index, newASTNode)
+        }
+    }
+
+    constructor(props: StatementsComponentProps) {
+        super(props)
+        this.editRow = this.editRow.bind(this)
+        this.deleteRow = this.deleteRow.bind(this)
+        this.insertRow = this.insertRow.bind(this)
+    }
+
+    private createPlusButton(index: number) {
+        return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
+    }
+
+    getInnerElement() {
+        const methods = this.props.program.methods;
+        const methodsList = methods.map((method, index) => {
+            return <div key={(index * 2) + 1} className='ast-list-row'>
+                <div className='ast-list-row-index'>{index}</div>
+                <div className='ast-list-row-content'>
+                    <MethodWrapperComponent {...this.props} method={method} onMethodDelete={this.deleteRow(index)} onMethodEdit={this.editRow(index)}/>
+                </div>
+            </div>
+        })
+        let elementsList = []
+        methodsList.forEach((method, index) => {
+            let plusButton = this.createPlusButton(index);
+            elementsList.push(plusButton);
+            elementsList.push(method);
+        })
+        let plusButton = this.createPlusButton(methods.length);
+        elementsList.push(plusButton);
+        return <div className='ast-list'>
+            {elementsList}
+        </div>
+    }
+}
+
 export interface StatementsComponentProps extends ASTComponentProps {
     statements: lang.Statements
 }
@@ -322,9 +420,9 @@ export class StatementsComponent extends ASTNodeComponent<StatementsComponentPro
     getInnerElement() {
         const statements = this.props.statements.statements;
         const statementsList = statements.map((statement, index) => {
-            return <div key={(index * 2) + 1} className='ast-statements-list-row'>
-                <div className='ast-statements-list-row-index'>{index}</div>
-                <div className='ast-statements-list-row-content'>
+            return <div key={(index * 2) + 1} className='ast-list-row'>
+                <div className='ast-list-row-index'>{index}</div>
+                <div className='ast-list-row-content'>
                     <StatementWrapperComponent {...this.props} statement={statement} onStatementDelete={this.deleteRow(index)} onStatementEdit={this.editRow(index)}/>
                 </div>
             </div>
@@ -337,7 +435,7 @@ export class StatementsComponent extends ASTNodeComponent<StatementsComponentPro
         })
         let plusButton = this.createPlusButton(statements.length);
         elementsList.push(plusButton);
-        return <div className='ast-statements-list'>
+        return <div className='ast-list'>
             {elementsList}
         </div>
     }

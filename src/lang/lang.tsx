@@ -117,7 +117,7 @@ export class EmptyExpression extends Expression {
 
 export class Statements extends ASTNode {
   constructor(
-    public statements: Statement[]
+    public statements: Statement[] = []
   ) {
     super()
   }
@@ -242,11 +242,15 @@ export function getMatchingIdentTypes(input: string) {
   return [new ConcreteIdent(input)]
 }
 
+export function getMatchingMethodTypes(input: string) {
+  return [new Method()]
+}
+
 export class Method extends ASTNode {
   constructor(
-    public name: ConcreteIdent,
-    public args: ConcreteIdent[],
-    public statements: Statements
+    public name: Ident = new EmptyIdent(),
+    public args: Ident[] = [],
+    public statements: Statements = new Statements()
   ) {
     super()
   }
@@ -274,5 +278,21 @@ export class MethodCallStatement extends Statement {
 
   render(props) {
     return <render.MethodCallStatementComponent {...props} methodCallStatement={this} />
+  }
+}
+
+export class Program extends ASTNode {
+  constructor(
+    public methods: Method[] = []
+  ) {
+    super()
+  }
+
+  internalCodegen(machine: vm.Machine) {
+    this.methods.forEach(method => method.codegen(machine))
+  }
+
+  render(props) {
+    return <render.ProgramComponent {...props} program={this} />
   }
 }
