@@ -11,8 +11,6 @@
     "allowSyntheticDefaultImports": true
   },
   "exclude": [
-    "src-old",
-    "pegjs-test",
     "node_modules"
   ]
 }
