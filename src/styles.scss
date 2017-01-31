@@ -50,6 +50,7 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    transition: width 2s, height 2s, font-size 2s, border 2s, margin 2s, padding 2s;
 }
 
 .ast-button:hover {
@@ -162,6 +163,17 @@ body {
     border: 1px solid black;
     font-size: small;
 
+    &:not(.hovering) {
+        .ast-button {
+            width: 0px;
+            height: 0px;
+            font-size: 0%;
+            border: 0;
+            margin: 0;
+            padding: 0;
+        }
+    }
+
     & > .title {
         font-style: italic;
         font-weight: bold;
@@ -171,28 +183,46 @@ body {
         transition: font-size 2s, margin 2s;
     }
 
-    &.hovering-0 > .title {
-        font-size: 100%;
+    &.hovering-0 {
+        & > .title {
+            font-size: 100%;
+        }
+
+        .ast-wrapper {
+            .ast-button {
+                
+            }
+        }
     }
 
-    &.hovering-1 > .title {
-        font-size: 90%;
+    &.hovering-1 {
+        & > .title {
+            font-size: 90%;
+        }
     }
 
-    &.hovering-2 > .title {
-        font-size: 80%;
+    &.hovering-2 > {
+        .title {
+            font-size: 80%;
+        }
     }
 
-    &.hovering-3 > .title {
-        font-size: 70%;
+    &.hovering-3 > {
+        .title {
+            font-size: 70%;
+        }
     }
 
-    &.hovering-4 > .title {
-        font-size: 60%;
+    &.hovering-4 > {
+        .title {
+            font-size: 60%;
+        }
     }
 
-    &.hovering-5 > .title {
-        font-size: 50%;
+    &.hovering-5 > {
+        .title {
+            font-size: 50%;
+        }
     }
 
     &.hovering-0 {

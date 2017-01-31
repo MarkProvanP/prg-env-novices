@@ -59,6 +59,7 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S extends AS
             'ast-node',
             astNode.constructor.name,
             selected ? 'clicked' : 'not-clicked',
+            mouseOverIndex != -1 ? 'hovering' : '',
             `hovering-${mouseOverIndex}`
         ].filter(s => s).join(" ");
     }
