@@ -7,6 +7,7 @@ import {
     NoState,
     ASTComponentProps,
     ASTNodeComponent,
+    ASTNodeComponentState,
     ASTWrapperComponent,
     ASTWrapperComponentState,
     ButtonComponent,
@@ -150,7 +151,13 @@ export interface IntegerComponentProps extends ASTComponentProps {
     integer: lang.Integer
 }
 
-export class IntegerComponent extends ASTNodeComponent<IntegerComponentProps, NoState> {
+export class IntegerComponent extends ASTNodeComponent<IntegerComponentProps, ASTNodeComponentState> {
+    constructor(props) {
+        super(props)
+        this.state = {
+            hovering: true
+        }
+    }
     getASTNode() {
         return this.props.integer;
     }
@@ -165,7 +172,7 @@ export class IntegerComponent extends ASTNodeComponent<IntegerComponentProps, No
 export interface ValueExpressionComponentProps extends ASTComponentProps {
     value: lang.ValueExpression
 }
-export class ValueExpressionComponent extends ASTNodeComponent<ValueExpressionComponentProps, NoState> {
+export class ValueExpressionComponent extends ASTNodeComponent<ValueExpressionComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.value;
     }
@@ -180,7 +187,7 @@ export class ValueExpressionComponent extends ASTNodeComponent<ValueExpressionCo
 export interface BinaryExpressionComponentProps extends ASTComponentProps {
     binaryExpression: lang.BinaryExpression
 }
-export class BinaryExpressionComponent extends ASTNodeComponent<BinaryExpressionComponentProps, NoState> {
+export class BinaryExpressionComponent extends ASTNodeComponent<BinaryExpressionComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.binaryExpression
     }
@@ -219,7 +226,7 @@ export interface EmptyExpressionProps extends ASTComponentProps {
     emptyExpression: lang.EmptyExpression
 }
 
-export class EmptyExpressionComponent extends ASTNodeComponent<EmptyExpressionProps, NoState> {
+export class EmptyExpressionComponent extends ASTNodeComponent<EmptyExpressionProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.emptyExpression
     }
@@ -232,7 +239,7 @@ export class EmptyExpressionComponent extends ASTNodeComponent<EmptyExpressionPr
 export interface AssignmentStatementComponentProps extends ASTComponentProps {
     assignmentStatement: lang.AssignmentStatement
 }
-export class AssignmentStatementComponent extends ASTNodeComponent<AssignmentStatementComponentProps, NoState> {
+export class AssignmentStatementComponent extends ASTNodeComponent<AssignmentStatementComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.assignmentStatement
     }
@@ -272,7 +279,7 @@ export class AssignmentStatementComponent extends ASTNodeComponent<AssignmentSta
 export interface WhileStatementComponentProps extends ASTComponentProps {
     whileStatement: lang.WhileStatement
 }
-export class WhileStatementComponent extends ASTNodeComponent<WhileStatementComponentProps, NoState> {
+export class WhileStatementComponent extends ASTNodeComponent<WhileStatementComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.whileStatement
     }
@@ -313,7 +320,7 @@ export interface ProgramComponentProps extends ASTComponentProps {
     program: lang.Program
 }
 
-export class ProgramComponent extends ASTNodeComponent<ProgramComponentProps, NoState> {
+export class ProgramComponent extends ASTNodeComponent<ProgramComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.program
     }
@@ -379,7 +386,7 @@ export interface StatementsComponentProps extends ASTComponentProps {
     statements: lang.Statements
 }
 
-export class StatementsComponent extends ASTNodeComponent<StatementsComponentProps, NoState> {
+export class StatementsComponent extends ASTNodeComponent<StatementsComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.statements
     }
@@ -445,7 +452,7 @@ export interface IdentComponentProps extends ASTComponentProps {
     ident: lang.ConcreteIdent
 }
 
-export class IdentComponent extends ASTNodeComponent<IdentComponentProps, NoState> {
+export class IdentComponent extends ASTNodeComponent<IdentComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.ident
     }
@@ -459,7 +466,7 @@ export interface EmptyIdentComponentProps extends ASTComponentProps {
     emptyIdent: lang.EmptyIdent
 }
 
-export class EmptyIdentComponent extends ASTNodeComponent<EmptyIdentComponentProps, NoState> {
+export class EmptyIdentComponent extends ASTNodeComponent<EmptyIdentComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.emptyIdent
     }
@@ -473,7 +480,7 @@ export interface EmptyStatementProps extends ASTComponentProps {
     emptyStatement: lang.EmptyStatement
 }
 
-export class EmptyStatementComponent extends ASTNodeComponent<EmptyStatementProps, NoState> {
+export class EmptyStatementComponent extends ASTNodeComponent<EmptyStatementProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.emptyStatement
     }
@@ -487,7 +494,7 @@ export interface MethodComponentProps extends ASTComponentProps {
     method: lang.Method
 }
 
-export class MethodComponent extends ASTNodeComponent<MethodComponentProps, NoState> {
+export class MethodComponent extends ASTNodeComponent<MethodComponentProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.method
     }
@@ -555,7 +562,7 @@ export interface MethodCallStatementProps extends ASTComponentProps {
     methodCallStatement: lang.MethodCallStatement
 }
 
-export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallStatementProps, NoState> {
+export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallStatementProps, ASTNodeComponentState> {
     getASTNode() {
         return this.props.methodCallStatement
     }

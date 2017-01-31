@@ -20,9 +20,12 @@ interface WholeASTState {
 }
 
 export class WholeASTComponent extends React.Component<WholeASTProps, WholeASTState> {
+    onMouseOver(e) {
+        this.props.app.stopMouseOverASTNode();
+    }
     render() {
         const rootNode = this.props.node;
-        return <div className='whole-ast'>
+        return <div className='whole-ast' onMouseOver={this.onMouseOver.bind(this)}>
             {rootNode.render(this.props)}
         </div>
     }
@@ -32,9 +35,12 @@ export interface ASTComponentProps {
     node: ast.ASTNode,
     app: App
 }
+export interface ASTNodeComponentState {
+    hovering: boolean
+}
 export interface NoState {}
 
-export abstract class ASTNodeComponent<P extends ASTComponentProps, S> extends React.Component<P, S> {
+export abstract class ASTNodeComponent<P extends ASTComponentProps, S extends ASTNodeComponentState> extends React.Component<P, S> {
     onClick(e) {
         const astNode = this.getASTNode()
         let selectedBefore = this.props.app.selectedASTNode == astNode
@@ -46,10 +52,14 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S> extends R
     getClassName() {
         const astNode = this.getASTNode()
         let selected = this.props.app.selectedASTNode == astNode
+        if (this.props.app.mousedOverASTNodes) {
+            var mouseOverIndex = this.props.app.mousedOverASTNodes.indexOf(astNode)
+        }
         return [
             'ast-node',
             astNode.constructor.name,
-            selected ? 'clicked' : ''
+            selected ? 'clicked' : 'not-clicked',
+            `hovering-${mouseOverIndex}`
         ].filter(s => s).join(" ");
     }
 
@@ -61,12 +71,16 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S> extends R
     abstract getASTNode()
     abstract getInnerElement()
 
+    onMouseOver(e) {
+        this.props.app.mouseOverASTNode(this.getASTNode())
+    }
+
     render() {
         if (!this.getInnerElement) {
             debugger;
         }
         const astNode = this.getASTNode();
-        return <div className={this.getClassName()} onClick={this.onClick}>
+        return <div className={this.getClassName()} onClick={this.onClick} onMouseOver={this.onMouseOver.bind(this)}>
             <div className='title'>{astNode.constructor.name}</div>
             <div className='content'>
                 {this.getInnerElement()}

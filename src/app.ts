@@ -7,7 +7,8 @@ export class App {
     machine: vm.Machine
 
     selectedASTNode: ast.ASTNode
-    mousedOverASTNode: ast.ASTNode
+    mousedOverASTNodes: ast.ASTNode[] = []
+    private _mousedOverNodesBuilder: ast.ASTNode[]
 
     selectedLabel: string
 
@@ -29,9 +30,17 @@ export class App {
         this.renderApp()
     }
 
-    mouseOverASTNode(node: ast.ASTNode) {
-        this.mousedOverASTNode = node;
+    stopMouseOverASTNode() {
+        this.mousedOverASTNodes = this._mousedOverNodesBuilder
+        this._mousedOverNodesBuilder = undefined;
         this.renderApp()
+    }
+
+    mouseOverASTNode(node: ast.ASTNode) {
+        if (!this._mousedOverNodesBuilder) {
+            this._mousedOverNodesBuilder = []
+        }
+        this._mousedOverNodesBuilder.push(node);
     }
 
     selectLabel(label: string) {
