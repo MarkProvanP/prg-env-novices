@@ -9,6 +9,8 @@ export class App {
     selectedASTNode: ast.ASTNode
     mousedOverASTNode: ast.ASTNode
 
+    selectedLabel: string
+
     setup(ast: ast.ASTNode, machine: vm.Machine) {
         this.ast = ast;
         this.machine = machine;
@@ -29,6 +31,11 @@ export class App {
 
     mouseOverASTNode(node: ast.ASTNode) {
         this.mousedOverASTNode = node;
+        this.renderApp()
+    }
+
+    selectLabel(label: string) {
+        this.selectedLabel = label
         this.renderApp()
     }
 

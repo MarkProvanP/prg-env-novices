@@ -53,12 +53,11 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, NoSta
     }
 }
 
-interface InstructionProps {
+interface InstructionProps extends VMStateProps {
     index: number,
     instruction: vm.Instruction,
     currentIp: number,
-    insideRange: boolean,
-    app: App
+    insideRange: boolean
 }
 interface InstructionState {}
 
@@ -69,14 +68,13 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
         return classNames(
             'instruction',
             (this.props.currentIp == this.props.index) ? 'current-ip' : '',
-            this.props.insideRange ? 'within-range' : ''
+            this.props.insideRange ? 'within-range' : '',
+            this.getLabels().includes(this.props.app.selectedLabel) ? 'selected-label' : ''
         )
     }
 
-    getLabels() {
-        let labels = this.props.app.machine.indexToLabelsMap[this.props.index];
-        if (!labels) return;
-        return labels.join(" ")
+    private getLabels() {
+        return this.props.app.machine.indexToLabelsMap[this.props.index] || []
     }
 
     getActiveASTNodesAtIndex(index: number) {
@@ -93,11 +91,14 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
     }
 
     render() {
+        const labelElements = this.getLabels().map((label, index) => (
+            <div key={index} className='label'>{label}</div>
+        ))
         return <div className={this.getClassName()}>
-            <div className='labels'>{this.getLabels()}</div>
+            <div className='labels'>{labelElements}</div>
             <div className='index'>{this.props.index}</div>
             <div className='opcode'>{this.props.instruction.constructor.name}</div>
-            {getComponentForInstruction(this.props.instruction)}
+            {getComponentForInstruction.bind(this)(this.props.instruction)}
             <div className='active-ast-nodes'>
                 {this.getActiveASTNodesAtIndex(this.props.index)}
             </div>
@@ -111,11 +112,34 @@ function getComponentForInstruction(instruction: vm.Instruction) {
     } else if (instruction instanceof vm.CallFunction) {
         return <div className='args machine-call-function'>{instruction.func.name}</div>
     } else if (instruction instanceof vm.IfGoto) {
-        return <div className='args machine-if-goto'>{instruction.label}</div>
+        return <div className='args machine-if-goto'>
+            <LabelComponent label={instruction.label} app={this.props.app}/>
+        </div>
     } else if (instruction instanceof vm.Set) {
         return <div className='args machine-set'>{instruction.key}</div>
     } else if (instruction instanceof vm.Get) {
         return <div className='args machine-get'>{instruction.key}</div>
+    }
+}
+
+interface LabelComponentProps extends VMStateProps {
+    label: string
+}
+
+export class LabelComponent extends React.Component<LabelComponentProps, NoState> {
+    onMouseEnter(e) {
+        this.props.app.selectLabel(this.props.label)
+    }
+
+    onMouseLeave(e) {
+        this.props.app.selectLabel("")
+    }
+
+    render() {
+        return <div className='label'
+        onMouseEnter={this.onMouseEnter.bind(this)}
+        onMouseLeave={this.onMouseLeave.bind(this)}
+        >{this.props.label}</div>
     }
 }
 

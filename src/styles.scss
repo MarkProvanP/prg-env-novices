@@ -110,6 +110,13 @@ body {
 
         .args {
             font-style: italic;
+
+            .label {
+                font-size: smaller;
+                border: 1px solid black;
+                margin: 1px;
+                font-weight: bold;
+            }
         }
 
         .active-ast-nodes {
@@ -119,6 +126,8 @@ body {
 
             .active-node {
                 font-size: smaller;
+                border: 1px solid black;
+                margin: 1px;
             }
         }
     }
@@ -130,6 +139,15 @@ body {
     .instruction.within-range {
         background-color: mediumaquamarine;
     }
+
+    .instruction.selected-label {
+        background-color: hotpink
+    }
+}
+
+.label {
+    font-weight: bold;
+    font-style: italic;
 }
 
 .stack {
@@ -163,10 +181,6 @@ body {
     border-color: yellow;
 }
 
-.active-node {
-    border: 1px solid black;
-    margin: 1px;
-}
 
 .syntax {
     font-weight: bold;
