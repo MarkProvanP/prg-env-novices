@@ -60,7 +60,7 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S extends AS
             astNode.constructor.name,
             selected ? 'clicked' : 'not-clicked',
             mouseOverIndex != -1 ? 'hovering' : '',
-            `hovering-${mouseOverIndex}`
+            mouseOverIndex != -1 ? `hovering-${mouseOverIndex}` : ''
         ].filter(s => s).join(" ");
     }
 
@@ -250,10 +250,15 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
     }
 
     getClassName() {
+        const astNode = this.getASTNode()
+        if (this.props.app.mousedOverASTNodes) {
+            var mouseOverIndex = this.props.app.mousedOverASTNodes.indexOf(astNode)
+        }
         return classNames(
             'ast-wrapper',
             this.constructor.name,
-            (this.props.app.mousedOverASTNode == this.getASTNode()) ? 'mouseover' : ''
+            mouseOverIndex != -1 ? 'hovering' : '',
+            mouseOverIndex != -1 ? `hovering-${mouseOverIndex}` : ''
         )
     }
 
