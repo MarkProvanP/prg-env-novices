@@ -41,13 +41,29 @@ body {
     }
 }
 
-.ast-button {
+@mixin button-invisible {
+    width: 0px;
+    height: 0px;
+    font-size: 0%;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+@mixin button-visible {
     padding-left: 5px;
     padding-right: 5px;
     margin-left: 2px;
     margin-right: 2px;
     height: 20px;
+    width: initial;
     border: 1px solid black;
+    font-size: 100%;
+}
+
+.ast-button {
+    background-color: green;
+    @include button-invisible();
     border-radius: 5px;
     background-color: white;
     display: flex;
@@ -165,17 +181,6 @@ body {
 .ast-node {
     transition: margin 2s, border 2s;
 
-    &:not(.hovering) {
-        .ast-button {
-            width: 0px;
-            height: 0px;
-            font-size: 0%;
-            border: 0;
-            margin: 0;
-            padding: 0;
-        }
-    }
-
     & > .title {
         font-style: italic;
         font-weight: bold;
@@ -196,10 +201,14 @@ body {
             width: 30px;
             font-size: medium
         }
+        
+        .ast-button {
+            @include button-visible();
+        }
 
-        .ast-wrapper {
+        .ast-node.not-hovering {
             .ast-button {
-                
+                @include button-invisible();
             }
         }
     }

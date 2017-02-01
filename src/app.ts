@@ -7,6 +7,7 @@ export class App {
     machine: vm.Machine
 
     selectedASTNode: ast.ASTNode
+    
     mousedOverASTNodes: ast.ASTNode[] = []
     private _mousedOverNodesBuilder: ast.ASTNode[]
 
@@ -33,6 +34,7 @@ export class App {
     stopMouseOverASTNode() {
         this.mousedOverASTNodes = this._mousedOverNodesBuilder
         this._mousedOverNodesBuilder = undefined;
+        console.log("Moused over nodes", this.mousedOverASTNodes)
         this.renderApp()
     }
 

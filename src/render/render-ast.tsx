@@ -59,7 +59,7 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S extends AS
             'ast-node',
             astNode.constructor.name,
             selected ? 'clicked' : 'not-clicked',
-            mouseOverIndex != -1 ? 'hovering' : '',
+            mouseOverIndex != -1 ? 'hovering' : 'not-hovering',
             mouseOverIndex != -1 ? `hovering-${mouseOverIndex}` : ''
         ].filter(s => s).join(" ");
     }
@@ -111,20 +111,6 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
     }
     
     abstract isEmptyAST()
-
-    onMouseOver(e) {
-        this.props.app.mouseOverASTNode(this.getASTNode())
-        e.nativeEvent.stopPropagation();
-        return false;
-    }
-
-    onMouseOut(e) {
-        this.setState(prevState => ({
-            mousedOver: false
-        }))
-        e.nativeEvent.stopPropagation();
-        return false;
-    }
 
     onKeyDown(e) {
         let event = e.nativeEvent;
@@ -257,7 +243,7 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
         return classNames(
             'ast-wrapper',
             this.constructor.name,
-            mouseOverIndex != -1 ? 'hovering' : '',
+            mouseOverIndex != -1 ? 'hovering' : 'not-hovering',
             mouseOverIndex != -1 ? `hovering-${mouseOverIndex}` : ''
         )
     }
@@ -265,8 +251,6 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
     render() {
         return <div className={this.getClassName()}
         onKeyDown={this.onKeyDown.bind(this)}
-        onMouseOver={this.onMouseOver.bind(this)}
-        onMouseOut={this.onMouseOut.bind(this)}
         >
             <div className='title'>{this.getASTType().name}</div>
             {this.getASTContent()}
