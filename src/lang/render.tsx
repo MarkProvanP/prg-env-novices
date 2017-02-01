@@ -216,17 +216,19 @@ export class BinaryExpressionComponent extends ASTNodeComponent<BinaryExpression
 
     getInnerElement() {
         return <div className='ast-row'>
+            <SyntaxComponent syntax='('/>
             <ExpressionWrapperComponent {...this.props}
             expression={this.props.binaryExpression.left}
             onExpressionDelete={this.removeExpression("left").bind(this)}
             onExpressionEdit={this.editExpression("left").bind(this)}
             />
-            <div className='operator'>{this.props.binaryExpression.op}</div>
+            <div className='operator syntax'>{this.props.binaryExpression.op}</div>
             <ExpressionWrapperComponent {...this.props}
             expression={this.props.binaryExpression.right}
             onExpressionDelete={this.removeExpression("right").bind(this)}
             onExpressionEdit={this.editExpression("right").bind(this)}
             />
+            <SyntaxComponent syntax=')'/>
         </div>
     }
 }
