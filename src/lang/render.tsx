@@ -176,10 +176,19 @@ export class ValueExpressionComponent extends ASTNodeComponent<ValueExpressionCo
     getASTNode() {
         return this.props.value;
     }
+
+    onIdentDelete() {
+        let newEmptyIdent = new lang.EmptyIdent()
+        this.props.app.replaceElement(this.props.value, "ident", newEmptyIdent)
+    }
+
+    onIdentEdit(replacement: lang.Ident) {
+        this.props.app.replaceElement(this.props.value, "ident", replacement)
+    }
     
     getInnerElement() {
         return <div className='ast-row'>
-            {this.props.value.ident.render(this.props)}
+            <IdentWrapperComponent {...this.props} ident={this.props.value.ident} onIdentEdit={this.onIdentEdit.bind(this)} onIdentDelete={this.onIdentDelete.bind(this)}/>
         </div>
     }
 }
