@@ -161,10 +161,14 @@ export class IntegerComponent extends ASTNodeComponent<IntegerComponentProps, AS
     getASTNode() {
         return this.props.integer;
     }
+
+    handleChange(event) {
+        this.props.app.replaceElement(this.props.integer, "value", event.target.value)
+    }
     
     getInnerElement() {
         return <div className='ast-row'>
-            {this.props.integer.value}
+            <input type='number' className='ast-value' value={this.props.integer.value} onChange={this.handleChange.bind(this)}/>
         </div>
     }
 }
