@@ -2,9 +2,82 @@ import * as ast from "./ast"
 import * as render from "./render/render"
 import * as vm from "./machine"
 
+abstract class ASTChange {
+    abstract apply()
+}
+
+class ReplaceChange extends ASTChange {
+    public replaced: ast.ASTNode
+
+    constructor(
+        public node: ast.ASTNode,
+        public element: string,
+        public replacement: ast.ASTNode
+    ) {
+        super()
+        this.replaced = node[element]
+    }
+
+    apply() {
+        this.node[this.element] = this.replacement
+    }
+}
+
+class InsertIntoArrayChange extends ASTChange {
+    constructor(
+        public node: ast.ASTNode,
+        public array: string,
+        public index: number,
+        public insert: ast.ASTNode
+    ) {
+        super()
+    }
+
+    apply() {
+        this.node[this.array].splice(this.index, 0, this.insert)
+    }
+}
+
+class DeleteFromArrayChange extends ASTChange {
+    public deleted: ast.ASTNode
+
+    constructor(
+        public node: ast.ASTNode,
+        public array: string,
+        public index: number
+    ) {
+        super()
+        this.deleted = node[array][index]
+    }
+
+    apply() {
+        this.node[this.array].splice(this.index, 1)
+    }
+}
+
+class ReplaceInArrayChange extends ASTChange {
+    public replaced: ast.ASTNode
+
+    constructor(
+        public node: ast.ASTNode,
+        public array: string,
+        public index: number,
+        public insert: ast.ASTNode
+    ) {
+        super()
+        this.replaced = node[array][index]
+    }
+
+    apply() {
+        this.node[this.array][this.index] = this.insert;
+    }
+}
+
 export class App {
     ast: ast.ASTNode
     machine: vm.Machine
+
+    astChanges: ASTChange[] = []
 
     selectedASTNode: ast.ASTNode
     
@@ -50,27 +123,30 @@ export class App {
         this.renderApp()
     }
 
+    addNewChange(change: ASTChange) {
+        this.astChanges.push(change)
+        change.apply()
+        this.changeAST()
+        this.renderApp()
+    }
+
     replaceElement(node: ast.ASTNode, element: string, replacement: ast.ASTNode) {
-        node[element] = replacement
-        this.changeAST();
-        this.renderApp();
+        let change = new ReplaceChange(node, element, replacement)
+        this.addNewChange(change)
     }
 
     deleteFromArray(node: ast.ASTNode, array: string, index: number) {
-        node[array].splice(index, 1)
-        this.changeAST()
-        this.renderApp();
+        let change = new DeleteFromArrayChange(node, array, index)
+        this.addNewChange(change)
     }
 
     insertIntoArray(node: ast.ASTNode, array: string, index: number, insert: ast.ASTNode) {
-        node[array].splice(index, 0, insert)
-        this.changeAST()
-        this.renderApp();
+        let change = new InsertIntoArrayChange(node, array, index, insert)
+        this.addNewChange(change)
     }
 
     replaceElementInArray(node: ast.ASTNode, array: string, index: number, insert: ast.ASTNode) {
-        node[array][index] = insert;
-        this.changeAST()
-        this.renderApp()
+        let change = new ReplaceInArrayChange(node, array, index, insert)
+        this.addNewChange(change)
     }
 }
