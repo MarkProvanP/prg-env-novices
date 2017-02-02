@@ -312,3 +312,24 @@ export class ButtonComponent extends React.Component<ButtonComponentProps, NoSta
         return <div className={this.getClassName()} onClick={this.props.onClick} >{this.props.text}</div>
     }
 }
+
+export interface InputComponentProps {
+    value: any,
+    type: string,
+    onChange: (e) => void
+}
+
+export class InputComponent extends React.Component<InputComponentProps, NoState> {
+    getStyle() {
+        const numChars = String(this.props.value).length;
+        const buttonsWidth = 15
+        const charWidth = 10
+        const width = numChars * charWidth + buttonsWidth
+        return {
+            width: `${width}px`
+        }
+    }
+    render() {
+        return <input className='ast-input' style={this.getStyle()} type={this.props.type} value={this.props.value} onChange={this.props.onChange} />
+    }
+}

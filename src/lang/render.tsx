@@ -15,7 +15,9 @@ import {
     KeywordComponent,
     KeywordComponentProps,
     SyntaxComponent,
-    SyntaxComponentProps
+    SyntaxComponentProps,
+    InputComponent,
+    InputComponentProps
 } from "../render/render-ast";
 
 
@@ -168,7 +170,7 @@ export class IntegerComponent extends ASTNodeComponent<IntegerComponentProps, AS
     
     getInnerElement() {
         return <div className='ast-row'>
-            <input type='number' className='ast-value' value={this.props.integer.value} onChange={this.handleChange.bind(this)}/>
+            <InputComponent type='number' value={this.props.integer.value} onChange={this.handleChange.bind(this)}/>
         </div>
     }
 }
@@ -471,9 +473,15 @@ export class IdentComponent extends ASTNodeComponent<IdentComponentProps, ASTNod
     getASTNode() {
         return this.props.ident
     }
+
+    handleChange(event) {
+        this.props.app.replaceElement(this.props.ident, "name", event.target.value)
+    }
     
     getInnerElement() {
-        return <div className='ast-row'>{this.props.ident.name}</div>
+        return <div className='ast-row'>
+            <InputComponent type='text' value={this.props.ident.name} onChange={this.handleChange.bind(this)} />
+        </div>
     }
 }
 
