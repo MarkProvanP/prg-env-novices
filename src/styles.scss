@@ -1,3 +1,5 @@
+$transition-delay: 0.2s;
+
 body {
     height: 100vh;
     display: flex;
@@ -28,7 +30,8 @@ body {
             font-style: italic;
             font-weight: bold;
             font-size: 0;
-            transition: width 2s, font-size 2s
+            transition: width 2s, font-size 2s;
+            transition-delay: $transition-delay;
         }
 
         .ast-list-row-content {
@@ -70,7 +73,8 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: width 2s, height 2s, font-size 2s, border 2s, margin 2s, padding 2s;
+    transition: width 2s ease-in-out, height 2s ease-in-out, font-size 2s ease-in-out, border 2s ease-in-out, margin 2s ease-in-out, padding 2s ease-in-out;
+    transition-delay: $transition-delay;
 }
 
 .ast-button:hover {
@@ -179,14 +183,16 @@ body {
 }
 
 .ast-node {
-    transition: margin 2s, border 2s;
-
+    transition: margin 2s ease-in-out, border 2s ease-in-out;
+    transition-delay: $transition-delay;
+    
     & > .title {
         font-style: italic;
         font-weight: bold;
         pointer-events: none;
         font-size: 0%;
         transition: font-size 2s, margin 2s;
+        transition-delay: $transition-delay;
     }
 
     &.hovering-0 {
@@ -245,7 +251,6 @@ body {
 
     &.hovering-0 {
         margin: 5px;
-        transition: margin 1s ease-in-out;
     }
 
     .ast-row {
