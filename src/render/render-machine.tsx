@@ -25,10 +25,31 @@ export class VMStateComponent extends React.Component<VMStateProps, NoState> {
             IP: {this.props.app.machine.instructionPointer}
             Count: {this.props.app.machine.instructionCount}
             </div>
+            <ASTChangesComponent app={this.props.app} />
             <VMInstructionsComponent app={this.props.app}/>
             <VMStackComponent app={this.props.app} />
             <VMEnvComponent app={this.props.app} />
         </div>;
+    }
+}
+
+export class ASTChangesComponent extends React.Component<VMStateProps, NoState> {
+    undoChange() {
+        this.props.app.undoLastChange();
+    }
+
+    render() {
+        const changeElements = this.props.app.astChanges.map((change, index) => {
+            const className = classNames('change', change.constructor.name)
+            return <div key={index} className={className}>
+                <div className='description'>{change.describe()}</div>
+            </div>
+        })
+        return <div className='ast-changes'>
+            <h3>AST Change History</h3>
+            <button onClick={this.undoChange.bind(this)}>Undo Change</button>
+            <div className='change-list'>{changeElements}</div>
+        </div>
     }
 }
 

@@ -110,6 +110,16 @@ body {
     flex-direction: column;
 }
 
+.change-list {
+    display: flex;
+    overflow-x: scroll;
+    width: 600px;
+
+    .change {
+        width: 150px;
+    }
+}
+
 .instructions {
     flex: 1;
     overflow-y: scroll;

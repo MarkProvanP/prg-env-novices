@@ -4,22 +4,30 @@ import * as vm from "./machine"
 
 abstract class ASTChange {
     abstract apply()
+    abstract describe()
+    abstract reverse(): ASTChange
 }
 
 class ReplaceChange extends ASTChange {
-    public replaced: ast.ASTNode
-
     constructor(
         public node: ast.ASTNode,
         public element: string,
-        public replacement: ast.ASTNode
+        public replacement: ast.ASTNode,
+        public replaced: ast.ASTNode = node[element]
     ) {
         super()
-        this.replaced = node[element]
     }
 
     apply() {
         this.node[this.element] = this.replacement
+    }
+
+    describe() {
+        return `Replaced ${this.replaced} with ${this.replacement} as ${this.node.constructor.name}.${this.element}`
+    }
+
+    reverse() {
+        return new ReplaceChange(this.node, this.element, this.replaced, this.replacement)
     }
 }
 
@@ -36,40 +44,60 @@ class InsertIntoArrayChange extends ASTChange {
     apply() {
         this.node[this.array].splice(this.index, 0, this.insert)
     }
+
+    describe() {
+        return `Inserted ${this.insert} into ${this.node}.${this.array} at index ${this.index}`
+    }
+
+    reverse() {
+        return new DeleteFromArrayChange(this.node, this.array, this.index, this.insert)
+    }
 }
 
 class DeleteFromArrayChange extends ASTChange {
-    public deleted: ast.ASTNode
-
     constructor(
         public node: ast.ASTNode,
         public array: string,
-        public index: number
+        public index: number,
+        public deleted: ast.ASTNode = node[array][index]
     ) {
         super()
-        this.deleted = node[array][index]
     }
 
     apply() {
         this.node[this.array].splice(this.index, 1)
     }
+
+    describe() {
+        return `Deleted ${this.deleted} from ${this.node}.${this.array} at index ${this.index}`
+    }
+
+    reverse() {
+        return new InsertIntoArrayChange(this.node, this.array, this.index, this.deleted)
+    }
 }
 
 class ReplaceInArrayChange extends ASTChange {
-    public replaced: ast.ASTNode
-
     constructor(
         public node: ast.ASTNode,
         public array: string,
         public index: number,
-        public insert: ast.ASTNode
+        public insert: ast.ASTNode,
+        public replaced: ast.ASTNode = node[array][index]
     ) {
         super()
-        this.replaced = node[array][index]
     }
 
     apply() {
         this.node[this.array][this.index] = this.insert;
+    }
+
+    describe() {
+        return `Replaced ${this.replaced} with ${this.insert} in ${this.node}.${this.array} at index ${this.index}`
+    }
+
+    reverse() {
+        return new ReplaceInArrayChange(this.node, this.array, this.index, this.replaced, this.insert)
     }
 }
 
@@ -128,6 +156,15 @@ export class App {
         change.apply()
         this.changeAST()
         this.renderApp()
+    }
+
+    undoLastChange() {
+        if (!this.astChanges.length) {
+            return
+        }
+        let lastChange = this.astChanges[this.astChanges.length - 1]
+        let reversed = lastChange.reverse()
+        this.addNewChange(reversed)
     }
 
     replaceElement(node: ast.ASTNode, element: string, replacement: ast.ASTNode) {
