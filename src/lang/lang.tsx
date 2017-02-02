@@ -84,10 +84,12 @@ export class BinaryExpression extends Expression {
   constructor(
     public left: Expression = new EmptyExpression(),
     public right: Expression = new EmptyExpression(),
-    public op
+    public op = "+"
   ) {
     super()
   }
+
+  public static OP_LIST = ["+", "-", "/", "*"]
 
   internalCodegen(machine: vm.Machine) {
     this.left.codegen(machine)

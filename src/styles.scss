@@ -319,6 +319,7 @@ body {
 .empty-ast {
     input {
         width: 100%;
+        min-width: 50px;
     }
 
     .possibilities {
@@ -342,5 +343,11 @@ body {
     background-color: transparent;
     border: none;
     font: inherit;
-    //width: 50px;
+    min-width: 20px;
+}
+
+.ast-select {
+    background-color: transparent;
+    border: none;
+    font: inherit;
 }

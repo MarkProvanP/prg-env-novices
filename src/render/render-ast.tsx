@@ -333,3 +333,19 @@ export class InputComponent extends React.Component<InputComponentProps, NoState
         return <input className='ast-input' style={this.getStyle()} type={this.props.type} value={this.props.value} onChange={this.props.onChange} />
     }
 }
+
+export interface SelectionComponentProps {
+    value: any,
+    values: any[],
+    onChange: (e) => void
+}
+
+export class SelectionComponent extends React.Component<SelectionComponentProps, NoState> {
+    render() {
+        const optionElements = this.props.values.map((value, index) => (
+            <option key={index} value={value}>{value}</option>
+        ))
+        console.log(this.props.value, this.props.values)
+        return <select className='ast-select' value={this.props.value} onChange={this.props.onChange}>{optionElements}</select>
+    }
+}

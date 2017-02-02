@@ -17,7 +17,9 @@ import {
     SyntaxComponent,
     SyntaxComponentProps,
     InputComponent,
-    InputComponentProps
+    InputComponentProps,
+    SelectionComponent,
+    SelectionComponentProps
 } from "../render/render-ast";
 
 
@@ -220,6 +222,10 @@ export class BinaryExpressionComponent extends ASTNodeComponent<BinaryExpression
         }
     }
 
+    changeOp(event) {
+        this.props.app.replaceElement(this.props.binaryExpression, "op", event.target.value)
+    }
+
     getInnerElement() {
         return <div className='ast-row'>
             <SyntaxComponent syntax='('/>
@@ -228,7 +234,7 @@ export class BinaryExpressionComponent extends ASTNodeComponent<BinaryExpression
             onExpressionDelete={this.removeExpression("left").bind(this)}
             onExpressionEdit={this.editExpression("left").bind(this)}
             />
-            <div className='operator syntax'>{this.props.binaryExpression.op}</div>
+            <SelectionComponent value={this.props.binaryExpression.op} values={lang.BinaryExpression.OP_LIST} onChange={this.changeOp.bind(this)} />
             <ExpressionWrapperComponent {...this.props}
             expression={this.props.binaryExpression.right}
             onExpressionDelete={this.removeExpression("right").bind(this)}
