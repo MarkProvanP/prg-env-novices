@@ -1,4 +1,5 @@
 $transition-delay: 0.2s;
+$executing-color: lime;
 
 body {
     height: 100vh;
@@ -173,7 +174,7 @@ body {
     }
 
     .instruction.current-ip {
-        background-color: lime;
+        background-color: $executing-color;
     }
 
     .instruction.within-range {
@@ -200,8 +201,10 @@ body {
 .ast-node {
     min-height: 10px;
     min-width: 10px;
-    
-    transition: margin 2s ease-in-out, border 2s ease-in-out;
+
+    border: 1px solid transparent;
+
+    transition: margin 2s ease-in-out, border 0.1s ease-in-out;
     transition-delay: $transition-delay;
     
     & > .title {
@@ -279,9 +282,12 @@ body {
 }
 
 .ast-node.clicked {
-    border-color: yellow;
+   border: 2px solid gold;
 }
 
+.ast-node.executing {
+    border: 2px solid $executing-color;
+}
 
 .syntax {
     font-weight: bold;

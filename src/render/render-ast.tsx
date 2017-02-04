@@ -55,12 +55,14 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S extends AS
         if (this.props.app.mousedOverASTNodes) {
             var mouseOverIndex = this.props.app.mousedOverASTNodes.indexOf(astNode)
         }
+        const executing = this.props.app.machine.getExecutingASTNode() == astNode
         return [
             'ast-node',
             astNode.constructor.name,
             selected ? 'clicked' : 'not-clicked',
             mouseOverIndex != -1 ? 'hovering' : 'not-hovering',
-            mouseOverIndex != -1 ? `hovering-${mouseOverIndex}` : ''
+            mouseOverIndex != -1 ? `hovering-${mouseOverIndex}` : '',
+            executing ? 'executing' : ''
         ].filter(s => s).join(" ");
     }
 

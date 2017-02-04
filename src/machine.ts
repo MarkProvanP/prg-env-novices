@@ -182,6 +182,14 @@ export class Machine {
     this.applyMachineChange(change);
     this.instructionCount++;
   }
+
+  getExecutingASTNode() {
+    let activeNodesAtCurrentIndex = this.activeASTNodesAtIndices[this.instructionPointer]
+    if (!activeNodesAtCurrentIndex.length) {
+      return
+    }
+    return activeNodesAtCurrentIndex[activeNodesAtCurrentIndex.length - 1]
+  }
 }
 
 class MachineChange {
