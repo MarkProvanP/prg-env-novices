@@ -191,12 +191,6 @@ body {
     font-style: italic;
 }
 
-.stack {
-    .element {
-        border: 1px solid black;
-        background-color: darkgoldenrod
-    }
-}
 
 .ast-node {
     min-height: 10px;
@@ -300,6 +294,18 @@ body {
     color: darkblue;
     margin-right: 10px;
     margin-left: 10px;
+}
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .element {
+        border: 1px solid black;
+        background-color: darkgoldenrod;
+        padding: 5px;
+    }
 }
 
 .env {
