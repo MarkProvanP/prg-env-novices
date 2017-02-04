@@ -13,12 +13,14 @@ method test ( derp ) {
     let x := 10
     while (x) do { let x := x - 1}
     let x := 4
-    call hello(x, y) 
+    call hello(x, y)
+    return x
 }
 
 method hello (x, y, z) {
     let x := 5
     call test(x)
+    return
 }
     </textarea>
     <button id="parse-button">Parse</button>

@@ -266,7 +266,7 @@ export class Method extends ASTNode {
   constructor(
     public name: Ident = new EmptyIdent(),
     public args: Ident[] = [],
-    public statements: Statements = new Statements()
+    public statements: Statements = new Statements([new ReturnStatement()])
   ) {
     super()
   }
@@ -312,5 +312,21 @@ export class Program extends ASTNode {
 
   render(props) {
     return <render.ProgramComponent {...props} program={this} />
+  }
+}
+
+export class ReturnStatement extends Statement {
+  constructor(
+    public expression: Expression = new EmptyExpression()
+  ) {
+    super()
+  }
+
+  internalCodegen(machine: vm.Machine) {
+    
+  }
+
+  render(props) {
+    return <render.ReturnStatementComponent {...props} returnStatement={this} />
   }
 }

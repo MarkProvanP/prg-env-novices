@@ -653,3 +653,32 @@ export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallSta
         </div>
     }
 }
+
+export interface ReturnStatementProps extends ASTComponentProps {
+    returnStatement: lang.ReturnStatement
+}
+
+export class ReturnStatementComponent extends ASTNodeComponent<ReturnStatementProps, ASTNodeComponentState> {
+    getASTNode() {
+        return this.props.returnStatement
+    }
+
+    deleteExpression() {
+        let newEmptyExpression = new lang.EmptyIdent()
+        this.props.app.replaceElement(this.props.returnStatement, "expression", newEmptyExpression)
+    }
+    editExpression(replacement) {
+        this.props.app.replaceElement(this.props.returnStatement, "expression", replacement)
+    }
+
+    getInnerElement() {
+        return <div className='ast-row'>
+            <KeywordComponent keyword='return' />
+            <ExpressionWrapperComponent {...this.props}
+            expression={this.props.returnStatement.expression}
+            onExpressionDelete={this.deleteExpression.bind(this)}
+            onExpressionEdit={this.editExpression.bind(this)}
+            />
+        </div>
+    }
+}
