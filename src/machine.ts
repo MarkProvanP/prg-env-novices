@@ -32,6 +32,10 @@ export class EnvChange {
     public after: any,
     public envNo: number
   ) {}
+
+  reverse() {
+    return new EnvChange(this.key, this.after, this.before, this.envNo)
+  }
 }
 
 export class InstructionRange {
@@ -183,6 +187,13 @@ export class Machine {
     this.instructionCount++;
   }
 
+  oneStepBackward() {
+    let lastChange = this.changeHistory.pop();
+    console.log(lastChange)
+    this.applyMachineChange(lastChange.reverse());
+    this.instructionCount--;
+  }
+
   getExecutingASTNode() {
     let activeNodesAtCurrentIndex = this.activeASTNodesAtIndices[this.instructionPointer]
     if (!activeNodesAtCurrentIndex.length) {
@@ -228,6 +239,16 @@ class MachineChange {
   withIpChange(change: number) {
     this.ipChange = change;
     return this;
+  }
+
+  reverse() {
+    return new MachineChange()
+    .withStackPopped(this.stackPushed)
+    .withStackPushed(this.stackPopped)
+    .withEnvPopped(this.envPushed)
+    .withEnvPushed(this.envPopped)
+    .withEnvChanged(this.envChanged ? this.envChanged.reverse() : undefined)
+    .withIpChange(-this.ipChange)
   }
 }
 
@@ -318,7 +339,7 @@ export class CallFunction extends Instruction {
   machineChange(machine: Machine) {
     let arity = this.func.arity;
     let args = machine.peek(arity);
-    let poppedArray = [this.func].concat(args)
+    let poppedArray = args;
     let pushedArray = [this.func.apply(null, args)]
     console.log('arity', arity, 'args', args, 'popped', poppedArray, 'pushed', pushedArray);
     return new MachineChange()

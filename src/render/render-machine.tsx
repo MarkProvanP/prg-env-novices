@@ -22,12 +22,28 @@ interface VMStateProps {
 interface NoState {}
 
 export class VMStateComponent extends React.Component<VMStateProps, NoState> {
+    onForwardButtonClick() {
+        this.props.app.forward()   
+    }
+
+    onBackwardButtonClick() {
+        this.props.app.backward()
+    }
+
+    constructor(props) {
+        super(props)
+        this.onBackwardButtonClick = this.onBackwardButtonClick.bind(this)
+        this.onForwardButtonClick = this.onForwardButtonClick.bind(this)
+    }
+
     render() {
         return <div className='vm-state'>
             <h2>Machine State</h2>
-            <div className='ip'>
-            IP: {this.props.app.machine.instructionPointer}
-            Count: {this.props.app.machine.instructionCount}
+            <div className='info'>
+                <span className='instruction-pointer'>IP: {this.props.app.machine.instructionPointer}</span>
+                <span className='instruction-count'>Count: {this.props.app.machine.instructionCount}</span>
+                <button onClick={this.onForwardButtonClick}>Forward</button>
+                <button onClick={this.onBackwardButtonClick}>Backward</button>
             </div>
             <ASTChangesComponent app={this.props.app} />
             <VMStackComponent app={this.props.app} />

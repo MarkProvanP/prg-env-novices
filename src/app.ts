@@ -119,6 +119,22 @@ export class App {
         this.machine = machine;
     }
 
+    forward() {
+        if (!this.machine) {
+            return
+        }
+        this.machine.oneStepExecute();
+        this.renderApp();
+    }
+
+    backward() {
+        if (!this.machine) {
+            return
+        }
+        this.machine.oneStepBackward();
+        this.renderApp();
+    }
+
     renderApp() {
         render.renderApp(this)
     }
