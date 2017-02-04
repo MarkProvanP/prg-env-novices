@@ -68,6 +68,7 @@ export class Machine {
 
   setAST(ast: ast.ASTNode) {
     this.instructions = [];
+    this.labelToIndexMap = {}
     ast.codegen(this)
     this.indexToLabelsMap = this.getLabelIndices();
   }
@@ -315,6 +316,22 @@ export class CallFunction extends Instruction {
     return new MachineChange()
     .withStackPushed(pushedArray)
     .withStackPopped(poppedArray)
+  }
+}
+
+export class MethodCall extends Instruction {
+  constructor(
+    public name: string
+  ) {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    let originalIp = machine.instructionPointer
+    let newIP = machine.labelToIndexMap[this.name]
+    let change = newIP - originalIp
+    return new MachineChange()
+    .withIpChange(change)
   }
 }
 

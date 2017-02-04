@@ -297,6 +297,7 @@ export class SyntaxComponent extends React.Component<SyntaxComponentProps, NoSta
 export interface ButtonComponentProps {
     text: string,
     name: string,
+    cannotHide?: boolean,
     onClick: (e) => void
 }
 
@@ -304,7 +305,8 @@ export class ButtonComponent extends React.Component<ButtonComponentProps, NoSta
     getClassName() {
         return classNames(
             'ast-button',
-            this.props.name
+            this.props.name,
+            this.props.cannotHide ? 'cannot-hide' : 'can-hide'
         )
     }
 

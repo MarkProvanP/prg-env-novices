@@ -9,6 +9,10 @@ export function renderMachine(app: App) {
         <VMStateComponent app={app}/>,
         document.getElementById('react-vm-div')
     )
+    ReactDOM.render(
+        <VMInstructionsComponent app={app}/>,
+        document.getElementById('instructions-div')
+    )
 }
 
 interface VMStateProps {
@@ -26,7 +30,6 @@ export class VMStateComponent extends React.Component<VMStateProps, NoState> {
             Count: {this.props.app.machine.instructionCount}
             </div>
             <ASTChangesComponent app={this.props.app} />
-            <VMInstructionsComponent app={this.props.app}/>
             <VMStackComponent app={this.props.app} />
             <VMEnvComponent app={this.props.app} />
         </div>;
@@ -107,7 +110,8 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
             }
         }
         return nodes.map((node, index) => {
-            return <div key={index} className={className(node)} onClick={selectNode(node).bind(this)}>{node.constructor.name}</div>
+            const text = node.constructor.name.split("").filter((l: string) => l.toUpperCase() == l)
+            return <div key={index} className={className(node)} onClick={selectNode(node).bind(this)}>{text}</div>
         })
     }
 

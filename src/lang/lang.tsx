@@ -198,11 +198,17 @@ export class EmptyStatement extends Statement {
   }
 }
 
-export abstract class Ident extends ASTNode {}
+export abstract class Ident extends ASTNode {
+  abstract getName()
+}
 
 export class EmptyIdent extends Ident {
   constructor() {
     super()
+  }
+
+  getName() {
+    return "NO_NAME!"
   }
 
   internalCodegen(machine: vm.Machine) {
@@ -218,6 +224,10 @@ export class ConcreteIdent extends Ident {
     public name: string
   ) {
     super()
+  }
+
+  getName() {
+    return this.name
   }
 
   internalCodegen(machine: vm.Machine) {
@@ -249,6 +259,10 @@ export function getMatchingMethodTypes(input: string) {
 }
 
 export class Method extends ASTNode {
+  static labelName(methodName: string) {
+    return `METHOD_${methodName}`
+  }
+
   constructor(
     public name: Ident = new EmptyIdent(),
     public args: Ident[] = [],
@@ -258,6 +272,7 @@ export class Method extends ASTNode {
   }
 
   internalCodegen(machine: vm.Machine) {
+    machine.addLabel(Method.labelName(this.name.getName()))
     machine.addInstruction(new vm.NewEnv())
     this.statements.codegen(machine)
   }
@@ -276,6 +291,7 @@ export class MethodCallStatement extends Statement {
   }
 
   internalCodegen(machine: vm.Machine) {
+    machine.addInstruction(new vm.MethodCall(Method.labelName(this.ident.getName())))
   }
 
   render(props) {

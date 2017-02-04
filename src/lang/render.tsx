@@ -443,8 +443,8 @@ export class StatementsComponent extends ASTNodeComponent<StatementsComponentPro
         this.insertRow = this.insertRow.bind(this)
     }
 
-    private createPlusButton(index: number) {
-        return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
+    private createPlusButton(index: number, cannotHide?: boolean) {
+        return <ButtonComponent cannotHide={cannotHide} key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
     }
 
     getInnerElement() {
@@ -463,7 +463,7 @@ export class StatementsComponent extends ASTNodeComponent<StatementsComponentPro
             elementsList.push(plusButton);
             elementsList.push(statement);
         })
-        let plusButton = this.createPlusButton(statements.length);
+        let plusButton = this.createPlusButton(statements.length, statements.length == 0);
         elementsList.push(plusButton);
         return <div className='ast-list'>
             {elementsList}

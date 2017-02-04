@@ -77,6 +77,10 @@ body {
     transition-delay: $transition-delay;
 }
 
+.ast-button.cannot-hide {
+    @include button-visible();
+}
+
 .ast-button:hover {
     background-color: beige;
 }
@@ -129,6 +133,7 @@ body {
         margin: 5px;
         display: flex;
         align-items: center;
+        font-size: smaller;
 
         .labels {
             width: 100px;
@@ -193,6 +198,9 @@ body {
 }
 
 .ast-node {
+    min-height: 10px;
+    min-width: 10px;
+    
     transition: margin 2s ease-in-out, border 2s ease-in-out;
     transition-delay: $transition-delay;
     
