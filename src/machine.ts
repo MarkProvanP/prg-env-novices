@@ -364,6 +364,22 @@ export class MethodCall extends Instruction {
   }
 }
 
+export class Goto extends Instruction {
+  constructor(
+    public label: string
+  ) {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    let originalIP = machine.instructionPointer;
+    let newIP = machine.labelToIndexMap[this.label];
+    let change = newIP - originalIP;
+    return new MachineChange()
+    .withIpChange(change)
+  }
+}
+
 export class IfGoto extends Instruction {
   constructor(public label: string) {
     super();

@@ -173,8 +173,7 @@ export class WhileStatement extends Statement {
     machine.addInstruction(new vm.CallFunction(vm.builtInFunctions['!']))
     machine.addInstruction(new vm.IfGoto(whileEndLabel))
     this.statements.codegen(machine)
-    machine.addInstruction(new vm.Push(1))
-    machine.addInstruction(new vm.IfGoto(whileBeginLabel))
+    machine.addInstruction(new vm.Goto(whileBeginLabel))
     machine.addLabel(whileEndLabel);
   }
 

@@ -152,8 +152,8 @@ function getComponentForInstruction(instruction: vm.Instruction) {
         return <div className='args machine-push-val'>{instruction.val}</div>
     } else if (instruction instanceof vm.CallFunction) {
         return <div className='args machine-call-function'>{instruction.func.name}</div>
-    } else if (instruction instanceof vm.IfGoto) {
-        return <div className='args machine-if-goto'>
+    } else if (instruction instanceof vm.IfGoto || instruction instanceof vm.Goto) {
+        return <div className='args machine-goto'>
             <LabelComponent label={instruction.label} app={this.props.app}/>
         </div>
     } else if (instruction instanceof vm.Set) {
