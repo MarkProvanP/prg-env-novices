@@ -1,0 +1,30 @@
+expression
+  = additive
+  / multiplicative
+
+additive
+  = left:multiplicative w "+" w right:additive { return new lang.BinaryExpression(left, right, "+"); }
+  / left:multiplicative w "-" w right:additive { return new lang.BinaryExpression(left, right, "-"); }
+  / multiplicative
+
+multiplicative
+  = left:primary w "*" w right:multiplicative { return new lang.BinaryExpression(left, right, "*"); }
+  / left:primary w "/" w right:multiplicative { return new lang.BinaryExpression(left, right, "/"); }
+  / primary
+
+value
+  = i:ident { return new lang.ValueExpression(i); }
+
+primary
+  = value
+  / integer
+  / "(" w additive:additive w ")" { return additive; }
+
+integer "integer"
+  = digits:[0-9]+ { return new lang.Integer(parseInt(digits.join(""), 10)); }
+
+ident
+  = name:[a-z]+ { return new lang.ConcreteIdent(name.join("")) }
+
+w
+  = [ \t\n\r]*

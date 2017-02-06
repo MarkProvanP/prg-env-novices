@@ -1,0 +1,28 @@
+statement
+  = assignmentStatement
+  / whileStatement
+  / methodCallStatement
+  / returnStatement
+
+assignmentStatement
+  = "let" w i:ident w ":=" w e:expression w { return new lang.AssignmentStatement(i, e); }
+
+whileStatement
+  = "while" w "(" w c:expression w ")" w "do" w "{" w s:statements w "}" w { return new lang.WhileStatement(c, s); }
+
+methodCallStatement
+  = "call" w i:ident w "(" w a:methodCallArgs w ")" w { return new lang.MethodCallStatement(i, a)}
+
+methodCallArgs
+  = list:methodCallArgListElement* w single:expression { return [].concat(list).concat(single).filter(function(s) { return s })}
+  / "" { return []}
+
+methodCallArgListElement
+  = w e:expression w "," w { return e }
+
+returnStatement
+  = "return" w e:expression w { return new lang.ReturnStatement(e) }
+  / "return" w { return new lang.ReturnStatement() }
+
+statements
+  = s:statement* { return new lang.Statements(s)}

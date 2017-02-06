@@ -1,6 +1,7 @@
 import * as ast from "./ast"
 import * as render from "./render/render"
 import * as vm from "./machine"
+import * as pegjs from "pegjs"
 
 abstract class ASTChange {
     abstract apply()
@@ -113,6 +114,26 @@ export class App {
     private _mousedOverNodesBuilder: ast.ASTNode[]
 
     selectedLabel: string
+
+    constructor(public grammar) {
+        
+    }
+
+    parseExpression(input: string) {
+        try {
+            return [this.grammar.Expression.parse(input)]
+        } catch (e) {
+            return []
+        }
+    }
+
+    parseStatement(input: string) {
+        try {
+            return [this.grammar.Statement.parse(input)]
+        } catch (e) {
+            return []
+        }
+    }
 
     setup(ast: ast.ASTNode, machine: vm.Machine) {
         this.ast = ast;

@@ -4,14 +4,14 @@ import * as vm from "./machine";
 import * as pegjs from "pegjs"
 import { App } from "./app";
 
-let grammar = require("./lang/grammar.peg");
+import grammar from "./lang/grammars/index"
 
 let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HTMLTextAreaElement;
 let parseButton: HTMLButtonElement = document.getElementById("parse-button") as HTMLButtonElement;
 
 window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {lang}
-let parser = pegjs.generate(grammar, {trace: false})
-let app = new App();
+let parser = grammar.Program
+let app = new App(grammar);
 
 parseButton.onclick = (event) => {
     let input = langInput.value;

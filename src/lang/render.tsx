@@ -51,7 +51,7 @@ class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperCo
     }
 
     getMatchingASTTypes(input: string) {
-        return lang.getMatchingExpressionTypes(input)
+        return this.props.app.parseExpression(input).concat(lang.getMatchingExpressionTypes(input))
     }
 }
 
@@ -83,7 +83,7 @@ class StatementWrapperComponent extends ASTWrapperComponent<StatementWrapperComp
     }
 
     getMatchingASTTypes(input: string) {
-        return lang.getMatchingStatementTypes(input)
+        return this.props.app.parseStatement(input).concat(lang.getMatchingStatementTypes(input))
     }
 }
 
