@@ -239,7 +239,7 @@ export class Machine {
   }
 
   canReverse() {
-    return this.instructionPointer > 0
+    return this.changeHistory.length
   }
 
   oneStepExecute() {
@@ -354,15 +354,13 @@ export abstract class Instruction {
 }
 
 export class PushStackFrame extends Instruction {
-  constructor(
-    public frame: StackFrame
-  ) {
+  constructor() {
     super()
   }
 
   machineChange(machine: Machine) {
     return new MachineChange()
-    .withStackFramePushed([this.frame])
+    .withStackFramePushed([new StackFrame()])
   }
 }
 

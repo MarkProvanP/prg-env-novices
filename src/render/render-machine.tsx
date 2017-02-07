@@ -199,7 +199,7 @@ export class VMStackComponent extends React.Component<VMStateProps, NoState> {
         const stackFrames = this.props.app.machine.stack.getFrames()
         const frameComponents = stackFrames.map((frame, index) => {
             return <StackFrameComponent key={index} frame={frame} />
-        })
+        }).reverse()
         return <div className='stack'>
             <h3>Stack</h3>
             {frameComponents}
@@ -215,7 +215,7 @@ export class StackFrameComponent extends React.Component<StackFrameProps, NoStat
         const stackElements = this.props.frame.stack;
         const stackComponents = stackElements.map((element, index) => {
             return <StackElementComponent key={index} element={element} />
-        })
+        }).reverse()
         return <div className='frame'>
             {stackComponents}
             <h3>Stack Frame</h3>
