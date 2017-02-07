@@ -33,7 +33,7 @@ export class PushStackFrame extends Instruction {
 
   machineChange(machine: Machine) {
     return new MachineChange()
-    .withStackFramePushed([new StackFrame()])
+    .withStackFramePushed(new StackFrame())
   }
 }
 
@@ -44,7 +44,7 @@ export class PopStackFrame extends Instruction {
 
   machineChange(machine: Machine) {
     return new MachineChange()
-    .withStackFramePopped([machine.stack.getTopStackFrame()])
+    .withStackFramePopped(machine.stack.getTopStackFrame())
   }
 }
 
@@ -114,7 +114,7 @@ export class MethodCall extends Instruction {
 
     return new MachineChange()
     .withIpChange(change)
-    .withStackFrameChanged(new StackFrameChange('returnAddress', currentFrame.returnAddress, originalIp, currentFrameIndex))
+    .withStackFrameChanged('returnAddress', currentFrame.returnAddress, originalIp, currentFrameIndex)
   }
 }
 
@@ -133,7 +133,7 @@ export class Return extends Instruction {
 
     let change = new MachineChange()
     .withIpChange(ipChange)
-    .withStackFramePopped([currentFrame])
+    .withStackFramePopped(currentFrame)
     
     if (this.withExpression) {
       let stackTop = machine.stack.peek()
@@ -198,7 +198,7 @@ export class Set extends Instruction {
     let envChanged = new StackFrameChange(this.key, before, value, index);
     return new MachineChange()
     .withStackPopped([value])
-    .withStackFrameEnvChanged([envChanged])
+    .withStackFrameEnvChanged(this.key, before, value, index)
   }
 }
 

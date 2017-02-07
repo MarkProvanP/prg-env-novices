@@ -5,6 +5,7 @@ import { MachineChange } from "./changes"
 
 export class Machine {
   public instructions: Instruction[] = []
+  instructionCount = 0;
 
   public stack = new Stack()
   public globalEnvironment = new Environment()
@@ -71,41 +72,9 @@ export class Machine {
   }
 
   applyMachineChange(machineChange: MachineChange) {
-    machineChange.stackFramePushed.forEach(pushed => {
-      this.stack.pushStackFrame(pushed)
-    })
-    machineChange.stackFramePopped.forEach(poppped => {
-      this.stack.popStackFrame()
-    })
-    machineChange.stackPopped.forEach(popped => {
-      console.log('popping from stack', popped);
-      this.stack.pop();
-    })
-    machineChange.stackPushed.forEach(pushed => {
-      console.log('pushing onto stack', pushed);
-      this.stack.push(pushed);
-    })
-
-    if (machineChange.stackFrameChanged) {
-      let stackFrameChanged = machineChange.stackFrameChanged
-      let changedFrame = this.stack.getFrame(stackFrameChanged.frameNo)
-      let key = stackFrameChanged.key
-      changedFrame[key] = stackFrameChanged.after
-    }
-    machineChange.stackFrameEnvChanged.forEach(changed => {
-      let changedStackFrame = this.stack.getFrame(changed.frameNo)
-      changedStackFrame.stackEnvironment.set(changed.key, changed.after)
-    })
-    machineChange.globalEnvChanged.forEach(changed => {
-      let key = changed.key
-      let newValue = changed.after
-      this.globalEnvironment.set(key, newValue)
-    })
-    console.log(`instruction pointer changing by ${machineChange.ipChange}`)
+    machineChange.changes.forEach(change => change.apply(this))
     this.instructionPointer += machineChange.ipChange;
   }
-
-  instructionCount = 0;
 
   execute() {
     while (this.instructionPointer < this.instructions.length) {
@@ -135,8 +104,10 @@ export class Machine {
 
   oneStepBackward() {
     let lastChange = this.changeHistory.pop();
-    console.log(lastChange)
-    this.applyMachineChange(lastChange.reverse());
+    console.log('Original', lastChange)
+    let reversed = lastChange.reverse()
+    console.log('Reversed', reversed)
+    this.applyMachineChange(reversed);
     this.instructionCount--;
   }
 
@@ -151,7 +122,6 @@ export class Machine {
 
 
 export type StackElement = any;
-
 
 export class InstructionRange {
     constructor(
@@ -177,7 +147,11 @@ export class Environment {
   }
 
   public set(key: string, value: any) {
-    this.mapping[key] = value;
+    if (value === undefined) {
+      delete this.mapping[key]
+    } else {
+      this.mapping[key] = value;
+    }
   }
 
   hasKey(key: string) {
