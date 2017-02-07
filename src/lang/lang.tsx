@@ -272,8 +272,10 @@ export class Method extends ASTNode {
 
   internalCodegen(machine: vm.Machine) {
     machine.addLabel(Method.labelName(this.name.getName()))
+    machine.addInstruction(new vm.PushStackFrame(new vm.StackFrame()))
     machine.addInstruction(new vm.NewEnv())
     this.statements.codegen(machine)
+    machine.addInstruction(new vm.PopStackFrame())
   }
 
   render(props) {

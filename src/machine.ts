@@ -50,18 +50,14 @@ export class InstructionRange {
     }
 }
 
-export class Stack {
-  stack = []
-
-  getElements() {
-    return this.stack
-  }
+export class StackFrame {
+  stack: StackElement = []
 
   push(element: StackElement) {
     this.stack.push(element)
   }
 
-  pop() {
+  pop(): StackElement {
     return this.stack.pop()
   }
 
@@ -70,6 +66,42 @@ export class Stack {
       return this.stack.slice(0, n)
     }
     return this.stack[this.stack.length - 1];
+  }
+}
+
+export class Stack {
+  stackFrames: StackFrame[] = []
+
+  getElements() {
+    return this.stackFrames.map(frame => frame.stack).reduce((l, r) => l.concat(r), [])
+  }
+
+  getFrames() {
+    return this.stackFrames
+  }
+
+  pushStackFrame(stackFrame: StackFrame) {
+    this.stackFrames.push(stackFrame)
+  }
+
+  popStackFrame() {
+    return this.stackFrames.pop()
+  }
+
+  getTopStackFrame() {
+    return this.stackFrames[this.stackFrames.length - 1]
+  }
+
+  push(element: StackElement) {
+    this.getTopStackFrame().push(element)
+  }
+
+  pop() {
+    return this.getTopStackFrame().pop()
+  }
+
+  peek(n?: number) {
+    return this.getTopStackFrame().peek(n)
   }
 }
 
@@ -165,6 +197,12 @@ export class Machine {
       console.log('pushing onto stack', pushed);
       this.stack.push(pushed);
     })
+    machineChange.stackFramePushed.forEach(pushed => {
+      this.stack.pushStackFrame(pushed)
+    })
+    machineChange.stackFramePopped.forEach(poppped => {
+      this.stack.popStackFrame()
+    })
     machineChange.envPopped.forEach(popped => {
       console.log('popping env from stack', popped)
       this.envStack.pop();
@@ -223,6 +261,8 @@ export class Machine {
 class MachineChange {
   public stackPushed: StackElement[] = []
   public stackPopped: StackElement[] = []
+  public stackFramePushed: StackFrame[] = []
+  public stackFramePopped: StackFrame[] = []
   public envPushed: EnvElement[] = []
   public envPopped: EnvElement[] = []
   public envChanged: EnvChange
@@ -235,6 +275,16 @@ class MachineChange {
 
   withStackPopped(elements: StackElement[]) {
     this.stackPopped = elements;
+    return this;
+  }
+
+  withStackFramePushed(frames: StackFrame[]) {
+    this.stackFramePushed = frames;
+    return this;
+  }
+
+  withStackFramePopped(frames: StackFrame[]) {
+    this.stackFramePopped = frames;
     return this;
   }
 
@@ -262,6 +312,8 @@ class MachineChange {
     return new MachineChange()
     .withStackPopped(this.stackPushed)
     .withStackPushed(this.stackPopped)
+    .withStackFramePopped(this.stackFramePushed)
+    .withStackFramePushed(this.stackFramePopped)
     .withEnvPopped(this.envPushed)
     .withEnvPushed(this.envPopped)
     .withEnvChanged(this.envChanged ? this.envChanged.reverse() : undefined)
@@ -291,6 +343,30 @@ export let builtInFunctions = {
 
 export abstract class Instruction {
   abstract machineChange(machine: Machine): MachineChange;
+}
+
+export class PushStackFrame extends Instruction {
+  constructor(
+    public frame: StackFrame
+  ) {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    return new MachineChange()
+    .withStackFramePushed([this.frame])
+  }
+}
+
+export class PopStackFrame extends Instruction {
+  constructor() {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    return new MachineChange()
+    .withStackFramePopped([machine.stack.getTopStackFrame()])
+  }
 }
 
 export class Push extends Instruction {

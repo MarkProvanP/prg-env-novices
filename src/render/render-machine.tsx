@@ -186,14 +186,27 @@ export class LabelComponent extends React.Component<LabelComponentProps, NoState
 
 export class VMStackComponent extends React.Component<VMStateProps, NoState> {
     render() {
-        const stackElements = this.props.app.machine.stack.getElements();
-        const stackComponents = stackElements.map((element, index) => {
-            return <StackElementComponent key={index} element={element} />
+        const stackFrames = this.props.app.machine.stack.getFrames()
+        const frameComponents = stackFrames.map((frame, index) => {
+            return <StackFrameComponent key={index} frame={frame} />
         })
         return <div className='stack'>
             <h3>Stack</h3>
-            {stackComponents}
+            {frameComponents}
         </div>
+    }
+}
+
+interface StackFrameProps {
+    frame: vm.StackFrame
+}
+export class StackFrameComponent extends React.Component<StackFrameProps, NoState> {
+    render() {
+        const stackElements = this.props.frame.stack;
+        const stackComponents = stackElements.map((element, index) => {
+            return <StackElementComponent key={index} element={element} />
+        })
+        return <div className='frame'>{stackComponents}</div>
     }
 }
 

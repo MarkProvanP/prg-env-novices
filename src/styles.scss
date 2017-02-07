@@ -301,6 +301,12 @@ body {
     flex-direction: column;
     align-items: center;
 
+    .frame {
+        border: 1px solid red;
+        padding: 5px;
+        background-color: pink;
+    }
+
     .element {
         border: 1px solid black;
         background-color: darkgoldenrod;
