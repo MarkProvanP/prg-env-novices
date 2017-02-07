@@ -57,7 +57,7 @@ export class VMStateComponent extends React.Component<VMStateProps, NoState> {
             </div>
             <ASTChangesComponent app={this.props.app} />
             <VMStackComponent app={this.props.app} />
-            <VMEnvComponent app={this.props.app} />
+            <VMGlobalEnvComponent app={this.props.app} />
         </div>;
     }
 }
@@ -219,6 +219,7 @@ export class StackFrameComponent extends React.Component<StackFrameProps, NoStat
         return <div className='frame'>
             {stackComponents}
             <h3>Stack Frame</h3>
+            <EnvElementComponent environment={this.props.frame.stackEnvironment}/>
             <p>Return Address: {this.props.frame.returnAddress}</p>
         </div>
     }
@@ -237,36 +238,32 @@ export class StackElementComponent extends React.Component<StackElementProps, St
     }
 }
 
-export class VMEnvComponent extends React.Component<VMStateProps, NoState> {
+export class VMGlobalEnvComponent extends React.Component<VMStateProps, NoState> {
     render() {
-        const stackElements = this.props.app.machine.envStack;
-        const stackComponents = stackElements.map((element, index) => {
-            return <EnvElementComponent key={index} element={element} />
-        })
-        return <div className='env'>
-            <h3>Environment</h3>
-            {stackComponents}
+        return <div className='global-environment'>
+            <h3>Global Environment</h3>
+            <EnvElementComponent environment={this.props.app.machine.globalEnvironment}/>
         </div>
     }
 }
 
 interface EnvElementProps {
-    element: vm.EnvElement
+    environment: vm.Environment
 }
 interface EnvElementState {}
 
 export class EnvElementComponent extends React.Component<EnvElementProps, EnvElementState> {
     render() {
-        const keys = this.props.element.keys()
+        const keys = this.props.environment.keys()
         const mappings = keys.map((key, index) => {
-            let value = this.props.element.get(key)
+            let value = this.props.environment.get(key)
             return <div className='mapping' key={index}>
                 <div className='key'>{key}</div>
                 <div className='arrow'>-></div>
                 <div className='value'>{value}</div>
             </div>
         })
-        return <div className='element'>
+        return <div className='env'>
             {mappings}
         </div>
     }

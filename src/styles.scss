@@ -312,6 +312,10 @@ body {
         background-color: darkgoldenrod;
         padding: 5px;
     }
+
+    .env {
+        background-color: chartreuse
+    }
 }
 
 .env {
@@ -319,26 +323,20 @@ body {
     flex-direction: column;
     align-items: center;
 
-    .element {
-        border: 1px solid black;
-        background-color: pink;
-        padding: 5px;
+    .mapping {
+        display: flex;
 
-        .mapping {
-            display: flex;
+        .key {
+            font-style: italic;
+        }
 
-            .key {
-                font-style: italic;
-            }
+        .arrow {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
 
-            .arrow {
-                margin-left: 10px;
-                margin-right: 10px;
-            }
-
-            .value {
-                font-weight: bold;
-            }
+        .value {
+            font-weight: bold;
         }
     }
 }

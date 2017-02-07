@@ -4,37 +4,15 @@ import * as ast from "./ast";
 
 export type StackElement = any;
 
-export class EnvElement {
-  private mapping = {};
-
-  public keys() {
-    return Object.keys(this.mapping)
-  }
-
-  public get(key: string) {
-    return this.mapping[key];
-  }
-
-  public set(key: string, value: any) {
-    this.mapping[key] = value;
-  }
-
-  hasKey(key: string) {
-    console.log(`checking if key: ${key} exists in mapping:`, this.mapping)
-    return this.mapping.hasOwnProperty(key);
-  }
-}
-
-export class EnvChange {
+export class GlobalEnvChange {
   constructor(
     public key: string,
     public before: any,
-    public after: any,
-    public envNo: number
+    public after: any
   ) {}
 
   reverse() {
-    return new EnvChange(this.key, this.after, this.before, this.envNo)
+    return new GlobalEnvChange(this.key, this.after, this.before)
   }
 }
 
@@ -63,8 +41,30 @@ export class InstructionRange {
     }
 }
 
+export class Environment {
+  private mapping = {};
+
+  public keys() {
+    return Object.keys(this.mapping)
+  }
+
+  public get(key: string) {
+    return this.mapping[key];
+  }
+
+  public set(key: string, value: any) {
+    this.mapping[key] = value;
+  }
+
+  hasKey(key: string) {
+    console.log(`checking if key: ${key} exists in mapping:`, this.mapping)
+    return this.mapping.hasOwnProperty(key);
+  }
+}
+
 export class StackFrame {
   stack: StackElement = []
+  public stackEnvironment: Environment = new Environment()
   public returnAddress: number
 
   push(element: StackElement) {
@@ -80,7 +80,7 @@ export class StackFrame {
       return this.stack.slice(0, n)
     }
     return this.stack[this.stack.length - 1];
-  }
+  }  
 }
 
 export class Stack {
@@ -127,8 +127,7 @@ export class Machine {
   public instructions: Instruction[] = []
 
   public stack = new Stack()
-
-  public envStack = []
+  public globalEnvironment = new Environment()
 
   public instructionPointer = 0;
   public labelToIndexMap = {};
@@ -186,24 +185,9 @@ export class Machine {
     return indexToLabelMap
   }
 
-  peekEnv() {
-    return this.envStack[this.envStack.length - 1];
-  }
-
   static isTruthy(val: StackElement) {
     console.log('isTruthy?', val);
     return !!val;
-  }
-
-  getIndexOfEnvWithKey(key: string) {
-    for (let i = 0; i < this.envStack.length; i++) {
-      let env = this.envStack[i];
-      if (env.hasKey(key)) {
-        return i;
-      }
-    }
-    // If we haven't found it yet, just use the topmost env
-    return this.envStack.length - 1;
   }
 
   applyMachineChange(machineChange: MachineChange) {
@@ -227,21 +211,15 @@ export class Machine {
       let key = stackFrameChanged.key
       changedFrame[key] = stackFrameChanged.after
     }
-    machineChange.envPopped.forEach(popped => {
-      console.log('popping env from stack', popped)
-      this.envStack.pop();
+    machineChange.stackFrameEnvChanged.forEach(changed => {
+      let changedStackFrame = this.stack.getFrame(changed.frameNo)
+      changedStackFrame.stackEnvironment.set(changed.key, changed.after)
     })
-    machineChange.envPushed.forEach(pushed => {
-      console.log('pushing env onto stack', pushed);
-      this.envStack.push(pushed);
+    machineChange.globalEnvChanged.forEach(changed => {
+      let key = changed.key
+      let newValue = changed.after
+      this.globalEnvironment.set(key, newValue)
     })
-    if (machineChange.envChanged) {
-      let envChanged = machineChange.envChanged;
-      let changedEnv = this.envStack[envChanged.envNo];
-      let key = envChanged.key;
-      changedEnv.set(key, envChanged.after)
-      console.log(`Setting: ${key} to val: `, envChanged.after);
-    }
     console.log(`instruction pointer changing by ${machineChange.ipChange}`)
     this.instructionPointer += machineChange.ipChange;
   }
@@ -296,9 +274,8 @@ class MachineChange {
   public stackFramePushed: StackFrame[] = []
   public stackFramePopped: StackFrame[] = []
   public stackFrameChanged: StackFrameChange
-  public envPushed: EnvElement[] = []
-  public envPopped: EnvElement[] = []
-  public envChanged: EnvChange
+  public stackFrameEnvChanged: StackFrameChange[] = []
+  public globalEnvChanged: GlobalEnvChange[] = []
   public ipChange: number = 1
 
   withStackPushed(elements: StackElement[]) {
@@ -326,18 +303,13 @@ class MachineChange {
     return this
   }
 
-  withEnvPushed(elements: EnvElement[]) {
-    this.envPushed = elements;
-    return this;
+  withStackFrameEnvChanged(change: StackFrameChange[]) {
+    this.stackFrameEnvChanged = change
+    return this
   }
 
-  withEnvPopped(elements: EnvElement[]) {
-    this.envPopped = elements;
-    return this;
-  }
-
-  withEnvChanged(change: EnvChange) {
-    this.envChanged = change;
+  withGlobalEnvChanged(changes: GlobalEnvChange[]) {
+    this.globalEnvChanged = changes;
     return this;
   }
 
@@ -352,9 +324,7 @@ class MachineChange {
     .withStackPushed(this.stackPopped)
     .withStackFramePopped(this.stackFramePushed)
     .withStackFramePushed(this.stackFramePopped)
-    .withEnvPopped(this.envPushed)
-    .withEnvPushed(this.envPopped)
-    .withEnvChanged(this.envChanged ? this.envChanged.reverse() : undefined)
+    .withGlobalEnvChanged(this.globalEnvChanged.map(change => change.reverse()))
     .withIpChange(-this.ipChange)
   }
 }
@@ -437,28 +407,6 @@ export class Dup extends Instruction {
   machineChange(machine: Machine) {
     return new MachineChange()
     .withStackPushed(machine.stack.peek())
-  }
-}
-
-export class NewEnv extends Instruction {
-  constructor() {
-    super()
-  }
-
-  machineChange(machine: Machine) {
-    return new MachineChange()
-    .withEnvPushed([new EnvElement()])
-  }
-}
-
-export class PopEnv extends Instruction {
-  constructor() {
-    super()
-  }
-
-  machineChange(machine: Machine) {
-    return new MachineChange()
-    .withEnvPopped([machine.peekEnv()])
   }
 }
 
@@ -545,15 +493,15 @@ export class Set extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    let index = machine.getIndexOfEnvWithKey(this.key);
+    let index = machine.stack.getFrames().length - 1;
     console.log(`index: ${index}`)
-    let env = machine.envStack[index];
+    let env = machine.stack.getFrame(index).stackEnvironment;
     let before = env.get(this.key);
     let value = machine.stack.peek();
-    let envChanged = new EnvChange(this.key, before, value, index);
+    let envChanged = new StackFrameChange(this.key, before, value, index);
     return new MachineChange()
     .withStackPopped([value])
-    .withEnvChanged(envChanged)
+    .withStackFrameEnvChanged([envChanged])
   }
 }
 
@@ -563,8 +511,8 @@ export class Get extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    let index = machine.getIndexOfEnvWithKey(this.key);
-    let env = machine.envStack[index];
+    let index = machine.stack.getFrames().length - 1
+    let env = machine.stack.getFrame(index).stackEnvironment;
     let pushed = env.get(this.key);
     return new MachineChange()
     .withStackPushed([pushed])
