@@ -216,7 +216,11 @@ export class StackFrameComponent extends React.Component<StackFrameProps, NoStat
         const stackComponents = stackElements.map((element, index) => {
             return <StackElementComponent key={index} element={element} />
         })
-        return <div className='frame'>{stackComponents}</div>
+        return <div className='frame'>
+            {stackComponents}
+            <h3>Stack Frame</h3>
+            <p>Return Address: {this.props.frame.returnAddress}</p>
+        </div>
     }
 }
 

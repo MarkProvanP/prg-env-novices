@@ -38,6 +38,19 @@ export class EnvChange {
   }
 }
 
+export class StackFrameChange {
+  constructor(
+    public key: string,
+    public before: any,
+    public after: any,
+    public frameNo: number
+  ) {}
+
+  reverse() {
+    return new StackFrameChange(this.key, this.after, this.before, this.frameNo)
+  }
+}
+
 export class InstructionRange {
     constructor(
       public start: number,
@@ -52,6 +65,7 @@ export class InstructionRange {
 
 export class StackFrame {
   stack: StackElement = []
+  public returnAddress: number
 
   push(element: StackElement) {
     this.stack.push(element)
@@ -78,6 +92,10 @@ export class Stack {
 
   getFrames() {
     return this.stackFrames
+  }
+
+  getFrame(index: number) {
+    return this.stackFrames[index]
   }
 
   pushStackFrame(stackFrame: StackFrame) {
@@ -203,6 +221,12 @@ export class Machine {
     machineChange.stackFramePopped.forEach(poppped => {
       this.stack.popStackFrame()
     })
+    if (machineChange.stackFrameChanged) {
+      let stackFrameChanged = machineChange.stackFrameChanged
+      let changedFrame = this.stack.getFrame(stackFrameChanged.frameNo)
+      let key = stackFrameChanged.key
+      changedFrame[key] = stackFrameChanged.after
+    }
     machineChange.envPopped.forEach(popped => {
       console.log('popping env from stack', popped)
       this.envStack.pop();
@@ -271,6 +295,7 @@ class MachineChange {
   public stackPopped: StackElement[] = []
   public stackFramePushed: StackFrame[] = []
   public stackFramePopped: StackFrame[] = []
+  public stackFrameChanged: StackFrameChange
   public envPushed: EnvElement[] = []
   public envPopped: EnvElement[] = []
   public envChanged: EnvChange
@@ -294,6 +319,11 @@ class MachineChange {
   withStackFramePopped(frames: StackFrame[]) {
     this.stackFramePopped = frames;
     return this;
+  }
+
+  withStackFrameChanged(change: StackFrameChange) {
+    this.stackFrameChanged = change
+    return this
   }
 
   withEnvPushed(elements: EnvElement[]) {
@@ -460,8 +490,12 @@ export class MethodCall extends Instruction {
     let originalIp = machine.instructionPointer
     let newIP = machine.labelToIndexMap[this.name]
     let change = newIP - originalIp
+    let currentFrameIndex = machine.stack.getFrames().length - 1
+    let currentFrame = machine.stack.getTopStackFrame()
+
     return new MachineChange()
     .withIpChange(change)
+    .withStackFrameChanged(new StackFrameChange('returnAddress', currentFrame.returnAddress, originalIp, currentFrameIndex))
   }
 }
 
