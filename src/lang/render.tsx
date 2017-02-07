@@ -10,6 +10,7 @@ import {
     ASTNodeComponentState,
     ASTWrapperComponent,
     ASTWrapperComponentState,
+    ASTWrapperComponentProps,
     ButtonComponent,
     ButtonComponentProps,
     KeywordComponent,
@@ -23,7 +24,7 @@ import {
 } from "../render/render-ast";
 
 
-interface ExpressionWrapperComponentProps extends ASTComponentProps {
+interface ExpressionWrapperComponentProps extends ASTWrapperComponentProps {
     expression: lang.Expression,
     onExpressionDelete: () => void,
     onExpressionEdit: (replacement: lang.Expression) => void
@@ -55,7 +56,7 @@ class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperCo
     }
 }
 
-interface StatementWrapperComponentProps extends ASTComponentProps {
+interface StatementWrapperComponentProps extends ASTWrapperComponentProps {
     statement: lang.Statement,
     onStatementDelete: () => void,
     onStatementEdit: (replacement: lang.Statement) => void
@@ -87,7 +88,7 @@ class StatementWrapperComponent extends ASTWrapperComponent<StatementWrapperComp
     }
 }
 
-interface IdentWrapperComponentProps extends ASTComponentProps {
+interface IdentWrapperComponentProps extends ASTWrapperComponentProps {
     ident: lang.Ident,
     onIdentDelete: () => void,
     onIdentEdit: (replacement: lang.Ident) => void
@@ -119,7 +120,7 @@ class IdentWrapperComponent extends ASTWrapperComponent<IdentWrapperComponentPro
     }
 }
 
-interface MethodWrapperComponentProps extends ASTComponentProps {
+interface MethodWrapperComponentProps extends ASTWrapperComponentProps {
     method: lang.Method,
     onMethodDelete: () => void,
     onMethodEdit: (replacement: lang.Method) => void
@@ -678,6 +679,7 @@ export class ReturnStatementComponent extends ASTNodeComponent<ReturnStatementPr
             expression={this.props.returnStatement.expression}
             onExpressionDelete={this.deleteExpression.bind(this)}
             onExpressionEdit={this.editExpression.bind(this)}
+            required={false}
             />
         </div>
     }

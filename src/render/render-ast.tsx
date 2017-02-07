@@ -92,6 +92,10 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S extends AS
     }
 }
 
+export interface ASTWrapperComponentProps extends ASTComponentProps {
+    required? : boolean
+}
+
 export interface ASTWrapperComponentState<T extends ast.ASTNode> {
     showingSuggestions: boolean,
     matchingASTTypes: T[],
@@ -100,8 +104,8 @@ export interface ASTWrapperComponentState<T extends ast.ASTNode> {
     mousedOver: boolean
 }
 
-export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends ast.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
-    constructor(props: ASTComponentProps) {
+export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps, T extends ast.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
+    constructor(props: ASTWrapperComponentProps) {
         super(props)
         this.state = {
             showingSuggestions: false,
@@ -205,7 +209,7 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
                 {possibleTypesElements}
             </div>
         : undefined
-        return <div className={classNames('empty-ast')}>
+        return <div className={classNames('empty-ast', this.props.required ? 'required' : 'not-required')}>
             <input type='text'
             placeholder={this.getASTType().name}
             onInput={this.textOnInput.bind(this)}
@@ -214,6 +218,10 @@ export abstract class ASTWrapperComponent<P extends ASTComponentProps, T extends
             />
             {possibilitiesElement}
         </div>
+    }
+
+    isRequired() {
+        return this.props.required !== false
     }
 
     abstract deleteAST();

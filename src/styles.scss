@@ -357,6 +357,28 @@ body {
         min-width: 50px;
     }
 
+    &.not-required {
+        input {
+            background-color: transparent;
+            color: black;
+            border: 0;
+            transition: background-color 2s ease-in-out
+        }
+
+        input:focus {
+            background-color: teal;
+        }
+
+        input::-webkit-input-placeholder {
+            color: black;
+        }
+
+        input::-moz-placeholder {
+            color: black;
+        }
+
+    }
+
     .possibilities {
         background-color: red;
         display: flex;
