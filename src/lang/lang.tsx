@@ -323,7 +323,10 @@ export class ReturnStatement extends Statement {
   }
 
   internalCodegen(machine: vm.Machine) {
-    
+    if (this.expression) {
+      this.expression.codegen(machine)
+    }
+    machine.addInstruction(new vm.Return(!!this.expression))
   }
 
   render(props) {

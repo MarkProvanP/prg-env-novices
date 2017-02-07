@@ -107,7 +107,11 @@ export class Stack {
   }
 
   getTopStackFrame() {
-    return this.stackFrames[this.stackFrames.length - 1]
+    return this.stackFrames[this.getTopStackFrameIndex()]
+  }
+
+  getTopStackFrameIndex() {
+    return this.stackFrames.length - 1
   }
 
   push(element: StackElement) {
@@ -191,6 +195,12 @@ export class Machine {
   }
 
   applyMachineChange(machineChange: MachineChange) {
+    machineChange.stackFramePushed.forEach(pushed => {
+      this.stack.pushStackFrame(pushed)
+    })
+    machineChange.stackFramePopped.forEach(poppped => {
+      this.stack.popStackFrame()
+    })
     machineChange.stackPopped.forEach(popped => {
       console.log('popping from stack', popped);
       this.stack.pop();
@@ -199,12 +209,7 @@ export class Machine {
       console.log('pushing onto stack', pushed);
       this.stack.push(pushed);
     })
-    machineChange.stackFramePushed.forEach(pushed => {
-      this.stack.pushStackFrame(pushed)
-    })
-    machineChange.stackFramePopped.forEach(poppped => {
-      this.stack.popStackFrame()
-    })
+
     if (machineChange.stackFrameChanged) {
       let stackFrameChanged = machineChange.stackFrameChanged
       let changedFrame = this.stack.getFrame(stackFrameChanged.frameNo)
@@ -436,12 +441,38 @@ export class MethodCall extends Instruction {
     let originalIp = machine.instructionPointer
     let newIP = machine.labelToIndexMap[this.name]
     let change = newIP - originalIp
-    let currentFrameIndex = machine.stack.getFrames().length - 1
+    let currentFrameIndex = machine.stack.getTopStackFrameIndex()
     let currentFrame = machine.stack.getTopStackFrame()
 
     return new MachineChange()
     .withIpChange(change)
     .withStackFrameChanged(new StackFrameChange('returnAddress', currentFrame.returnAddress, originalIp, currentFrameIndex))
+  }
+}
+
+export class Return extends Instruction {
+  constructor(public withExpression: boolean) {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    let index = machine.stack.getTopStackFrameIndex()
+    let currentFrame = machine.stack.getTopStackFrame()
+    let lowerIndex = index - 1;
+    let lowerFrame = machine.stack.getFrame(lowerIndex)
+    let newIP = lowerFrame.returnAddress + 1
+    let ipChange = newIP - machine.instructionPointer
+
+    let change = new MachineChange()
+    .withIpChange(ipChange)
+    .withStackFramePopped([currentFrame])
+    
+    if (this.withExpression) {
+      let stackTop = machine.stack.peek()
+      change = change.withStackPushed([stackTop])
+    }
+    
+    return change
   }
 }
 
@@ -491,7 +522,7 @@ export class Set extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    let index = machine.stack.getFrames().length - 1;
+    let index = machine.stack.getTopStackFrameIndex()
     console.log(`index: ${index}`)
     let env = machine.stack.getFrame(index).stackEnvironment;
     let before = env.get(this.key);
@@ -509,7 +540,7 @@ export class Get extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    let index = machine.stack.getFrames().length - 1
+    let index = machine.stack.getTopStackFrameIndex()
     let env = machine.stack.getFrame(index).stackEnvironment;
     let pushed = env.get(this.key);
     return new MachineChange()
