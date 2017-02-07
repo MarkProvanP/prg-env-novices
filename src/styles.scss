@@ -193,6 +193,8 @@ body {
 
 
 .ast-node {
+    user-select: none;
+    
     min-height: 10px;
     min-width: 10px;
 
