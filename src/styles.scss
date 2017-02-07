@@ -355,7 +355,15 @@ body {
     }
 }
 
+.ast-wrapper-component {
+    transition: margin 2s ease-in-out, border 2s ease-in-out, padding 2s ease-in-out
+}
+
 .empty-ast {
+    border: 1px solid grey;
+    padding: 5px;
+    margin: 5px;
+
     input {
         width: 100%;
         min-width: 50px;

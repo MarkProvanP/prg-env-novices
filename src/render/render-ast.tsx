@@ -209,7 +209,7 @@ export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps, T 
                 {possibleTypesElements}
             </div>
         : undefined
-        return <div className={classNames('empty-ast', this.props.required ? 'required' : 'not-required')}>
+        return <div className={classNames('ast-wrapper-content', 'empty-ast', this.props.required ? 'required' : 'not-required')}>
             <input type='text'
             placeholder={this.getASTType().name}
             onInput={this.textOnInput.bind(this)}
@@ -234,7 +234,7 @@ export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps, T 
     abstract getMatchingASTTypes(input: string)
 
     existentASTElement() {
-        return <div className={classNames('ast-row')}>
+        return <div className={classNames('ast-wrapper-content', 'ast-row')}>
             {this.getASTNode().render(this.props)}
             <ButtonComponent name='element-delete' text='-' onClick={this.deleteAST.bind(this)} />
         </div>
