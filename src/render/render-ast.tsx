@@ -237,7 +237,6 @@ export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps, T 
         return <div className={classNames('ast-row')}>
             {this.getASTNode().render(this.props)}
             <ButtonComponent name='element-delete' text='-' onClick={this.deleteAST.bind(this)} />
-            <ButtonComponent name='row-edit' text='Edit' onClick={this.editASTButton.bind(this)} />
         </div>
     }
 
