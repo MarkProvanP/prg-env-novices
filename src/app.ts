@@ -3,110 +3,12 @@ import * as render from "./render/render"
 import * as vm from "./machine"
 import * as pegjs from "pegjs"
 
-abstract class ASTChange {
-    abstract apply()
-    abstract describe()
-    abstract reverse(): ASTChange
-}
-
-class ReplaceChange extends ASTChange {
-    constructor(
-        public node: ast.ASTNode,
-        public element: string,
-        public replacement: ast.ASTNode,
-        public replaced: ast.ASTNode = node[element]
-    ) {
-        super()
-    }
-
-    apply() {
-        this.node[this.element] = this.replacement
-    }
-
-    describe() {
-        return `Replaced ${this.replaced} with ${this.replacement} as ${this.node.constructor.name}.${this.element}`
-    }
-
-    reverse() {
-        return new ReplaceChange(this.node, this.element, this.replaced, this.replacement)
-    }
-}
-
-class InsertIntoArrayChange extends ASTChange {
-    constructor(
-        public node: ast.ASTNode,
-        public array: string,
-        public index: number,
-        public insert: ast.ASTNode
-    ) {
-        super()
-    }
-
-    apply() {
-        this.node[this.array].splice(this.index, 0, this.insert)
-    }
-
-    describe() {
-        return `Inserted ${this.insert} into ${this.node}.${this.array} at index ${this.index}`
-    }
-
-    reverse() {
-        return new DeleteFromArrayChange(this.node, this.array, this.index, this.insert)
-    }
-}
-
-class DeleteFromArrayChange extends ASTChange {
-    constructor(
-        public node: ast.ASTNode,
-        public array: string,
-        public index: number,
-        public deleted: ast.ASTNode = node[array][index]
-    ) {
-        super()
-    }
-
-    apply() {
-        this.node[this.array].splice(this.index, 1)
-    }
-
-    describe() {
-        return `Deleted ${this.deleted} from ${this.node}.${this.array} at index ${this.index}`
-    }
-
-    reverse() {
-        return new InsertIntoArrayChange(this.node, this.array, this.index, this.deleted)
-    }
-}
-
-class ReplaceInArrayChange extends ASTChange {
-    constructor(
-        public node: ast.ASTNode,
-        public array: string,
-        public index: number,
-        public insert: ast.ASTNode,
-        public replaced: ast.ASTNode = node[array][index]
-    ) {
-        super()
-    }
-
-    apply() {
-        this.node[this.array][this.index] = this.insert;
-    }
-
-    describe() {
-        return `Replaced ${this.replaced} with ${this.insert} in ${this.node}.${this.array} at index ${this.index}`
-    }
-
-    reverse() {
-        return new ReplaceInArrayChange(this.node, this.array, this.index, this.replaced, this.insert)
-    }
-}
 
 export class App {
     ast: ast.ASTNode
     machine: vm.Machine
 
-    astChanges: ASTChange[] = []
+    astChanges: ast.ASTChange[] = []
 
     selectedASTNode: ast.ASTNode
     
@@ -188,7 +90,7 @@ export class App {
         this.renderApp()
     }
 
-    addNewChange(change: ASTChange) {
+    addNewChange(change: ast.ASTChange) {
         this.astChanges.push(change)
         change.apply()
         this.changeAST()
@@ -205,22 +107,22 @@ export class App {
     }
 
     replaceElement(node: ast.ASTNode, element: string, replacement: ast.ASTNode) {
-        let change = new ReplaceChange(node, element, replacement)
+        let change = new ast.ReplaceChange(node, element, replacement)
         this.addNewChange(change)
     }
 
     deleteFromArray(node: ast.ASTNode, array: string, index: number) {
-        let change = new DeleteFromArrayChange(node, array, index)
+        let change = new ast.DeleteFromArrayChange(node, array, index)
         this.addNewChange(change)
     }
 
     insertIntoArray(node: ast.ASTNode, array: string, index: number, insert: ast.ASTNode) {
-        let change = new InsertIntoArrayChange(node, array, index, insert)
+        let change = new ast.InsertIntoArrayChange(node, array, index, insert)
         this.addNewChange(change)
     }
 
     replaceElementInArray(node: ast.ASTNode, array: string, index: number, insert: ast.ASTNode) {
-        let change = new ReplaceInArrayChange(node, array, index, insert)
+        let change = new ast.ReplaceInArrayChange(node, array, index, insert)
         this.addNewChange(change)
     }
 }
