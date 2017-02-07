@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import * as vm from "../machine";
+import * as vm from "../machine/index";
 import { App } from "../app";
 
 export function renderMachine(app: App) {

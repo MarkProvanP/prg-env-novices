@@ -1,4 +1,4 @@
-import * as vm from "./machine"
+import * as vm from "./machine/index"
 import * as render from "./render/render-ast"
 
 export abstract class ASTNode {

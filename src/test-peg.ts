@@ -1,9 +1,6 @@
-"use strict"
-
 import * as peg from "pegjs";
 import * as fs from "fs";
-
-import * as vm from "./machine";
+import * as vm from "./machine/index";
 
 const GRAMMAR_FILE = process.argv[2]
 const INPUT_FILE = process.argv[3]

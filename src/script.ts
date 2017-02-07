@@ -1,6 +1,6 @@
 require("./styles.scss");
 import * as lang from "./lang/lang";
-import * as vm from "./machine";
+import * as vm from "./machine/index";
 import * as pegjs from "pegjs"
 import { App } from "./app";
 

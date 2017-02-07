@@ -1,4 +1,4 @@
-import * as vm from "../machine"
+import * as vm from "../machine/index"
 require("./style.scss")
 
 import React from "react";

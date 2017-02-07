@@ -1,6 +1,6 @@
 import * as ast from "./ast"
 import * as render from "./render/render"
-import * as vm from "./machine"
+import * as vm from "./machine/index"
 import * as pegjs from "pegjs"
 
 
