@@ -50,10 +50,34 @@ export class InstructionRange {
     }
 }
 
+export class Stack {
+  stack = []
+
+  getElements() {
+    return this.stack
+  }
+
+  push(element: StackElement) {
+    this.stack.push(element)
+  }
+
+  pop() {
+    return this.stack.pop()
+  }
+
+  peek(n?: number) {
+    if (typeof(n) == 'number') {
+      return this.stack.slice(0, n)
+    }
+    return this.stack[this.stack.length - 1];
+  }
+}
+
 export class Machine {
   public instructions: Instruction[] = []
 
-  public stack = [];
+  public stack = new Stack()
+
   public envStack = []
 
   public instructionPointer = 0;
@@ -110,13 +134,6 @@ export class Machine {
       indexToLabelMap[index].push(label)
     })
     return indexToLabelMap
-  }
-
-  peek(n?: number) {
-    if (typeof(n) == 'number') {
-      return this.stack.slice(0, n)
-    }
-    return this.stack[this.stack.length - 1];
   }
 
   peekEnv() {
@@ -294,7 +311,7 @@ export class Pop extends Instruction {
 
   machineChange(machine: Machine) {
     return new MachineChange()
-    .withStackPopped([machine.peek()])
+    .withStackPopped([machine.stack.peek()])
   }
 }
 
@@ -305,7 +322,7 @@ export class Dup extends Instruction {
 
   machineChange(machine: Machine) {
     return new MachineChange()
-    .withStackPushed(machine.peek())
+    .withStackPushed(machine.stack.peek())
   }
 }
 
@@ -338,7 +355,7 @@ export class CallFunction extends Instruction {
 
   machineChange(machine: Machine) {
     let arity = this.func.arity;
-    let args = machine.peek(arity);
+    let args = machine.stack.peek(arity);
     let poppedArray = args;
     let pushedArray = [this.func.apply(null, args)]
     console.log('arity', arity, 'args', args, 'popped', poppedArray, 'pushed', pushedArray);
@@ -387,7 +404,7 @@ export class IfGoto extends Instruction {
 
   machineChange(machine: Machine) {
     console.log('machine.stack', machine.stack)
-    let stackTop = machine.peek();
+    let stackTop = machine.stack.peek();
     console.log('stackTop', stackTop);
     let isTruthy = Machine.isTruthy(stackTop);
     if (isTruthy) {
@@ -414,7 +431,7 @@ export class Set extends Instruction {
     console.log(`index: ${index}`)
     let env = machine.envStack[index];
     let before = env.get(this.key);
-    let value = machine.peek();
+    let value = machine.stack.peek();
     let envChanged = new EnvChange(this.key, before, value, index);
     return new MachineChange()
     .withStackPopped([value])

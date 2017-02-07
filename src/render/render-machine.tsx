@@ -186,7 +186,7 @@ export class LabelComponent extends React.Component<LabelComponentProps, NoState
 
 export class VMStackComponent extends React.Component<VMStateProps, NoState> {
     render() {
-        const stackElements = this.props.app.machine.stack;
+        const stackElements = this.props.app.machine.stack.getElements();
         const stackComponents = stackElements.map((element, index) => {
             return <StackElementComponent key={index} element={element} />
         })
