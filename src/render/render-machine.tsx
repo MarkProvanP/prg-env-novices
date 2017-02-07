@@ -26,24 +26,34 @@ export class VMStateComponent extends React.Component<VMStateProps, NoState> {
         this.props.app.forward()   
     }
 
+    isForwardButtonDisabled() {
+        return !this.props.app.machine.canContinue()
+    }
+
     onBackwardButtonClick() {
         this.props.app.backward()
+    }
+
+    isBackButtonDisabled() {
+        return !this.props.app.machine.canReverse()
     }
 
     constructor(props) {
         super(props)
         this.onBackwardButtonClick = this.onBackwardButtonClick.bind(this)
         this.onForwardButtonClick = this.onForwardButtonClick.bind(this)
+        this.isForwardButtonDisabled = this.isForwardButtonDisabled.bind(this)
+        this.isBackButtonDisabled = this.isBackButtonDisabled.bind(this)
     }
 
     render() {
         return <div className='vm-state'>
             <h2>Machine State</h2>
             <div className='info'>
+                <button disabled={this.isBackButtonDisabled()} onClick={this.onBackwardButtonClick}>Backward</button>
                 <span className='instruction-pointer'>IP: {this.props.app.machine.instructionPointer}</span>
                 <span className='instruction-count'>Count: {this.props.app.machine.instructionCount}</span>
-                <button onClick={this.onForwardButtonClick}>Forward</button>
-                <button onClick={this.onBackwardButtonClick}>Backward</button>
+                <button disabled={this.isForwardButtonDisabled()} onClick={this.onForwardButtonClick}>Forward</button>
             </div>
             <ASTChangesComponent app={this.props.app} />
             <VMStackComponent app={this.props.app} />

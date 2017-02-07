@@ -232,6 +232,14 @@ export class Machine {
     console.log('execution complete');
   }
 
+  canContinue() {
+    return this.instructionPointer < this.instructions.length - 1
+  }
+
+  canReverse() {
+    return this.instructionPointer > 0
+  }
+
   oneStepExecute() {
     let ip = this.instructionPointer;
     let instruction = this.instructions[ip];
