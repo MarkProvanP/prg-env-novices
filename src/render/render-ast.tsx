@@ -92,7 +92,10 @@ export abstract class ASTNodeComponent<P extends ASTComponentProps, S extends AS
     }
 }
 
-export interface ASTWrapperComponentProps extends ASTComponentProps {
+export interface ASTWrapperComponentProps<T extends ast.ASTNode> extends ASTComponentProps {
+    node: T,
+    onNodeDelete: () => void,
+    onNodeEdit: (replacement: T) => void,
     required? : boolean
 }
 
@@ -104,8 +107,8 @@ export interface ASTWrapperComponentState<T extends ast.ASTNode> {
     mousedOver: boolean
 }
 
-export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps, T extends ast.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
-    constructor(props: ASTWrapperComponentProps) {
+export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps<T>, T extends ast.ASTNode> extends React.Component<P, ASTWrapperComponentState<T>> {
+    constructor(props: ASTWrapperComponentProps<T>) {
         super(props)
         this.state = {
             showingSuggestions: false,
@@ -227,15 +230,14 @@ export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps, T 
     abstract deleteAST();
     abstract editAST(replacement: T);
     editASTButton(e) {
-        this.editAST(this.getASTNode())
+        this.editAST(this.props.node)
     }
     abstract getASTType();
-    abstract getASTNode();
     abstract getMatchingASTTypes(input: string)
 
     existentASTElement() {
         return <div className={classNames('ast-wrapper-content', 'ast-row')}>
-            {this.getASTNode().render(this.props)}
+            {this.props.node.render(this.props)}
             <ButtonComponent name='element-delete' text='-' onClick={this.deleteAST.bind(this)} />
         </div>
     }
@@ -245,7 +247,7 @@ export abstract class ASTWrapperComponent<P extends ASTWrapperComponentProps, T 
     }
 
     getClassName() {
-        const astNode = this.getASTNode()
+        const astNode = this.props.node
         if (this.props.app.mousedOverASTNodes) {
             var mouseOverIndex = this.props.app.mousedOverASTNodes.indexOf(astNode)
         }

@@ -23,20 +23,9 @@ import {
     SelectionComponentProps
 } from "../render/render-ast";
 
-
-interface ExpressionWrapperComponentProps extends ASTWrapperComponentProps {
-    expression: lang.Expression,
-    onExpressionDelete: () => void,
-    onExpressionEdit: (replacement: lang.Expression) => void
-}
-
-class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperComponentProps, lang.Expression> {
+class ExpressionWrapperComponent extends ASTWrapperComponent<ASTWrapperComponentProps<lang.Expression>, lang.Expression> {
     isEmptyAST() {
-        return this.props.expression instanceof lang.EmptyExpression
-    }
-    
-    getASTNode() {
-        return this.props.expression
+        return this.props.node instanceof lang.EmptyExpression
     }
 
     getASTType() {
@@ -44,11 +33,11 @@ class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperCo
     }
 
     deleteAST() {
-        this.props.onExpressionDelete()
+        this.props.onNodeDelete()
     }
 
     editAST(replacement: lang.Expression) {
-        this.props.onExpressionEdit(replacement)
+        this.props.onNodeEdit(replacement)
     }
 
     getMatchingASTTypes(input: string) {
@@ -56,19 +45,9 @@ class ExpressionWrapperComponent extends ASTWrapperComponent<ExpressionWrapperCo
     }
 }
 
-interface StatementWrapperComponentProps extends ASTWrapperComponentProps {
-    statement: lang.Statement,
-    onStatementDelete: () => void,
-    onStatementEdit: (replacement: lang.Statement) => void
-}
-
-class StatementWrapperComponent extends ASTWrapperComponent<StatementWrapperComponentProps, lang.Statement> {
+class StatementWrapperComponent extends ASTWrapperComponent<ASTWrapperComponentProps<lang.Statement>, lang.Statement> {
     isEmptyAST() {
-        return this.props.statement instanceof lang.EmptyStatement
-    }
-
-    getASTNode() {
-        return this.props.statement
+        return this.props.node instanceof lang.EmptyStatement
     }
 
     getASTType() {
@@ -76,11 +55,11 @@ class StatementWrapperComponent extends ASTWrapperComponent<StatementWrapperComp
     }
 
     deleteAST() {
-        this.props.onStatementDelete()
+        this.props.onNodeDelete()
     }
 
     editAST(replacement: lang.Statement) {
-        this.props.onStatementEdit(replacement)
+        this.props.onNodeEdit(replacement)
     }
 
     getMatchingASTTypes(input: string) {
@@ -88,19 +67,9 @@ class StatementWrapperComponent extends ASTWrapperComponent<StatementWrapperComp
     }
 }
 
-interface IdentWrapperComponentProps extends ASTWrapperComponentProps {
-    ident: lang.Ident,
-    onIdentDelete: () => void,
-    onIdentEdit: (replacement: lang.Ident) => void
-}
-
-class IdentWrapperComponent extends ASTWrapperComponent<IdentWrapperComponentProps, lang.Ident> {
+class IdentWrapperComponent extends ASTWrapperComponent<ASTWrapperComponentProps<lang.Ident>, lang.Ident> {
     isEmptyAST() {
-        return this.props.ident instanceof lang.EmptyIdent;
-    }
-
-    getASTNode() {
-        return this.props.ident
+        return this.props.node instanceof lang.EmptyIdent;
     }
 
     getASTType() {
@@ -108,11 +77,11 @@ class IdentWrapperComponent extends ASTWrapperComponent<IdentWrapperComponentPro
     }
 
     deleteAST() {
-        this.props.onIdentDelete()
+        this.props.onNodeDelete()
     }
 
     editAST(replacement: lang.Ident) {
-        this.props.onIdentEdit(replacement)
+        this.props.onNodeEdit(replacement)
     }
 
     getMatchingASTTypes(input: string) {
@@ -120,19 +89,9 @@ class IdentWrapperComponent extends ASTWrapperComponent<IdentWrapperComponentPro
     }
 }
 
-interface MethodWrapperComponentProps extends ASTWrapperComponentProps {
-    method: lang.Method,
-    onMethodDelete: () => void,
-    onMethodEdit: (replacement: lang.Method) => void
-}
-
-class MethodWrapperComponent extends ASTWrapperComponent<MethodWrapperComponentProps, lang.Method> {
+class MethodWrapperComponent extends ASTWrapperComponent<ASTWrapperComponentProps<lang.Method>, lang.Method> {
     isEmptyAST() {
         return false
-    }
-
-    getASTNode() {
-        return this.props.method
     }
 
     getASTType() {
@@ -140,11 +99,11 @@ class MethodWrapperComponent extends ASTWrapperComponent<MethodWrapperComponentP
     }
 
     deleteAST() {
-        this.props.onMethodDelete()
+        this.props.onNodeDelete()
     }
 
     editAST(replacement: lang.Method) {
-        this.props.onMethodEdit(replacement)
+        this.props.onNodeEdit(replacement)
     }
 
     getMatchingASTTypes(input: string) {
@@ -197,7 +156,7 @@ export class ValueExpressionComponent extends ASTNodeComponent<ValueExpressionCo
     
     getInnerElement() {
         return <div className='ast-row'>
-            <IdentWrapperComponent {...this.props} ident={this.props.value.ident} onIdentEdit={this.onIdentEdit.bind(this)} onIdentDelete={this.onIdentDelete.bind(this)}/>
+            <IdentWrapperComponent {...this.props} node={this.props.value.ident} onNodeEdit={this.onIdentEdit.bind(this)} onNodeDelete={this.onIdentDelete.bind(this)}/>
         </div>
     }
 }
@@ -231,15 +190,15 @@ export class BinaryExpressionComponent extends ASTNodeComponent<BinaryExpression
         return <div className='ast-row'>
             <SyntaxComponent syntax='('/>
             <ExpressionWrapperComponent {...this.props}
-            expression={this.props.binaryExpression.left}
-            onExpressionDelete={this.removeExpression("left").bind(this)}
-            onExpressionEdit={this.editExpression("left").bind(this)}
+            node={this.props.binaryExpression.left}
+            onNodeDelete={this.removeExpression("left").bind(this)}
+            onNodeEdit={this.editExpression("left").bind(this)}
             />
             <SelectionComponent value={this.props.binaryExpression.op} values={lang.BinaryExpression.OP_LIST} onChange={this.changeOp.bind(this)} />
             <ExpressionWrapperComponent {...this.props}
-            expression={this.props.binaryExpression.right}
-            onExpressionDelete={this.removeExpression("right").bind(this)}
-            onExpressionEdit={this.editExpression("right").bind(this)}
+            node={this.props.binaryExpression.right}
+            onNodeDelete={this.removeExpression("right").bind(this)}
+            onNodeEdit={this.editExpression("right").bind(this)}
             />
             <SyntaxComponent syntax=')'/>
         </div>
@@ -286,15 +245,15 @@ export class AssignmentStatementComponent extends ASTNodeComponent<AssignmentSta
         return <div className='ast-row'>
             <KeywordComponent keyword='let' />
             <IdentWrapperComponent {...this.props}
-            ident={this.props.assignmentStatement.ident}
-            onIdentDelete={this.removeIdent.bind(this)}
-            onIdentEdit={this.editIdent.bind(this)}
+            node={this.props.assignmentStatement.ident}
+            onNodeDelete={this.removeIdent.bind(this)}
+            onNodeEdit={this.editIdent.bind(this)}
             />
             <SyntaxComponent syntax=':=' />
             <ExpressionWrapperComponent {...this.props}
-            expression={this.props.assignmentStatement.expression}
-            onExpressionDelete={this.removeExpression.bind(this)}
-            onExpressionEdit={this.editExpression.bind(this)}
+            node={this.props.assignmentStatement.expression}
+            onNodeDelete={this.removeExpression.bind(this)}
+            onNodeEdit={this.editExpression.bind(this)}
             />
         </div>
     }
@@ -322,9 +281,9 @@ export class WhileStatementComponent extends ASTNodeComponent<WhileStatementComp
                 <KeywordComponent keyword='while' />
                 <SyntaxComponent syntax='(' />
                 <ExpressionWrapperComponent {...this.props}
-                expression={this.props.whileStatement.condition}
-                onExpressionDelete={this.removeCondition.bind(this)}
-                onExpressionEdit={this.editCondition.bind(this)}
+                node={this.props.whileStatement.condition}
+                onNodeDelete={this.removeCondition.bind(this)}
+                onNodeEdit={this.editCondition.bind(this)}
                 />
                 <SyntaxComponent syntax=')' />
                 <KeywordComponent keyword='do' />
@@ -388,7 +347,7 @@ export class ProgramComponent extends ASTNodeComponent<ProgramComponentProps, AS
             return <div key={(index * 2) + 1} className='ast-list-row'>
                 <div className='ast-list-row-index'>{index}</div>
                 <div className='ast-list-row-content'>
-                    <MethodWrapperComponent {...this.props} method={method} onMethodDelete={this.deleteRow(index)} onMethodEdit={this.editRow(index)}/>
+                    <MethodWrapperComponent {...this.props} node={method} onNodeDelete={this.deleteRow(index)} onNodeEdit={this.editRow(index)}/>
                 </div>
             </div>
         })
@@ -454,7 +413,7 @@ export class StatementsComponent extends ASTNodeComponent<StatementsComponentPro
             return <div key={(index * 2) + 1} className='ast-list-row'>
                 <div className='ast-list-row-index'>{index}</div>
                 <div className='ast-list-row-content'>
-                    <StatementWrapperComponent {...this.props} statement={statement} onStatementDelete={this.deleteRow(index)} onStatementEdit={this.editRow(index)}/>
+                    <StatementWrapperComponent {...this.props} node={statement} onNodeDelete={this.deleteRow(index)} onNodeEdit={this.editRow(index)}/>
                 </div>
             </div>
         })
@@ -558,10 +517,10 @@ export class MethodComponent extends ASTNodeComponent<MethodComponentProps, ASTN
         this.props.method.args.forEach((ident, index) => {
             argElements.push(<ButtonComponent key={index * 3} name='add' text='+' onClick={this.insertArg(index).bind(this)}/>)
             argElements.push(
-                <IdentWrapperComponent key={index * 3 + 1}
-                {...this.props} ident={ident}
-                onIdentDelete={this.deleteArg(index).bind(this)}
-                onIdentEdit={this.editArg(index).bind(this)}
+                <IdentWrapperComponent key={index * 3 + 1} {...this.props}
+                node={ident}
+                onNodeDelete={this.deleteArg(index).bind(this)}
+                onNodeEdit={this.editArg(index).bind(this)}
                 />
                 )
             if (index != this.props.method.args.length - 1) {
@@ -572,10 +531,10 @@ export class MethodComponent extends ASTNodeComponent<MethodComponentProps, ASTN
         return <div>
             <div className='ast-row'>
                 <KeywordComponent keyword='method'/>
-                <IdentWrapperComponent
-                {...this.props} ident={this.props.method.name}
-                onIdentDelete={this.removeIdent.bind(this)}
-                onIdentEdit={this.editIdent.bind(this)}
+                <IdentWrapperComponent {...this.props}
+                node={this.props.method.name}
+                onNodeDelete={this.removeIdent.bind(this)}
+                onNodeEdit={this.editIdent.bind(this)}
                 />
                 <SyntaxComponent syntax='(' />
                 {argElements}
@@ -626,10 +585,10 @@ export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallSta
         this.props.methodCallStatement.args.forEach((expression, index) => {
             argElements.push(<ButtonComponent key={index * 3} name='add' text='+' onClick={this.insertArg(index).bind(this)}/>)
             argElements.push(
-                <ExpressionWrapperComponent key={index * 3 + 1}
-                {...this.props} expression={expression}
-                onExpressionDelete={this.deleteArg(index).bind(this)}
-                onExpressionEdit={this.editArg(index).bind(this)}
+                <ExpressionWrapperComponent key={index * 3 + 1} {...this.props}
+                node={expression}
+                onNodeDelete={this.deleteArg(index).bind(this)}
+                onNodeEdit={this.editArg(index).bind(this)}
                 />
                 )
             if (index != this.props.methodCallStatement.args.length - 1) {
@@ -644,9 +603,9 @@ export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallSta
         return <div className='ast-row'>
             <KeywordComponent keyword='call' />
             <IdentWrapperComponent {...this.props}
-            ident={this.props.methodCallStatement.ident}
-            onIdentDelete={this.removeIdent.bind(this)}
-            onIdentEdit={this.editIdent.bind(this)}
+            node={this.props.methodCallStatement.ident}
+            onNodeDelete={this.removeIdent.bind(this)}
+            onNodeEdit={this.editIdent.bind(this)}
             />
             <SyntaxComponent syntax='(' />
             {argElements}
@@ -676,9 +635,9 @@ export class ReturnStatementComponent extends ASTNodeComponent<ReturnStatementPr
         return <div className='ast-row'>
             <KeywordComponent keyword='return' />
             <ExpressionWrapperComponent {...this.props}
-            expression={this.props.returnStatement.expression}
-            onExpressionDelete={this.deleteExpression.bind(this)}
-            onExpressionEdit={this.editExpression.bind(this)}
+            node={this.props.returnStatement.expression}
+            onNodeDelete={this.deleteExpression.bind(this)}
+            onNodeEdit={this.editExpression.bind(this)}
             required={false}
             />
         </div>
