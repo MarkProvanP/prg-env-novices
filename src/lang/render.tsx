@@ -20,7 +20,9 @@ import {
     InputComponent,
     InputComponentProps,
     SelectionComponent,
-    SelectionComponentProps
+    SelectionComponentProps,
+    VerticalListComponent,
+    VerticalListComponentProps
 } from "../render/render-ast";
 
 class ExpressionWrapperComponent extends ASTWrapperComponent<ASTWrapperComponentProps<lang.Expression>, lang.Expression> {
@@ -308,60 +310,13 @@ export class ProgramComponent extends ASTNodeComponent<ProgramComponentProps, AS
         return this.props.program
     }
     
-    editRow(index) {
-        return replacement => {
-            console.log('Edit at index', index)
-            this.props.app.replaceElementInArray(this.getASTNode(), "methods", index, replacement)
-        }
-    }
-
-    deleteRow(index) {
-        return () => {
-            console.log('Delete at index', index)
-            this.props.app.deleteFromArray(this.getASTNode(), "methods", index)
-        }
-    }
-
-    insertRow(index) {
-        return e => {
-            console.log('Insert at index', index, this);
-            let newASTNode = new lang.Method();
-            this.props.app.insertIntoArray(this.getASTNode(), "methods", index, newASTNode)
-        }
-    }
-
-    constructor(props: StatementsComponentProps) {
-        super(props)
-        this.editRow = this.editRow.bind(this)
-        this.deleteRow = this.deleteRow.bind(this)
-        this.insertRow = this.insertRow.bind(this)
-    }
-
-    private createPlusButton(index: number) {
-        return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
-    }
-
     getInnerElement() {
-        const methods = this.props.program.methods;
-        const methodsList = methods.map((method, index) => {
-            return <div key={(index * 2) + 1} className='ast-list-row'>
-                <div className='ast-list-row-index'>{index}</div>
-                <div className='ast-list-row-content'>
-                    <MethodWrapperComponent {...this.props} node={method} onNodeDelete={this.deleteRow(index)} onNodeEdit={this.editRow(index)}/>
-                </div>
-            </div>
-        })
-        let elementsList = []
-        methodsList.forEach((method, index) => {
-            let plusButton = this.createPlusButton(index);
-            elementsList.push(plusButton);
-            elementsList.push(method);
-        })
-        let plusButton = this.createPlusButton(methods.length);
-        elementsList.push(plusButton);
-        return <div className='ast-list'>
-            {elementsList}
-        </div>
+        return <VerticalListComponent {...this.props}
+        node={this.props.program}
+        arrayName='methods'
+        type={lang.Method}
+        wrapperType={MethodWrapperComponent}
+        />
     }
 }
 

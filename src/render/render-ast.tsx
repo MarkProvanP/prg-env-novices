@@ -362,3 +362,70 @@ export class SelectionComponent extends React.Component<SelectionComponentProps,
         return <select className='ast-select' value={this.props.value} onChange={this.props.onChange}>{optionElements}</select>
     }
 }
+
+export interface VerticalListComponentProps<P extends ASTWrapperComponentProps<S>, T extends ast.ASTNode, S extends ast.ASTNode> {
+    app: App,
+    node: T,
+    arrayName: string,
+    type: { new(): S },
+    wrapperType: { new(): ASTWrapperComponent<P, S> }
+}
+
+export class VerticalListComponent<P extends ASTWrapperComponentProps<S>, T extends ast.ASTNode, S extends ast.ASTNode> extends React.Component<VerticalListComponentProps<P, T, S>, NoState> {
+    editRow(index) {
+        return replacement => {
+            this.props.app.replaceElementInArray(this.props.node, this.props.arrayName, index, replacement)
+        }
+    }
+
+    deleteRow(index) {
+        return () => {
+            this.props.app.deleteFromArray(this.props.node, this.props.arrayName, index)
+        }
+    }
+
+    insertRow(index) {
+        return e => {
+            let newASTNode = new this.props.type();
+            this.props.app.insertIntoArray(this.props.node, this.props.arrayName, index, newASTNode)
+        }
+    }
+
+    constructor(props: VerticalListComponentProps<P, T, S>) {
+        super(props)
+        this.editRow = this.editRow.bind(this)
+        this.deleteRow = this.deleteRow.bind(this)
+        this.insertRow = this.insertRow.bind(this)
+    }
+
+    private createPlusButton(index: number) {
+        return <ButtonComponent key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
+    }
+
+    render() {
+        const methods = this.props.node[this.props.arrayName];
+        const methodsList = methods.map((method, index) => {
+            return <div key={(index * 2) + 1} className='ast-list-row'>
+                <div className='ast-list-row-index'>{index}</div>
+                <div className='ast-list-row-content'>
+                    <this.props.wrapperType {...this.props}
+                    node={method}
+                    onNodeDelete={this.deleteRow(index)}
+                    onNodeEdit={this.editRow(index)}
+                    />
+                </div>
+            </div>
+        })
+        let elementsList = []
+        methodsList.forEach((method, index) => {
+            let plusButton = this.createPlusButton(index);
+            elementsList.push(plusButton);
+            elementsList.push(method);
+        })
+        let plusButton = this.createPlusButton(methods.length);
+        elementsList.push(plusButton);
+        return <div className='ast-list'>
+            {elementsList}
+        </div>
+    }
+}
