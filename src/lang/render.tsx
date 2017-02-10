@@ -328,61 +328,14 @@ export class StatementsComponent extends ASTNodeComponent<StatementsComponentPro
     getASTNode() {
         return this.props.statements
     }
-    
-    editRow(index) {
-        return replacement => {
-            console.log('Edit at index', index)
-            this.props.app.replaceElementInArray(this.props.statements, "statements", index, replacement)
-        }
-    }
-
-    deleteRow(index) {
-        return () => {
-            console.log('Delete at index', index)
-            this.props.app.deleteFromArray(this.props.statements, "statements", index)
-        }
-    }
-
-    insertRow(index) {
-        return e => {
-            console.log('Insert at index', index, this);
-            let newASTNode = new lang.EmptyStatement();
-            this.props.app.insertIntoArray(this.props.statements, "statements", index, newASTNode)
-        }
-    }
-
-    constructor(props: StatementsComponentProps) {
-        super(props)
-        this.editRow = this.editRow.bind(this)
-        this.deleteRow = this.deleteRow.bind(this)
-        this.insertRow = this.insertRow.bind(this)
-    }
-
-    private createPlusButton(index: number, cannotHide?: boolean) {
-        return <ButtonComponent cannotHide={cannotHide} key={index * 2} name='row-insert' text='+' onClick={this.insertRow(index)} />
-    }
 
     getInnerElement() {
-        const statements = this.props.statements.statements;
-        const statementsList = statements.map((statement, index) => {
-            return <div key={(index * 2) + 1} className='ast-list-row'>
-                <div className='ast-list-row-index'>{index}</div>
-                <div className='ast-list-row-content'>
-                    <StatementWrapperComponent {...this.props} node={statement} onNodeDelete={this.deleteRow(index)} onNodeEdit={this.editRow(index)}/>
-                </div>
-            </div>
-        })
-        let elementsList = []
-        statementsList.forEach((statement, index) => {
-            let plusButton = this.createPlusButton(index);
-            elementsList.push(plusButton);
-            elementsList.push(statement);
-        })
-        let plusButton = this.createPlusButton(statements.length, statements.length == 0);
-        elementsList.push(plusButton);
-        return <div className='ast-list'>
-            {elementsList}
-        </div>
+        return <VerticalListComponent {...this.props}
+        node={this.props.statements}
+        arrayName='statements'
+        type={lang.Statement}
+        wrapperType={StatementWrapperComponent}
+        />
     }
 }
 
