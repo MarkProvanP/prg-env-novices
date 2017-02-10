@@ -8,19 +8,44 @@ let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HT
 let parseButton: HTMLButtonElement = document.getElementById("parse-button") as HTMLButtonElement;
 let loadFunTestButton: HTMLButtonElement = document.getElementById("load-fun-test-button") as HTMLButtonElement
 let loadLangTestButton: HTMLButtonElement = document.getElementById("load-lang-test-button") as HTMLButtonElement
+let languageIndicator = document.getElementById("language-indicator")
 
 import * as lang from "./lang/lang";
 import * as fun from "./fun/fun"
 
-let languageDefinition = fun.getLanguageDefinition()
+let grammar
+let parser
+let app
 
-window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {fun}
+function selectLang() {
+    let languageDefinition = lang.getLanguageDefinition()
 
-languageDefinition.initialise()
+    window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {lang}
 
-let grammar = languageDefinition.getGrammar()
-let parser = grammar.Program
-let app = new App(languageDefinition);
+    languageDefinition.initialise()
+
+    grammar = languageDefinition.getGrammar()
+    parser = grammar.Program
+    app = new App(languageDefinition);
+
+    languageIndicator.textContent = "Selected Language: lang"
+    console.log("Selected lang")
+}
+
+function selectFun() {
+    let languageDefinition = fun.getLanguageDefinition()
+
+    window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {fun}
+
+    languageDefinition.initialise()
+
+    grammar = languageDefinition.getGrammar()
+    parser = grammar.Program
+    app = new App(languageDefinition);
+
+    languageIndicator.textContent = "Selected Language: fun"
+    console.log("Selected fun")
+}
 
 parseButton.onclick = (event) => {
     let input = langInput.value;
@@ -35,10 +60,12 @@ parseButton.onclick = (event) => {
 
 loadFunTestButton.onclick = (event) => {
     langInput.value = funTest
+    selectFun()
 }
 
 loadLangTestButton.onclick = (event) => {
     langInput.value = langTest
+    selectLang()
 }
 
 let langTest = `
