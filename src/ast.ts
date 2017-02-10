@@ -1,6 +1,11 @@
 import * as vm from "./machine/index"
 import * as render from "./render/render-ast"
 
+export abstract class LanguageDefinition {
+    abstract getGrammar()
+    abstract initialise()
+}
+
 export abstract class ASTNode {
   codegen(machine: vm.Machine) {
     machine.beginASTRange(this)

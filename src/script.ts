@@ -1,17 +1,23 @@
 require("./styles.scss");
-import * as lang from "./lang/lang";
+
 import * as vm from "./machine/index";
 import * as pegjs from "pegjs"
 import { App } from "./app";
 
-import grammar from "./lang/grammars/index"
-
 let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HTMLTextAreaElement;
 let parseButton: HTMLButtonElement = document.getElementById("parse-button") as HTMLButtonElement;
 
+import * as lang from "./lang/lang";
+
+let languageDefinition = lang.getLanguageDefinition()
+
 window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {lang}
+
+languageDefinition.initialise()
+
+let grammar = languageDefinition.getGrammar()
 let parser = grammar.Program
-let app = new App(grammar);
+let app = new App(languageDefinition);
 
 parseButton.onclick = (event) => {
     let input = langInput.value;

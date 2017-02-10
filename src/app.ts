@@ -3,7 +3,6 @@ import * as render from "./render/render"
 import * as vm from "./machine/index"
 import * as pegjs from "pegjs"
 
-
 export class App {
     ast: ast.ASTNode
     machine: vm.Machine
@@ -17,8 +16,12 @@ export class App {
 
     selectedLabel: string
 
-    constructor(public grammar) {
-        
+    grammar: any
+
+    constructor(
+        public languageDefinition: ast.LanguageDefinition
+    ) {
+        this.grammar = languageDefinition.getGrammar()
     }
 
     parseExpression(input: string) {

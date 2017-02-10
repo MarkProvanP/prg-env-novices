@@ -1,10 +1,26 @@
 import * as vm from "../machine/index"
-require("./style.scss")
 
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { ASTNode } from "../ast"
+import { ASTNode, LanguageDefinition } from "../ast"
+
+import grammar from "./grammars/index"
+
+export function getLanguageDefinition() {
+  return definition
+}
+
+class Lang extends LanguageDefinition {
+  getGrammar() {
+    return grammar
+  }
+
+  initialise() {
+    require("./style.scss")
+  }
+}
+let definition = new Lang()
 
 import * as render from "./render"
 
