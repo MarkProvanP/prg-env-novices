@@ -1,0 +1,41 @@
+expression
+  = additive
+  / multiplicative
+
+additive
+  = left:multiplicative w "+" w right:additive { return new fun.BinaryExpression(left, right, "+"); }
+  / left:multiplicative w "-" w right:additive { return new fun.BinaryExpression(left, right, "-"); }
+  / multiplicative
+
+multiplicative
+  = left:primary w "*" w right:multiplicative { return new fun.BinaryExpression(left, right, "*"); }
+  / left:primary w "/" w right:multiplicative { return new fun.BinaryExpression(left, right, "/"); }
+  / primary
+
+value
+  = i:ident { return new fun.ValueExpression(i); }
+
+primary
+  = functionCallExpression
+  / value
+  / integer
+  / "(" w additive:additive w ")" { return additive; }
+
+integer "integer"
+  = digits:[0-9]+ { return new fun.Integer(parseInt(digits.join(""), 10)); }
+
+ident
+  = name:[a-z]+ { return new fun.ConcreteIdent(name.join("")) }
+
+w
+  = [ \t\n\r]*
+
+functionCallExpression
+  = w i:ident w "(" w a:functionCallArgs w ")" w { return new fun.FunctionCallExpression(i, a)}
+
+functionCallArgs
+  = list:functionCallArgListElement* w single:expression { return [].concat(list).concat(single).filter(function(s) { return s })}
+  / "" { return []}
+
+functionCallArgListElement
+  = w e:expression w "," w { return e }

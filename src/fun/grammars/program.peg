@@ -1,0 +1,15 @@
+start
+  = w program w
+
+program
+  = m:method* w { return new fun.Program(m)}
+
+method
+  = "function" w i:ident w "(" w a:methodArgs w ")" w ":=" w e:expression w { return new fun.Function(i, a, e)}
+
+methodArgs
+  = list:methodArgListElement* w single:ident { return [].concat(list).concat(single).filter(function(s) { return s })}
+  / "" { return []}
+
+methodArgListElement
+  = w i:ident w "," w { return i }
