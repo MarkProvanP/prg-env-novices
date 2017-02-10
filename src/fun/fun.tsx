@@ -133,6 +133,30 @@ export class EmptyExpression extends Expression {
   }
 }
 
+export class ConditionalExpression extends Expression {
+  constructor(
+    public condition: Expression = new EmptyExpression(),
+    public thenExpression: Expression = new EmptyExpression(),
+    public elseExpression: Expression = new EmptyExpression()
+  ) {
+    super()
+  }
+
+  internalCodegen(machine: vm.Machine) {
+    this.condition.codegen(machine)
+    machine.addInstruction(new vm.IfGoto("ConditionalFalse"))
+    this.thenExpression.codegen(machine)
+    machine.addInstruction(new vm.Goto("ConditionalEnd"))
+    machine.addLabel("ConditionalFalse")
+    this.elseExpression.codegen(machine)
+    machine.addLabel("ConditionalEnd")
+  }
+
+  render(props) {
+    return <render.ConditionalExpressionComponent {...props} conditionalExpression={this} />
+  }
+}
+
 export abstract class Ident extends ASTNode {
   abstract getName()
 }
@@ -189,7 +213,7 @@ export function getMatchingFunctionTypes(input: string) {
 
 export class Function extends ASTNode {
   static labelName(functionName: string) {
-    return `_${functionName}`
+    return `FUNCTION_${functionName}`
   }
 
   constructor(

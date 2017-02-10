@@ -55,7 +55,6 @@ method hello (x, y, z) {
 }`
 
 let funTest = `
-function test(n) := test(1)
-function fib(num) := fib(num - 2) + fib(num - 1)
-function fact(num) := num * fact(num - 1)
+function fib(num) := if test then 1 else fib(num - 2) + fib(num - 1)
+function fact(num) := if test then 0 else num * fact(num - 1)
 `

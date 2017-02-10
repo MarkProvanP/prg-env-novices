@@ -17,6 +17,7 @@ value
 
 primary
   = functionCallExpression
+  / conditionalExpression
   / value
   / integer
   / "(" w additive:additive w ")" { return additive; }
@@ -39,3 +40,6 @@ functionCallArgs
 
 functionCallArgListElement
   = w e:expression w "," w { return e }
+
+conditionalExpression
+  = w "if" w c:expression w "then" w th:expression w "else" w el:expression w { return new fun.ConditionalExpression(c, th, el) }

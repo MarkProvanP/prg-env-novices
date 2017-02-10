@@ -386,3 +386,60 @@ export class FunctionCallExpressionComponent extends ASTNodeComponent<FunctionCa
         </div>
     }
 }
+
+export interface ConditionalExpressionProps extends ASTComponentProps {
+    conditionalExpression: fun.ConditionalExpression
+}
+
+export class ConditionalExpressionComponent extends ASTNodeComponent<ConditionalExpressionProps, ASTNodeComponentState> {
+    getASTNode() {
+        return this.props.conditionalExpression
+    }
+
+    removeCondition() {
+        let newEmptyExpression = new fun.EmptyExpression()
+        this.props.app.replaceElement(this.props.conditionalExpression, "condition", newEmptyExpression)
+    }
+    editCondition(replacement) {
+        this.props.app.replaceElement(this.props.conditionalExpression, "condition", replacement)
+    }
+
+    removeThenExpression() {
+        let newEmptyExpression = new fun.EmptyExpression()
+        this.props.app.replaceElement(this.props.conditionalExpression, "thenExpression", newEmptyExpression)
+    }
+    editThenExpression(replacement) {
+        this.props.app.replaceElement(this.props.conditionalExpression, "thenExpression", replacement)
+    }
+
+    removeElseExpression() {
+        let newEmptyExpression = new fun.EmptyExpression()
+        this.props.app.replaceElement(this.props.conditionalExpression, "elseExpression", newEmptyExpression)
+    }
+    editElseExpression(replacement) {
+        this.props.app.replaceElement(this.props.conditionalExpression, "elseExpression", replacement)
+    }
+    
+    getInnerElement() {
+        return <div className='ast-row'>
+            <KeywordComponent keyword='if' />
+            <ExpressionWrapperComponent {...this.props}
+            node={this.props.conditionalExpression.condition}
+            onNodeDelete={this.removeCondition}
+            onNodeEdit={this.editCondition}
+            />
+            <KeywordComponent keyword='then' />
+            <ExpressionWrapperComponent {...this.props}
+            node={this.props.conditionalExpression.thenExpression}
+            onNodeDelete={this.removeThenExpression}
+            onNodeEdit={this.editThenExpression}
+            />
+            <KeywordComponent keyword='else' />
+            <ExpressionWrapperComponent {...this.props}
+            node={this.props.conditionalExpression.elseExpression}
+            onNodeDelete={this.removeElseExpression}
+            onNodeEdit={this.editElseExpression}
+            />
+        </div>
+    }
+}
