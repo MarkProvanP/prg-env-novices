@@ -215,3 +215,29 @@ export class Get extends Instruction {
     .withStackPushed([pushed])
   }
 }
+
+export class ConsoleIn extends Instruction {
+  constructor() {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    let input = prompt("Input!")
+    return new MachineChange()
+    .withStackPushed([input])
+    .withConsoleChanged(input, "")
+  }
+}
+
+export class ConsoleOut extends Instruction {
+  constructor() {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    let output = machine.stack.getTopStackFrame().peek()
+    return new MachineChange()
+    .withStackPopped([output])
+    .withConsoleChanged(output, "")
+  }
+}

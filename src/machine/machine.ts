@@ -20,15 +20,18 @@ export class Machine {
   public activeASTNodesAtIndices = []
   private currentlyActiveASTNodes = []
 
-  constructor(ast: ast.ASTNode) {
+  public textConsole: Console = new Console()
+
+  constructor(ast: ast.ASTNode, private languageDefinition: ast.LanguageDefinition) {
     this.setAST(ast);
   }
 
   setAST(ast: ast.ASTNode) {
-    this.instructions = [];
+    this.instructions = []
     this.labelToIndexMap = {}
+    this.languageDefinition.machineInitialise(this)
     ast.codegen(this)
-    this.indexToLabelsMap = this.getLabelIndices();
+    this.indexToLabelsMap = this.getLabelIndices() 
   }
 
   addInstruction(instruction: Instruction) {
@@ -117,6 +120,22 @@ export class Machine {
       return
     }
     return activeNodesAtCurrentIndex[activeNodesAtCurrentIndex.length - 1]
+  }
+}
+
+export class Console {
+  text: string
+  
+  getText() {
+    return this.text
+  }
+
+  addText(text: string) {
+    this.text += text
+  }
+
+  removeText(chars) {
+    this.text = this.text.substr(0, this.text.length - chars)
   }
 }
 

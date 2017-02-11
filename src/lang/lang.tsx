@@ -19,6 +19,12 @@ class Lang extends LanguageDefinition {
   initialise() {
     require("./style.scss")
   }
+
+  machineInitialise(machine: vm.Machine) {
+    machine.addLabel(Method.labelName("PRINT"))
+    machine.addInstruction(new vm.Get("text"))
+    machine.addInstruction(new vm.ConsoleOut())
+  }
 }
 let definition = new Lang()
 

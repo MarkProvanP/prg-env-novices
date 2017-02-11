@@ -56,6 +56,14 @@ export class MachineChange {
         return this;
     }
 
+    withConsoleChanged(
+        added: string,
+        removed: string
+    ) {
+        this.changes.push(new ConsoleChange(added, removed))
+        return this
+    }
+
     withIpChange(change: number) {
         this.ipChange = change;
         return this;
@@ -182,4 +190,26 @@ export class StackFrameChange extends MachineComponentChange {
   reverse() {
     return new StackFrameChange(this.key, this.after, this.before, this.frameNo)
   }
+}
+
+export class ConsoleChange extends MachineComponentChange {
+    constructor(
+        public inserted: string,
+        public deleted: string
+    ) {
+        super()
+    }
+
+    apply(machine: Machine) {
+        if (this.deleted) {
+            machine.textConsole.removeText(this.deleted.length)
+        }
+        if (this.inserted) {
+            machine.textConsole.addText(this.inserted)
+        }
+    }
+
+    reverse() {
+        return new ConsoleChange(this.deleted, this.inserted)
+    }
 }

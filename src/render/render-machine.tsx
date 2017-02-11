@@ -58,6 +58,7 @@ export class VMStateComponent extends React.Component<VMStateProps, NoState> {
             <ASTChangesComponent app={this.props.app} />
             <VMStackComponent app={this.props.app} />
             <VMGlobalEnvComponent app={this.props.app} />
+            <VMConsoleComponent app={this.props.app} />
         </div>;
     }
 }
@@ -265,6 +266,17 @@ export class EnvElementComponent extends React.Component<EnvElementProps, EnvEle
         })
         return <div className='env'>
             {mappings}
+        </div>
+    }
+}
+
+class VMConsoleComponent extends React.Component<VMStateProps, NoState> {
+    render() {
+        return <div className='console'>
+            <h3>Console</h3>
+            <pre>
+                {this.props.app.machine.textConsole.getText()}
+            </pre>
         </div>
     }
 }

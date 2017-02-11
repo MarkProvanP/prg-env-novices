@@ -4,6 +4,7 @@ import * as render from "./render/render-ast"
 export abstract class LanguageDefinition {
     abstract getGrammar()
     abstract initialise()
+    abstract machineInitialise(machine: vm.Machine)
 }
 
 export abstract class ASTNode {

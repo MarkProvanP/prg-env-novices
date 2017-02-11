@@ -422,3 +422,13 @@ body {
     border: none;
     font: inherit;
 }
+
+.console {
+    pre {
+        background-color: darkgreen;
+        color: white;
+        border: 3px solid black;
+        height: 100px;
+        overflow-y: scroll;
+    }
+}
