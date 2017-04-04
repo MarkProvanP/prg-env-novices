@@ -333,7 +333,7 @@ export class StatementsComponent extends ASTNodeComponent<StatementsComponentPro
         return <VerticalListComponent {...this.props}
         node={this.props.statements}
         arrayName='statements'
-        type={lang.Statement}
+        type={lang.EmptyStatement}
         wrapperType={StatementWrapperComponent}
         />
     }
