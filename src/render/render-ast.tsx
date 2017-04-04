@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import * as ast from "../ast";
 import { App } from "../app";
 
+let classNames = (...classes) => classes.filter(s => s).join(" ")
+
 export function renderAST(app: App) {
     ReactDOM.render(
         <WholeASTComponent node={app.ast} app={app} />,
@@ -25,7 +27,7 @@ export class WholeASTComponent extends React.Component<WholeASTProps, WholeASTSt
     }
     render() {
         const rootNode = this.props.node;
-        return <div className='whole-ast' onMouseOver={this.onMouseOver.bind(this)}>
+        return <div className={classNames('whole-ast', this.props.app.languageDefinition.getName())} onMouseOver={this.onMouseOver.bind(this)}>
             {rootNode.render(this.props)}
         </div>
     }
@@ -273,7 +275,6 @@ export interface KeywordComponentProps {
     keyword: string
 }
 
-let classNames = (...classes) => classes.filter(s => s).join(" ")
 
 export class KeywordComponent extends React.Component<KeywordComponentProps, NoState> {
     getClassName() {

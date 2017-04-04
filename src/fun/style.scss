@@ -1,31 +1,33 @@
-.Integer {
-    background-color: hotpink
-}
+.Fun {
+    .Integer {
+        background-color: hotpink
+    }
 
-.ValueExpression {
-    background-color: deeppink
-}
+    .ValueExpression {
+        background-color: deeppink
+    }
 
-.BinaryExpression {
-    background-color: lightpink
-}
+    .BinaryExpression {
+        background-color: lightpink
+    }
 
-.ConcreteIdent {
-    background-color: lightcoral
-}
+    .ConcreteIdent {
+        background-color: lightcoral
+    }
 
-.Function {
-    background-color: cadetblue
-}
+    .Function {
+        background-color: cadetblue
+    }
 
-.FunctionCallExpression {
-    background-color: palegoldenrod
-}
+    .FunctionCallExpression {
+        background-color: palegoldenrod
+    }
 
-.ConditionalExpression {
-    background-color: aquamarine
-}
+    .ConditionalExpression {
+        background-color: aquamarine
+    }
 
-.Program {
-    background-color: deepskyblue
+    .Program {
+        background-color: deepskyblue
+    }
 }

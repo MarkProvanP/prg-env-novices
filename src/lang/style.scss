@@ -1,43 +1,45 @@
-.Statements {
-    background-color: peru;
-}
+.Lang {
+    .Statements {
+        background-color: peru;
+    }
 
-.AssignmentStatement {
-    background-color: aliceblue;
-}
+    .AssignmentStatement {
+        background-color: aliceblue;
+    }
 
-.WhileStatement {
-    background-color: lightsalmon;
-}
+    .WhileStatement {
+        background-color: lightsalmon;
+    }
 
-.Integer {
-    background-color: palegreen;
-}
+    .Integer {
+        background-color: palegreen;
+    }
 
-.ValueExpression {
-    background-color: peachpuff;
-}
+    .ValueExpression {
+        background-color: peachpuff;
+    }
 
-.BinaryExpression {
-    background-color: chocolate
-}
+    .BinaryExpression {
+        background-color: chocolate
+    }
 
-.ConcreteIdent {
-    background-color: springgreen
-}
+    .ConcreteIdent {
+        background-color: springgreen
+    }
 
-.Method {
-    background-color: tomato
-}
+    .Method {
+        background-color: tomato
+    }
 
-.MethodCallStatement {
-    background-color: olive
-}
+    .MethodCallStatement {
+        background-color: olive
+    }
 
-.Program {
-    background-color: lightslategray
-}
+    .Program {
+        background-color: lightslategray
+    }
 
-.ReturnStatement {
-    background-color: goldenrod
+    .ReturnStatement {
+        background-color: goldenrod
+    }
 }

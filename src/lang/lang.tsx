@@ -12,11 +12,19 @@ export function getLanguageDefinition() {
 }
 
 class Lang extends LanguageDefinition {
+  getName() {
+    return "Lang"
+  }
+  
   getGrammar() {
     return grammar
   }
 
   initialise() {
+    super.initialise()
+  }
+
+  stylesheet() {
     require("./style.scss")
   }
 

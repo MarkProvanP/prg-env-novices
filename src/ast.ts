@@ -2,9 +2,19 @@ import * as vm from "./machine/index"
 import * as render from "./render/render-ast"
 
 export abstract class LanguageDefinition {
+    stylesheetDom;
+    abstract getName()
     abstract getGrammar()
-    abstract initialise()
+    initialise() {
+        this.stylesheet()
+        this.stylesheetDom = document.styleSheets[document.styleSheets.length - 1];
+    }
+    abstract stylesheet()
     abstract machineInitialise(machine: vm.Machine)
+    shutdown() {
+        let styleNode = this.stylesheetDom.ownerNode
+        styleNode.parentNode.removeChild(styleNode)
+    }
 }
 
 export abstract class ASTNode {

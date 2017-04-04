@@ -29,7 +29,6 @@ export class Machine {
   setAST(ast: ast.ASTNode) {
     this.instructions = []
     this.labelToIndexMap = {}
-    this.languageDefinition.machineInitialise(this)
     ast.codegen(this)
     this.indexToLabelsMap = this.getLabelIndices() 
   }

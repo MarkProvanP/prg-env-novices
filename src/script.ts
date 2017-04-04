@@ -16,9 +16,13 @@ import * as fun from "./fun/fun"
 let grammar
 let parser
 let app
+let languageDefinition 
 
 function selectLang() {
-    let languageDefinition = lang.getLanguageDefinition()
+    if (languageDefinition) {
+        languageDefinition.shutdown();
+    }
+    languageDefinition = lang.getLanguageDefinition()
 
     window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {lang}
 
@@ -33,7 +37,10 @@ function selectLang() {
 }
 
 function selectFun() {
-    let languageDefinition = fun.getLanguageDefinition()
+    if (languageDefinition) {
+        languageDefinition.shutdown();
+    }
+    languageDefinition = fun.getLanguageDefinition()
 
     window['superDuperSecretWindowScopeThatNoOneShouldKnowAbout'] = {fun}
 
@@ -52,8 +59,8 @@ parseButton.onclick = (event) => {
     let parsed = parser.parse(input);
     
     let astRoot = parsed[1];
+    let machine = new vm.Machine(astRoot, languageDefinition);
 
-    let machine = new vm.Machine(astRoot);
     app.setup(astRoot, machine)
     app.renderApp();
 }

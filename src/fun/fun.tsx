@@ -12,19 +12,27 @@ export function getLanguageDefinition() {
 }
 
 class Fun extends LanguageDefinition {
-    getGrammar() {
-        return grammar
-    }
+  getName() {
+    return "Fun"
+  }
+  
+  getGrammar() {
+      return grammar
+  }
 
-    initialise() {
-        require("./style.scss")
-    }
-    
-    machineInitialise(machine: vm.Machine) {
-      machine.addLabel(Function.labelName("PRINT"))
-      machine.addInstruction(new vm.Get("text"))
-      machine.addInstruction(new vm.ConsoleOut())
-    }
+  initialise() {
+      super.initialise();
+  }
+
+  stylesheet() {
+    require("./style.scss")
+  }
+  
+  machineInitialise(machine: vm.Machine) {
+    machine.addLabel(Function.labelName("PRINT"))
+    machine.addInstruction(new vm.Get("text"))
+    machine.addInstruction(new vm.ConsoleOut())
+  }
 }
 let definition = new Fun()
 
