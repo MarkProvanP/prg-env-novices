@@ -87,7 +87,7 @@ export class Machine {
   }
 
   canContinue() {
-    return this.instructionPointer < this.instructions.length - 1
+    return this.instructionPointer < this.instructions.length
   }
 
   canReverse() {
@@ -99,6 +99,7 @@ export class Machine {
     let instruction = this.instructions[ip];
     console.log(`IP: ${ip}, instruction:`, instruction)
     let change = instruction.machineChange(this);
+    console.log('change', change);
     this.changeHistory.push(change);
     this.applyMachineChange(change);
     this.instructionCount++;
@@ -106,9 +107,9 @@ export class Machine {
 
   oneStepBackward() {
     let lastChange = this.changeHistory.pop();
-    console.log('Original', lastChange)
+    console.log('Original change', lastChange)
     let reversed = lastChange.reverse()
-    console.log('Reversed', reversed)
+    console.log('Reversed change', reversed)
     this.applyMachineChange(reversed);
     this.instructionCount--;
   }

@@ -93,8 +93,8 @@ export class CallFunction extends Instruction {
     let pushedArray = [this.func.apply(null, args)]
     console.log('arity', arity, 'args', args, 'popped', poppedArray, 'pushed', pushedArray);
     return new MachineChange()
-    .withStackPushed(pushedArray)
     .withStackPopped(poppedArray)
+    .withStackPushed(pushedArray)
   }
 }
 

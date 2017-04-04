@@ -359,7 +359,6 @@ export class SelectionComponent extends React.Component<SelectionComponentProps,
         const optionElements = this.props.values.map((value, index) => (
             <option key={index} value={value}>{value}</option>
         ))
-        console.log(this.props.value, this.props.values)
         return <select className='ast-select' value={this.props.value} onChange={this.props.onChange}>{optionElements}</select>
     }
 }

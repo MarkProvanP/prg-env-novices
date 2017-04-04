@@ -217,13 +217,9 @@ export class StackFrameComponent extends React.Component<StackFrameProps, NoStat
         const stackComponents = stackElements.map((element, index) => {
             return <StackElementComponent key={index} element={element} />
         }).reverse()
-        const args = this.props.frame.args.map((arg, index) => (
-            <div key={index} className='arg'>{JSON.stringify(arg)}</div>
-        ))
         return <div className='frame'>
             {stackComponents}
             <h3>Stack Frame</h3>
-            {args}
             <EnvElementComponent environment={this.props.frame.stackEnvironment}/>
             <p>Return Address: {this.props.frame.returnAddress}</p>
         </div>
