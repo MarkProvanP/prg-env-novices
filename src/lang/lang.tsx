@@ -364,3 +364,19 @@ export class ReturnStatement extends Statement {
     return <render.ReturnStatementComponent {...props} returnStatement={this} />
   }
 }
+
+export class ExpressionStatement extends Statement {
+  constructor(
+    public expression: Expression = new EmptyExpression()
+  ) {
+    super()
+  }
+
+  internalCodegen(machine: vm.Machine) {
+    this.expression.codegen(machine)
+  }
+
+  render(props) {
+    return <render.ExpressionStatementComponent {...props} expressionStatement={this} />
+  }
+}

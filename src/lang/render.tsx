@@ -551,3 +551,32 @@ export class ReturnStatementComponent extends ASTNodeComponent<ReturnStatementPr
         </div>
     }
 }
+
+export interface ExpressionStatementProps extends ASTComponentProps {
+    expressionStatement: lang.ExpressionStatement
+}
+
+export class ExpressionStatementComponent extends ASTNodeComponent<ExpressionStatementProps, ASTNodeComponentState> {
+    getASTNode() {
+        return this.props.expressionStatement
+    }
+
+    deleteExpression() {
+        let newEmptyExpression = new lang.EmptyIdent()
+        this.props.app.replaceElement(this.props.expressionStatement, "expression", newEmptyExpression)
+    }
+    editExpression(replacement) {
+        this.props.app.replaceElement(this.props.expressionStatement, "expression", replacement)
+    }
+
+    getInnerElement() {
+        return <div className='ast-row'>
+            <ExpressionWrapperComponent {...this.props}
+            node={this.props.expressionStatement.expression}
+            onNodeDelete={this.deleteExpression.bind(this)}
+            onNodeEdit={this.editExpression.bind(this)}
+            required={false}
+            />
+        </div>
+    }
+}

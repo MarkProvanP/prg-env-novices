@@ -3,6 +3,7 @@ statement
   / whileStatement
   / methodCallStatement
   / returnStatement
+  / expressionStatement
 
 assignmentStatement
   = "let" w i:ident w ":=" w e:expression w { return new lang.AssignmentStatement(i, e); }
@@ -23,6 +24,9 @@ methodCallArgListElement
 returnStatement
   = "return" w e:expression w { return new lang.ReturnStatement(e) }
   / "return" w { return new lang.ReturnStatement() }
+
+expressionStatement
+  = e:expression { return new lang.ExpressionStatement(e); }
 
 statements
   = s:statement* { return new lang.Statements(s)}
