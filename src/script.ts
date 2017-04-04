@@ -76,17 +76,17 @@ loadLangTestButton.onclick = (event) => {
 }
 
 let langTest = `
-method test ( derp ) {
+method main () {
     let x := 3
     while (x) do { let x := x - 1}
-    let x := 4
-    call hello(x, y)
+    let y := 4
+    call multiply(x, y)
 }
 
-method hello (x, y, z) {
-    let x := 5
-    return x
-}`
+method multiply (x, y) {
+    return x * y
+}
+`
 
 let funTest = `
 function fib(num) := if test then 1 else fib(num - 2) + fib(num - 1)

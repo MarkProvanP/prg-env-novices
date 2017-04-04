@@ -302,9 +302,8 @@ export class Method extends ASTNode {
 
   internalCodegen(machine: vm.Machine) {
     machine.addLabel(Method.labelName(this.name.getName()))
-    machine.addInstruction(new vm.PushStackFrame())
+    machine.addInstruction(new vm.ArgsToEnv(this.args.map(arg => arg.getName())))
     this.statements.codegen(machine)
-    machine.addInstruction(new vm.PopStackFrame())
   }
 
   render(props) {
@@ -321,7 +320,8 @@ export class MethodCallStatement extends Statement {
   }
 
   internalCodegen(machine: vm.Machine) {
-    machine.addInstruction(new vm.MethodCall(Method.labelName(this.ident.getName())))
+    this.args.forEach(arg => arg.codegen(machine))
+    machine.addInstruction(new vm.MethodCall(Method.labelName(this.ident.getName()), this.args.length))
   }
 
   render(props) {
@@ -337,6 +337,7 @@ export class Program extends ASTNode {
   }
 
   internalCodegen(machine: vm.Machine) {
+    machine.addInstruction(new vm.PushStackFrame())
     this.methods.forEach(method => method.codegen(machine))
   }
 

@@ -183,6 +183,10 @@ export class StackFrame {
   public stackEnvironment: Environment = new Environment()
   public returnAddress: number
 
+  constructor(public args: StackElement[]) {
+
+  }
+
   push(element: StackElement) {
     this.stack.push(element)
   }

@@ -33,7 +33,7 @@ export class PushStackFrame extends Instruction {
 
   machineChange(machine: Machine) {
     return new MachineChange()
-    .withStackFramePushed(new StackFrame())
+    .withStackFramePushed(new StackFrame([]))
   }
 }
 
@@ -100,7 +100,8 @@ export class CallFunction extends Instruction {
 
 export class MethodCall extends Instruction {
   constructor(
-    public name: string
+    public name: string,
+    public arity: number
   ) {
     super()
   }
@@ -110,11 +111,14 @@ export class MethodCall extends Instruction {
     let newIP = machine.labelToIndexMap[this.name]
     let change = newIP - originalIp
     let currentFrameIndex = machine.stack.getTopStackFrameIndex()
-    let currentFrame = machine.stack.getTopStackFrame()
+    let currentFrame = machine.stack.getTopStackFrame();
+    let operands = machine.stack.peek(this.arity);
 
     return new MachineChange()
     .withIpChange(change)
+    .withStackPopped(operands)
     .withStackFrameChanged('returnAddress', currentFrame.returnAddress, originalIp, currentFrameIndex)
+    .withStackFramePushed(new StackFrame(operands))
   }
 }
 
@@ -239,5 +243,22 @@ export class ConsoleOut extends Instruction {
     return new MachineChange()
     .withStackPopped([output])
     .withConsoleChanged(output, "")
+  }
+}
+
+export class ArgsToEnv extends Instruction {
+  constructor(public argNames: string[]) {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    let change = new MachineChange()
+    let stackFrameIndex = machine.stack.getTopStackFrameIndex()
+    let stackFrame = machine.stack.getTopStackFrame()
+    this.argNames.forEach((name, index) => {
+      let value = stackFrame.args[index]
+      change = change.withStackFrameEnvChanged(name, undefined, value, stackFrameIndex)
+    })
+    return change
   }
 }
