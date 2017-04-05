@@ -1,21 +1,20 @@
 import * as ast from "../ast";
 
-import { Instruction } from "./instructions"
+import { Instruction, Terminate } from "./instructions"
 import { MachineChange } from "./changes"
 
 export class Machine {
   public instructions: Instruction[] = []
   instructionCount = 0;
+  public instructionPointer = 0;
 
   public stack = new Stack()
   public globalEnvironment = new Environment()
 
-  public instructionPointer = 0;
-  public labelToIndexMap = {};
-  public indexToLabelsMap = {};
-
   public changeHistory: MachineChange[] = [];
 
+  public labelToIndexMap = {};
+  public indexToLabelsMap = {};
   public astInstructionRangeMap = new WeakMap<ast.ASTNode, InstructionRange>();
   public activeASTNodesAtIndices = []
   private currentlyActiveASTNodes = []
@@ -29,6 +28,10 @@ export class Machine {
   setAST(ast: ast.ASTNode) {
     this.instructions = []
     this.labelToIndexMap = {}
+    this.indexToLabelsMap = {}
+    this.activeASTNodesAtIndices = []
+    this.currentlyActiveASTNodes = []
+
     ast.codegen(this)
     this.indexToLabelsMap = this.getLabelIndices() 
   }
@@ -87,11 +90,11 @@ export class Machine {
   }
 
   canContinue() {
-    return this.instructionPointer < this.instructions.length
+    return !(this.instructions[this.instructionPointer] instanceof Terminate)
   }
 
   canReverse() {
-    return this.changeHistory.length
+    return this.instructionCount
   }
 
   oneStepExecute() {

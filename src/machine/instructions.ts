@@ -132,8 +132,15 @@ export class Return extends Instruction {
     let currentFrame = machine.stack.getTopStackFrame()
     let lowerIndex = index - 1;
     let lowerFrame = machine.stack.getFrame(lowerIndex)
-    let newIP = lowerFrame.returnAddress + 1
-    let ipChange = newIP - machine.instructionPointer
+
+    if (lowerFrame) {
+      let newIP = lowerFrame.returnAddress + 1
+      var ipChange = newIP - machine.instructionPointer
+    } else {
+      // No lower frame, therefore go to last instruction for termination
+      let lastInstructionPointer = machine.labelToIndexMap[Terminate.LABEL]
+      var ipChange = lastInstructionPointer - machine.instructionPointer
+    }
 
     let change = new MachineChange()
     .withIpChange(ipChange)
@@ -260,5 +267,17 @@ export class ArgsToEnv extends Instruction {
       change = change.withStackFrameEnvChanged(name, undefined, value, stackFrameIndex)
     })
     return change
+  }
+}
+
+export class Terminate extends Instruction {
+  static LABEL = "TERMINATE"
+
+  constructor() {
+    super()
+  }
+
+  machineChange(machine: Machine) {
+    return new MachineChange()
   }
 }

@@ -302,8 +302,14 @@ export class Method extends ASTNode {
 
   internalCodegen(machine: vm.Machine) {
     machine.addLabel(Method.labelName(this.name.getName()))
-    machine.addInstruction(new vm.ArgsToEnv(this.args.map(arg => arg.getName())))
+    if (this.args.length) {
+      machine.addInstruction(new vm.ArgsToEnv(this.args.map(arg => arg.getName())))
+    }
     this.statements.codegen(machine)
+    let lastInstruction = machine.instructions[machine.instructions.length - 1]
+    if (!(lastInstruction instanceof vm.Return)) {
+      machine.addInstruction(new vm.Return(false))
+    }
   }
 
   render(props) {
@@ -339,6 +345,8 @@ export class Program extends ASTNode {
   internalCodegen(machine: vm.Machine) {
     machine.addInstruction(new vm.PushStackFrame())
     this.methods.forEach(method => method.codegen(machine))
+    machine.addLabel(vm.Terminate.LABEL)
+    machine.addInstruction(new vm.Terminate())
   }
 
   render(props) {
