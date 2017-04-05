@@ -426,24 +426,24 @@ export class ConditionalExpressionComponent extends ASTNodeComponent<Conditional
                 <KeywordComponent keyword='if' />
                 <ExpressionWrapperComponent {...this.props}
                 node={this.props.conditionalExpression.condition}
-                onNodeDelete={this.removeCondition}
-                onNodeEdit={this.editCondition}
+                onNodeDelete={this.removeCondition.bind(this)}
+                onNodeEdit={this.editCondition.bind(this)}
                 />
             </div>
             <div className='ast-row'>
                 <KeywordComponent keyword='then' />
                 <ExpressionWrapperComponent {...this.props}
                 node={this.props.conditionalExpression.thenExpression}
-                onNodeDelete={this.removeThenExpression}
-                onNodeEdit={this.editThenExpression}
+                onNodeDelete={this.removeThenExpression.bind(this)}
+                onNodeEdit={this.editThenExpression.bind(this)}
                 />
             </div>
             <div className='ast-row'>
                 <KeywordComponent keyword='else' />
                 <ExpressionWrapperComponent {...this.props}
                 node={this.props.conditionalExpression.elseExpression}
-                onNodeDelete={this.removeElseExpression}
-                onNodeEdit={this.editElseExpression}
+                onNodeDelete={this.removeElseExpression.bind(this)}
+                onNodeEdit={this.editElseExpression.bind(this)}
                 />
             </div>
         </div>

@@ -15,7 +15,7 @@ export class App {
     mousedOverASTNodes: ast.ASTNode[] = []
     private _mousedOverNodesBuilder: ast.ASTNode[]
 
-    selectedLabel: string
+    selectedLabel: vm.Label
 
     grammar: any
 
@@ -88,7 +88,7 @@ export class App {
         this._mousedOverNodesBuilder.push(node);
     }
 
-    selectLabel(label: string) {
+    selectLabel(label: vm.Label) {
         this.selectedLabel = label
         this.renderApp()
     }

@@ -1,4 +1,4 @@
-import { Machine, StackFrame, StackElement } from "./index"
+import { Machine, StackFrame, StackElement, Label } from "./index"
 
 import { MachineChange, StackFrameChange } from "./changes"
 
@@ -108,7 +108,7 @@ export class MethodCall extends Instruction {
 
   machineChange(machine: Machine) {
     let originalIp = machine.instructionPointer
-    let newIP = machine.labelToIndexMap[this.name]
+    let newIP = machine.globalLabelIndexMap.get(this.name)
     let change = newIP - originalIp
     let currentFrameIndex = machine.stack.getTopStackFrameIndex()
     let currentFrame = machine.stack.getTopStackFrame();
@@ -138,7 +138,7 @@ export class Return extends Instruction {
       var ipChange = newIP - machine.instructionPointer
     } else {
       // No lower frame, therefore go to last instruction for termination
-      let lastInstructionPointer = machine.labelToIndexMap[Terminate.LABEL]
+      let lastInstructionPointer = machine.globalLabelIndexMap.get(Terminate.LABEL)
       var ipChange = lastInstructionPointer - machine.instructionPointer
     }
 
@@ -157,14 +157,14 @@ export class Return extends Instruction {
 
 export class Goto extends Instruction {
   constructor(
-    public label: string
+    public label: Label
   ) {
     super()
   }
 
   machineChange(machine: Machine) {
     let originalIP = machine.instructionPointer;
-    let newIP = machine.labelToIndexMap[this.label];
+    let newIP = machine.labelToIndexMap.get(this.label);
     let change = newIP - originalIP;
     return new MachineChange()
     .withIpChange(change)
@@ -172,7 +172,9 @@ export class Goto extends Instruction {
 }
 
 export class IfGoto extends Instruction {
-  constructor(public label: string) {
+  constructor(
+    public label: Label
+  ) {
     super();
   }
 
@@ -183,7 +185,7 @@ export class IfGoto extends Instruction {
     let isTruthy = Machine.isTruthy(stackTop);
     if (isTruthy) {
       let originalIP = machine.instructionPointer;
-      let newIP = machine.labelToIndexMap[this.label];
+      let newIP = machine.labelToIndexMap.get(this.label)
       let change = newIP - originalIP;
       return new MachineChange()
       .withStackPopped([stackTop])

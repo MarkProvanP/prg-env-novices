@@ -29,7 +29,8 @@ class Fun extends LanguageDefinition {
   }
   
   machineInitialise(machine: vm.Machine) {
-    machine.addLabel(Function.labelName("PRINT"))
+    machine.addGlobalLabel("PRINT")
+    machine.addInstruction(new vm.ArgsToEnv(["text"]))
     machine.addInstruction(new vm.Get("text"))
     machine.addInstruction(new vm.ConsoleOut())
   }
@@ -157,13 +158,16 @@ export class ConditionalExpression extends Expression {
   }
 
   internalCodegen(machine: vm.Machine) {
+    let conditionalFalseLabel = new vm.Label(this, "ConditionalFalse")
+    let conditionalEndLabel = new vm.Label(this, "ConditionalEnd")
+
     this.condition.codegen(machine)
-    machine.addInstruction(new vm.IfGoto("ConditionalFalse"))
+    machine.addInstruction(new vm.IfGoto(conditionalFalseLabel))
     this.thenExpression.codegen(machine)
-    machine.addInstruction(new vm.Goto("ConditionalEnd"))
-    machine.addLabel("ConditionalFalse")
+    machine.addInstruction(new vm.Goto(conditionalEndLabel))
+    machine.addLabel(conditionalFalseLabel)
     this.elseExpression.codegen(machine)
-    machine.addLabel("ConditionalEnd")
+    machine.addLabel(conditionalEndLabel)
   }
 
   render(props) {
@@ -239,7 +243,6 @@ export class Function extends ASTNode {
   }
 
   internalCodegen(machine: vm.Machine) {
-    machine.addLabel(Function.labelName(this.name.getName()))
     if (this.args.length) {
       machine.addInstruction(new vm.ArgsToEnv(this.args.map(arg => arg.getName())))
     }
@@ -262,7 +265,7 @@ export class FunctionCallExpression extends Expression {
 
   internalCodegen(machine: vm.Machine) {
     this.args.forEach(arg => arg.codegen(machine))
-    machine.addInstruction(new vm.MethodCall(Function.labelName(this.ident.getName()), this.args.length))
+    machine.addInstruction(new vm.MethodCall(this.ident.getName(), this.args.length))
   }
 
   render(props) {
@@ -279,8 +282,11 @@ export class Program extends ASTNode {
 
   internalCodegen(machine: vm.Machine) {
     machine.addInstruction(new vm.PushStackFrame())
-    this.methods.forEach(method => method.codegen(machine))
-    machine.addLabel(vm.Terminate.LABEL)
+    this.methods.forEach(method => {
+      machine.addGlobalLabel(method.name.getName())
+      method.codegen(machine)
+    })
+    machine.addGlobalLabel(vm.Terminate.LABEL)
     machine.addInstruction(new vm.Terminate())
   }
 

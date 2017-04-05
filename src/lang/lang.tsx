@@ -196,8 +196,8 @@ export class WhileStatement extends Statement {
   }
 
   internalCodegen(machine: vm.Machine) {
-    let whileBeginLabel = "whileBegin";
-    let whileEndLabel = "whileEnd";
+    let whileBeginLabel = new vm.Label(this, "whileBegin")
+    let whileEndLabel = new vm.Label(this, "whileEnd")
     machine.addLabel(whileBeginLabel)
     this.condition.codegen(machine)
     machine.addInstruction(new vm.CallFunction(vm.builtInFunctions['!']))
@@ -301,7 +301,6 @@ export class Method extends ASTNode {
   }
 
   internalCodegen(machine: vm.Machine) {
-    machine.addLabel(Method.labelName(this.name.getName()))
     if (this.args.length) {
       machine.addInstruction(new vm.ArgsToEnv(this.args.map(arg => arg.getName())))
     }
@@ -327,7 +326,7 @@ export class MethodCallExpression extends Expression {
 
   internalCodegen(machine: vm.Machine) {
     this.args.forEach(arg => arg.codegen(machine))
-    machine.addInstruction(new vm.MethodCall(Method.labelName(this.ident.getName()), this.args.length))
+    machine.addInstruction(new vm.MethodCall(this.ident.getName(), this.args.length))
   }
 
   render(props) {
@@ -344,8 +343,11 @@ export class Program extends ASTNode {
 
   internalCodegen(machine: vm.Machine) {
     machine.addInstruction(new vm.PushStackFrame())
-    this.methods.forEach(method => method.codegen(machine))
-    machine.addLabel(vm.Terminate.LABEL)
+    this.methods.forEach(method => {
+      machine.addGlobalLabel(method.name.getName())
+      method.codegen(machine)
+    })
+    machine.addGlobalLabel(vm.Terminate.LABEL)
     machine.addInstruction(new vm.Terminate())
   }
 

@@ -147,6 +147,14 @@ body {
     }
 }
 
+.tiny-ast-link {
+    font-size: smaller;
+    border: 1px solid black;
+    margin: 1px;
+    font-style: normal;
+    font-weight: normal;
+}
+
 .instructions {
     flex: 1;
     overflow-y: scroll;
@@ -160,6 +168,11 @@ body {
 
         .labels {
             width: 100px;
+
+            .label {
+                display: flex;
+                align-items: center;
+            }
         }
 
         .index {
@@ -186,12 +199,6 @@ body {
             margin-left: 20px;
             display: flex;
             align-items: center;
-
-            .active-node {
-                font-size: smaller;
-                border: 1px solid black;
-                margin: 1px;
-            }
         }
     }
 

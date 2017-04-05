@@ -13,7 +13,8 @@ export class Machine {
 
   public changeHistory: MachineChange[] = [];
 
-  public labelToIndexMap = {};
+  public labelToIndexMap: Map<Label, number>
+  public globalLabelIndexMap: Map<string, number>
   public indexToLabelsMap = {};
   public astInstructionRangeMap = new WeakMap<ast.ASTNode, InstructionRange>();
   public activeASTNodesAtIndices = []
@@ -27,7 +28,8 @@ export class Machine {
 
   setAST(ast: ast.ASTNode) {
     this.instructions = []
-    this.labelToIndexMap = {}
+    this.labelToIndexMap = new Map<Label, number>()
+    this.globalLabelIndexMap = new Map<string, number>()
     this.indexToLabelsMap = {}
     this.activeASTNodesAtIndices = []
     this.currentlyActiveASTNodes = []
@@ -55,14 +57,23 @@ export class Machine {
     this.currentlyActiveASTNodes.pop()
   }
 
-  addLabel(label: string) {
-    this.labelToIndexMap[label] = this.instructions.length;
+  addGlobalLabel(label: string) {
+    this.globalLabelIndexMap.set(label, this.instructions.length)
+  }
+
+  addLabel(label: Label) {
+    this.labelToIndexMap.set(label, this.instructions.length)
   }
 
   getLabelIndices() {
     let indexToLabelMap = {}
-    Object.keys(this.labelToIndexMap).forEach(label => {
-      let index = this.labelToIndexMap[label];
+    this.labelToIndexMap.forEach((index, label, map) => {
+      if (!indexToLabelMap[index]) {
+        indexToLabelMap[index] = []
+      }
+      indexToLabelMap[index].push(label)
+    })
+    this.globalLabelIndexMap.forEach((index, label, map) => {
       if (!indexToLabelMap[index]) {
         indexToLabelMap[index] = []
       }
@@ -123,6 +134,15 @@ export class Machine {
       return
     }
     return activeNodesAtCurrentIndex[activeNodesAtCurrentIndex.length - 1]
+  }
+}
+
+export class Label {
+  constructor(
+    public ownerNode: ast.ASTNode,
+    public name: string
+  ) {
+
   }
 }
 

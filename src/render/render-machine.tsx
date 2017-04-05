@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 
 import * as vm from "../machine/index";
 import { App } from "../app";
+import { ASTNode } from "../ast"
 import { EditorButtonComponent } from "./render-ast"
 
 export function renderMachine(app: App) {
@@ -139,24 +140,25 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
         return this.props.app.machine.indexToLabelsMap[this.props.index] || []
     }
 
+
     getActiveASTNodesAtIndex(index: number) {
         const nodes = this.props.app.machine.activeASTNodesAtIndices[index];
-        let className = node => classNames('active-node', node.constructor.name)
-        let selectNode = (node) => {
-            return (e) => {
-                this.props.app.selectASTNode(node)
-            }
-        }
         return nodes.map((node, index) => {
-            const text = node.constructor.name.split("").filter((l: string) => l.toUpperCase() == l)
-            return <div key={index} className={className(node)} onClick={selectNode(node).bind(this)}>{text}</div>
+            return <TinyASTLinkComponent key={index} app={this.props.app} node={node}/>
         })
     }
 
     render() {
-        const labelElements = this.getLabels().map((label, index) => (
-            <div key={index} className='label'>{label}</div>
-        ))
+        const labelElements = this.getLabels().map((label, index) => {
+            if (label instanceof vm.Label) {
+                return <div key={index} className='local-label label'>
+                    <TinyASTLinkComponent app={this.props.app} node={label.ownerNode}/>
+                    {label.name}
+                </div>
+            } else {
+                return <div key={index} className='global-label label'>{label}</div>
+            }
+        })
         return <div className={this.getClassName()}>
             <div className='labels'>{labelElements}</div>
             <div className='index'>{this.props.index}</div>
@@ -186,7 +188,7 @@ function getComponentForInstruction(instruction: vm.Instruction) {
 }
 
 interface LabelComponentProps extends VMStateProps {
-    label: string
+    label: vm.Label
 }
 
 export class LabelComponent extends React.Component<LabelComponentProps, NoState> {
@@ -195,14 +197,14 @@ export class LabelComponent extends React.Component<LabelComponentProps, NoState
     }
 
     onMouseLeave(e) {
-        this.props.app.selectLabel("")
+        this.props.app.selectLabel(undefined)
     }
 
     render() {
         return <div className='label'
         onMouseEnter={this.onMouseEnter.bind(this)}
         onMouseLeave={this.onMouseLeave.bind(this)}
-        >{this.props.label}</div>
+        >{this.props.label.name}</div>
     }
 }
 
@@ -304,5 +306,24 @@ class VMConsoleComponent extends React.Component<VMStateProps, NoState> {
                 {this.props.app.machine.textConsole.getText()}
             </pre>
         </div>
+    }
+}
+
+interface TinyASTLinkProps {
+    app: App,
+    node: ASTNode
+}
+
+class TinyASTLinkComponent extends React.Component<TinyASTLinkProps, NoState> {
+    selectNode() {
+        this.props.app.selectASTNode(this.props.node)
+    }
+
+    render() {
+        const node = this.props.node
+        const className = classNames('tiny-ast-link', node.constructor.name)
+        const shortName = node.constructor.name.split("").filter((l: string) => l.toUpperCase() == l)
+        return <div className={className} onClick={this.selectNode.bind(this)}>{shortName}</div>
+
     }
 }
