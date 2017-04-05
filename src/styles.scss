@@ -153,6 +153,10 @@ body {
     margin: 1px;
     font-style: normal;
     font-weight: normal;
+
+    &.selected {
+        border-color: yellow;
+    }
 }
 
 .instructions {
@@ -186,6 +190,11 @@ body {
 
         .args {
             font-style: italic;
+
+            .argument-label {
+                display: flex;
+                align-items: center;
+            }
 
             .label {
                 font-size: smaller;

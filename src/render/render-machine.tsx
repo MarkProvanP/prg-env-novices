@@ -188,7 +188,7 @@ function getComponentForInstruction(instruction: vm.Instruction) {
 }
 
 interface LabelComponentProps extends VMStateProps {
-    label: vm.Label
+    label: vm.Label | string
 }
 
 export class LabelComponent extends React.Component<LabelComponentProps, NoState> {
@@ -201,10 +201,13 @@ export class LabelComponent extends React.Component<LabelComponentProps, NoState
     }
 
     render() {
+        const contents = this.props.label instanceof vm.Label
+        ? <div className='argument-label'><TinyASTLinkComponent app={this.props.app} node={this.props.label.ownerNode}/>{this.props.label.name}</div>
+        : this.props.label
         return <div className='label'
         onMouseEnter={this.onMouseEnter.bind(this)}
         onMouseLeave={this.onMouseLeave.bind(this)}
-        >{this.props.label.name}</div>
+        >{contents}</div>
     }
 }
 
@@ -236,8 +239,8 @@ export class StackFrameComponent extends React.Component<StackFrameProps, NoStat
         }).reverse()
         const returnAddress = typeof this.props.frame.returnAddress == 'number'
         ? [
-            <div className='frame-divider'>Return Address</div>,
-            <div className='return-address'>{this.props.frame.returnAddress}</div>
+            <div key={1} className='frame-divider'>Return Address</div>,
+            <div key={2} className='return-address'>{this.props.frame.returnAddress}</div>
         ]
         : undefined
         return <div className='frame'>
@@ -321,7 +324,12 @@ class TinyASTLinkComponent extends React.Component<TinyASTLinkProps, NoState> {
 
     render() {
         const node = this.props.node
-        const className = classNames('tiny-ast-link', node.constructor.name)
+        const isSelected = this.props.app.selectedASTNode == this.props.node
+        const className = classNames(
+            'tiny-ast-link',
+            node.constructor.name,
+            isSelected ? 'selected' : ''
+        )
         const shortName = node.constructor.name.split("").filter((l: string) => l.toUpperCase() == l)
         return <div className={className} onClick={this.selectNode.bind(this)}>{shortName}</div>
 
