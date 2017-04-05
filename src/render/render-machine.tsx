@@ -338,16 +338,20 @@ interface TinyASTLinkProps {
 
 class TinyASTLinkComponent extends React.Component<TinyASTLinkProps, NoState> {
     selectNode() {
-        this.props.app.selectASTNode(this.props.node)
+        let node = this.isNodeSelected() ? undefined : this.props.node
+        this.props.app.selectASTNode(node)
+    }
+
+    isNodeSelected() {
+        return this.props.app.selectedASTNode == this.props.node
     }
 
     render() {
         const node = this.props.node
-        const isSelected = this.props.app.selectedASTNode == this.props.node
         const className = classNames(
             'tiny-ast-link',
             node.constructor.name,
-            isSelected ? 'selected' : ''
+            this.isNodeSelected() ? 'selected' : ''
         )
         const shortName = node.constructor.name.split("").filter((l: string) => l.toUpperCase() == l)
         return <div className={className} onClick={this.selectNode.bind(this)}>{shortName}</div>
