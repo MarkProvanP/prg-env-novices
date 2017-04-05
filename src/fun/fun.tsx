@@ -32,8 +32,19 @@ class Fun extends LanguageDefinition {
     machine.addGlobalLabel("trace")
     machine.addInstruction(new vm.ArgsToEnv(["text", "r"]))
     machine.addInstruction(new vm.Get("text"))
-    machine.addInstruction(new vm.ConsoleOut())
+    machine.addInstruction(new vm.ConsoleOut(false))
     machine.addInstruction(new vm.Get("r"))
+    machine.addInstruction(new vm.Return(true))
+
+    machine.addGlobalLabel("traceln")
+    machine.addInstruction(new vm.ArgsToEnv(["text", "r"]))
+    machine.addInstruction(new vm.Get("text"))
+    machine.addInstruction(new vm.ConsoleOut(true))
+    machine.addInstruction(new vm.Get("r"))
+    machine.addInstruction(new vm.Return(true))
+
+    machine.addGlobalLabel("input")
+    machine.addInstruction(new vm.ConsoleIn())
     machine.addInstruction(new vm.Return(true))
   }
 }
@@ -164,6 +175,7 @@ export class ConditionalExpression extends Expression {
     let conditionalEndLabel = new vm.Label(this, "ConditionalEnd")
 
     this.condition.codegen(machine)
+    machine.addInstruction(new vm.CallFunction(vm.builtInFunctions['!']))
     machine.addInstruction(new vm.IfGoto(conditionalFalseLabel))
     this.thenExpression.codegen(machine)
     machine.addInstruction(new vm.Goto(conditionalEndLabel))

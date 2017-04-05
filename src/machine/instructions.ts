@@ -235,23 +235,28 @@ export class ConsoleIn extends Instruction {
   }
 
   machineChange(machine: Machine) {
-    let input = prompt("Input!")
+    let input = prompt("Please enter a valid integer!")
+    while (isNaN(Number(input))) {
+      input = prompt("Try again, must be valid integer!")
+    }
+    let num = Number(input)
     return new MachineChange()
-    .withStackPushed([input])
+    .withStackPushed([num])
     .withConsoleChanged(input, "")
   }
 }
 
 export class ConsoleOut extends Instruction {
-  constructor() {
+  constructor(public newline: boolean) {
     super()
   }
 
   machineChange(machine: Machine) {
     let output = machine.stack.getTopStackFrame().peek()
+    let printed = this.newline ? output + "\n" : output
     return new MachineChange()
     .withStackPopped([output])
-    .withConsoleChanged(output, "")
+    .withConsoleChanged(printed, "")
   }
 }
 

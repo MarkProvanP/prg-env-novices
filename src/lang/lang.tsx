@@ -32,8 +32,18 @@ class Lang extends LanguageDefinition {
     machine.addGlobalLabel("print")
     machine.addInstruction(new vm.ArgsToEnv(["text"]))
     machine.addInstruction(new vm.Get("text"))
-    machine.addInstruction(new vm.ConsoleOut())
+    machine.addInstruction(new vm.ConsoleOut(false))
     machine.addInstruction(new vm.Return(false))
+
+    machine.addGlobalLabel("println")
+    machine.addInstruction(new vm.ArgsToEnv(["text"]))
+    machine.addInstruction(new vm.Get("text"))
+    machine.addInstruction(new vm.ConsoleOut(true))
+    machine.addInstruction(new vm.Return(false))
+
+    machine.addGlobalLabel("input")
+    machine.addInstruction(new vm.ConsoleIn())
+    machine.addInstruction(new vm.Return(true))
   }
 }
 let definition = new Lang()
