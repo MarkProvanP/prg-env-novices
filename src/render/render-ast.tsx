@@ -31,7 +31,7 @@ export class ASTEditor extends React.Component<ASTEditorProps, ASTEditorState> {
 
     render() {
         return <div className='ast-editor'>
-            <div className='editor-toolbar'>
+            <div className='ui-toolbar editor-toolbar'>
                 <EditorButtonComponent name='editor-undo' text='Undo' disabled={!this.props.app.canUndo()} onClick={this.undo.bind(this)}/>
                 <EditorButtonComponent name='editor-redo' text='Redo' disabled={!this.props.app.canRedo()} onClick={this.redo.bind(this)}/>
             </div>

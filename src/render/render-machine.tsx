@@ -3,15 +3,12 @@ import ReactDOM from "react-dom";
 
 import * as vm from "../machine/index";
 import { App } from "../app";
+import { EditorButtonComponent } from "./render-ast"
 
 export function renderMachine(app: App) {
     ReactDOM.render(
         <VMStateComponent app={app}/>,
         document.getElementById('react-vm-div')
-    )
-    ReactDOM.render(
-        <VMInstructionsComponent app={app}/>,
-        document.getElementById('instructions-div')
     )
 }
 
@@ -48,17 +45,24 @@ export class VMStateComponent extends React.Component<VMStateProps, NoState> {
 
     render() {
         return <div className='vm-state'>
-            <h2>Machine State</h2>
-            <div className='info'>
-                <button disabled={this.isBackButtonDisabled()} onClick={this.onBackwardButtonClick}>Backward</button>
-                <span className='instruction-pointer'>IP: {this.props.app.machine.instructionPointer}</span>
-                <span className='instruction-count'>Count: {this.props.app.machine.instructionCount}</span>
-                <button disabled={this.isForwardButtonDisabled()} onClick={this.onForwardButtonClick}>Forward</button>
+            <div className='ui-toolbar machine-toolbar'>
+                <EditorButtonComponent disabled={this.isBackButtonDisabled()} name='vm-step-back' text='Backward' onClick={this.onBackwardButtonClick} />
+                <div className='info-num'>
+                    <div className='info-label'>IP</div>
+                    <div className='info-value'>{this.props.app.machine.instructionPointer}</div>
+                </div>
+                <div className='info-num'>
+                    <div className='info-label'>Count</div>
+                    <div className='info-value'>{this.props.app.machine.instructionCount}</div>
+                </div>
+                <EditorButtonComponent disabled={this.isForwardButtonDisabled()} name='vm-step-forward' text='Forward' onClick={this.onForwardButtonClick} />
             </div>
-            <ASTChangesComponent app={this.props.app} />
-            <VMStackComponent app={this.props.app} />
-            <VMGlobalEnvComponent app={this.props.app} />
-            <VMConsoleComponent app={this.props.app} />
+            <div className='vm-content'>
+                <VMInstructionsComponent app={this.props.app}/>
+                <VMStackComponent app={this.props.app} />
+                <VMGlobalEnvComponent app={this.props.app} />
+                <VMConsoleComponent app={this.props.app}/>
+            </div>
         </div>;
     }
 }
@@ -98,7 +102,6 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, NoSta
             />
         })
         return <div className='instructions'>
-            <h3>Instructions</h3>
             {instructionComponents}
         </div>
     }
@@ -120,7 +123,8 @@ export class InstructionComponent extends React.Component<InstructionProps, Inst
             'instruction',
             (this.props.currentIp == this.props.index) ? 'current-ip' : '',
             this.props.insideRange ? 'within-range' : '',
-            this.getLabels().includes(this.props.app.selectedLabel) ? 'selected-label' : ''
+            this.getLabels().includes(this.props.app.selectedLabel) ? 'selected-label' : '',
+            this.props.app.languageDefinition.getName()
         )
     }
 

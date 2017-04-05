@@ -433,34 +433,73 @@ body {
     }
 }
 
+.ui-toolbar {
+    display: flex;
+    min-height: 35px;
+}
+
 .ast-editor {
     border: 2px solid black;
-    
+
     .editor-toolbar {
         background-color: #222;
-        display: flex;
+        
     }
     .editor-content {
         background-color: #333;
         padding: 10px;
     }
+}
 
-    .editor-button {
-        transition: background-color 0.5s ease-in-out;
-        background-color: lightgrey;
-        border: 1px solid black;
-        border-radius: 2px;
-        margin: 5px;
-        cursor: pointer;
-        padding: 2px;
+.info-num {
+    display: flex;
+    background-color: black;
+    border: 1px solid black;
+    border-radius: 2px;
+    margin: 5px;
+    padding: 2px;
 
-        &.disabled {
-            color: grey;
-            cursor: not-allowed;
-        }
+    .info-label {
+        color: lightgrey;
+    }
+    .info-value {
+        color: lightgrey;
+        margin-left: 10px;
+        background-color: #222;
+        border-radius: 1px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+}
 
-        &:hover {
-            background-color: lightgreen
-        }
+.vm-state {
+    border: 2px solid black;
+
+    .machine-toolbar {
+        background-color: #222;
+    }
+
+    .vm-content {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.editor-button {
+    transition: background-color 0.5s ease-in-out;
+    background-color: lightgrey;
+    border: 1px solid black;
+    border-radius: 2px;
+    margin: 5px;
+    cursor: pointer;
+    padding: 2px;
+
+    &.disabled {
+        color: grey;
+        cursor: not-allowed;
+    }
+
+    &:hover {
+        background-color: lightgreen
     }
 }
