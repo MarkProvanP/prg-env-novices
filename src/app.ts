@@ -8,6 +8,7 @@ export class App {
     machine: vm.Machine
 
     astChanges: ast.ASTChange[] = []
+    undoneChanges: ast.ASTChange[] = []
 
     selectedASTNode: ast.ASTNode
     
@@ -94,6 +95,10 @@ export class App {
 
     addNewChange(change: ast.ASTChange) {
         this.astChanges.push(change)
+        this.applyChange(change)
+    }
+
+    applyChange(change: ast.ASTChange) {
         change.apply()
         this.changeAST()
         this.renderApp()
@@ -106,6 +111,27 @@ export class App {
         let lastChange = this.astChanges[this.astChanges.length - 1]
         let reversed = lastChange.reverse()
         this.addNewChange(reversed)
+    }
+
+    editorUndo() {
+        let lastChange = this.astChanges.pop()
+        let reversed = lastChange.reverse()
+        this.applyChange(reversed)
+        this.undoneChanges.push(lastChange)
+    }
+
+    editorRedo() {
+        let lastUndoneChange = this.undoneChanges.pop()
+        this.astChanges.push(lastUndoneChange)
+        this.applyChange(lastUndoneChange)
+    }
+
+    canUndo() {
+        return !!this.astChanges.length
+    }
+
+    canRedo() {
+        return !!this.undoneChanges.length
     }
 
     replaceElement(node: ast.ASTNode, element: string, replacement: ast.ASTNode) {

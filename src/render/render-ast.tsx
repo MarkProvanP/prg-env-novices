@@ -7,9 +7,67 @@ let classNames = (...classes) => classes.filter(s => s).join(" ")
 
 export function renderAST(app: App) {
     ReactDOM.render(
-        <WholeASTComponent node={app.ast} app={app} />,
+        <ASTEditor app={app} />,
         document.getElementById("react-ast-div")
     )
+}
+
+interface ASTEditorProps {
+    app: App
+}
+
+interface ASTEditorState {
+
+}
+
+export class ASTEditor extends React.Component<ASTEditorProps, ASTEditorState> {
+    undo(e) {
+        this.props.app.editorUndo()
+    }
+
+    redo(e) {
+        this.props.app.editorRedo()
+    }
+
+    render() {
+        return <div className='ast-editor'>
+            <div className='editor-toolbar'>
+                <EditorButtonComponent name='editor-undo' text='Undo' disabled={!this.props.app.canUndo()} onClick={this.undo.bind(this)}/>
+                <EditorButtonComponent name='editor-redo' text='Redo' disabled={!this.props.app.canRedo()} onClick={this.redo.bind(this)}/>
+            </div>
+            <div className='editor-content'>
+                <WholeASTComponent node={this.props.app.ast} app={this.props.app} />
+            </div>
+        </div>
+    }
+}
+
+export interface EditorButtonComponentProps {
+    text: string,
+    name: string,
+    disabled?: boolean,
+    onClick: (e) => void
+}
+
+export class EditorButtonComponent extends React.Component<EditorButtonComponentProps, NoState> {
+    getClassName() {
+        return classNames(
+            'editor-button',
+            this.props.name,
+            this.props.disabled ? 'disabled' : ''
+        )
+    }
+
+    click(e) {
+        if (this.props.disabled) {
+            return;
+        }
+        return this.props.onClick(e)
+    }
+
+    render() {
+        return <div className={this.getClassName()} onClick={this.click.bind(this)} >{this.props.text}</div>
+    }
 }
 
 interface WholeASTProps {
