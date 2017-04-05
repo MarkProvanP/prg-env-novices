@@ -16,6 +16,7 @@ export class Machine {
   public labelToIndexMap: Map<Label, number>
   public globalLabelIndexMap: Map<string, number>
   public indexToLabelsMap = {};
+  public indexToGlobalLabelsMap = {};
   public astInstructionRangeMap = new WeakMap<ast.ASTNode, InstructionRange>();
   public activeASTNodesAtIndices = []
   private currentlyActiveASTNodes = []
@@ -36,7 +37,7 @@ export class Machine {
 
     ast.codegen(this)
     this.languageDefinition.machineInitialise(this)
-    this.indexToLabelsMap = this.getLabelIndices() 
+    this.getLabelIndices() 
   }
 
   addInstruction(instruction: Instruction) {
@@ -67,20 +68,22 @@ export class Machine {
   }
 
   getLabelIndices() {
-    let indexToLabelMap = {}
+    let locals = {}
     this.labelToIndexMap.forEach((index, label, map) => {
-      if (!indexToLabelMap[index]) {
-        indexToLabelMap[index] = []
+      if (!locals[index]) {
+        locals[index] = []
       }
-      indexToLabelMap[index].push(label)
+      locals[index].push(label)
     })
+    let globals = {}
     this.globalLabelIndexMap.forEach((index, label, map) => {
-      if (!indexToLabelMap[index]) {
-        indexToLabelMap[index] = []
+      if (!globals[index]) {
+        globals[index] = []
       }
-      indexToLabelMap[index].push(label)
+      globals[index].push(label)
     })
-    return indexToLabelMap
+    this.indexToLabelsMap = locals
+    this.indexToGlobalLabelsMap = globals
   }
 
   static isTruthy(val: StackElement) {

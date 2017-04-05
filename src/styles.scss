@@ -164,6 +164,10 @@ body {
     overflow-y: scroll;
     height: 100%;
 
+    .global-label {
+        color: white;
+    }
+
     .instruction {
         border: 1px solid black;
         margin: 5px;

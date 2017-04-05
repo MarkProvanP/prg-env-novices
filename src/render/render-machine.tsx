@@ -98,15 +98,24 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, NoSta
     render() {
         const instructions = this.props.app.machine.instructions;
         const instructionRange = this.props.app.machine.astInstructionRangeMap.get(this.props.app.selectedASTNode);
-        const instructionComponents = instructions.map((instruction, index) => {
-            return <InstructionComponent
-            key={index}
+        const instructionComponents = []
+        let key = 0;
+        instructions.forEach((instruction, index) => {
+            let globalLabelsAtIndex = this.props.app.machine.indexToGlobalLabelsMap[index]
+            if (globalLabelsAtIndex) {
+                instructionComponents.push(<div className='global-label' key={key}>{globalLabelsAtIndex}</div>)
+                key++
+            }
+            let instructionComponent = <InstructionComponent
+            key={key}
             instruction={instruction}
             index={index}
             currentIp={this.props.app.machine.instructionPointer}
             insideRange={instructionRange ? instructionRange.withinRange(index) : false}
             app={this.props.app}
             />
+            instructionComponents.push(instructionComponent)
+            key++
         })
         return <div className='instructions ui-component'>
             <div className='ui-component-title'>
