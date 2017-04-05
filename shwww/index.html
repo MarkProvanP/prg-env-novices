@@ -2,23 +2,25 @@
 <html>
 <head>
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-  <title>SH Project Experiments</title>
+  <title>mrp4 SH</title>
 </head>
 <body>
-  <div class='header'>
-    <h1>SH Project (NEW)</h1>
-    <div id='language-indicator'></div>
-    <textarea id="lang-input">
-    </textarea>
-    <button id="parse-button">Parse</button>
-    <button id="load-fun-test-button">Load Fun Test</button>
-    <button id="load-lang-test-button">Load Lang Test</button>
-    <div id='root'>
+  <div class='app'>
+    <div class='app-toolbar'>
+      <div class='title'>Visual Programming Environment for Novices</div>
+      <div id='language-indicator'></div>
+      <textarea id="lang-input">
+      </textarea>
+      <button id="parse-button">Parse</button>
+      <button id="load-fun-test-button">Load Fun Test</button>
+      <button id="load-lang-test-button">Load Lang Test</button>
+      <div id='root'>
+      </div>
     </div>
-  </div>
-  <div class='main-pane'>
-    <div id='react-ast-div' class='expand'></div>
-    <div id='react-vm-div' class='expand'></div>
+    <div class='main-pane'>
+      <div id='react-ast-div' class='expand'></div>
+      <div id='react-vm-div' class='expand'></div>
+    </div>
   </div>
   <script src="bundle.js"></script>
 </body>
