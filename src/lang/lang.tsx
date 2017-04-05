@@ -29,9 +29,11 @@ class Lang extends LanguageDefinition {
   }
 
   machineInitialise(machine: vm.Machine) {
-    machine.addLabel(Method.labelName("PRINT"))
+    machine.addGlobalLabel("print")
+    machine.addInstruction(new vm.ArgsToEnv(["text"]))
     machine.addInstruction(new vm.Get("text"))
     machine.addInstruction(new vm.ConsoleOut())
+    machine.addInstruction(new vm.Return(false))
   }
 }
 let definition = new Lang()

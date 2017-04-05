@@ -35,6 +35,7 @@ export class Machine {
     this.currentlyActiveASTNodes = []
 
     ast.codegen(this)
+    this.languageDefinition.machineInitialise(this)
     this.indexToLabelsMap = this.getLabelIndices() 
   }
 
@@ -147,7 +148,7 @@ export class Label {
 }
 
 export class Console {
-  text: string
+  text: string = ""
   
   getText() {
     return this.text
@@ -157,8 +158,8 @@ export class Console {
     this.text += text
   }
 
-  removeText(chars) {
-    this.text = this.text.substr(0, this.text.length - chars)
+  removeText(numChars: number) {
+    this.text = this.text.substr(0, this.text.length - numChars)
   }
 }
 

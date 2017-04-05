@@ -198,6 +198,8 @@ export class ConsoleChange extends MachineComponentChange {
         public deleted: string
     ) {
         super()
+        this.inserted = String(inserted)
+        this.deleted = String(deleted)
     }
 
     apply(machine: Machine) {

@@ -29,10 +29,12 @@ class Fun extends LanguageDefinition {
   }
   
   machineInitialise(machine: vm.Machine) {
-    machine.addGlobalLabel("PRINT")
-    machine.addInstruction(new vm.ArgsToEnv(["text"]))
+    machine.addGlobalLabel("trace")
+    machine.addInstruction(new vm.ArgsToEnv(["text", "r"]))
     machine.addInstruction(new vm.Get("text"))
     machine.addInstruction(new vm.ConsoleOut())
+    machine.addInstruction(new vm.Get("r"))
+    machine.addInstruction(new vm.Return(true))
   }
 }
 let definition = new Fun()

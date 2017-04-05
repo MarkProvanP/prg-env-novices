@@ -162,7 +162,8 @@ body {
 .instructions {
     flex: 1;
     overflow-y: scroll;
-
+    height: 100%;
+    
     .instruction {
         border: 1px solid black;
         margin: 5px;
