@@ -13,7 +13,6 @@ export abstract class LanguageDefinition {
     abstract machineInitialise(machine: vm.Machine)
     shutdown() {
         let styleNode = this.stylesheetDom.ownerNode
-        styleNode.parentNode.removeChild(styleNode)
     }
 }
 

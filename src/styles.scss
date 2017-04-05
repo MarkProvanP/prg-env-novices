@@ -26,6 +26,10 @@ body {
             align-items: center;
             padding: 10px;
         }
+
+        button {
+            margin: 5px;
+        }
     }
 }
 
@@ -153,7 +157,6 @@ body {
 
 .instructions {
     flex: 1;
-    overflow-y: scroll;
     height: 100%;
 
     .global-label {
@@ -338,20 +341,18 @@ body {
 
 .ui-component.vm-stack-component {
     flex: 3;
-    overflow-y: scroll;
 }
 
 .ui-component.vm-global-environment-component {
-    overflow-y: scroll;
 }
 
 .stack {
-    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
 
     .frame {
+        flex-shrink: 0;
         border: 1px solid red;
         padding: 5px;
         background-color: pink;
@@ -591,6 +592,7 @@ body {
     .ui-component-content {
         background-color: #333;
         flex: 1;
+        overflow-y: scroll;
     }
 }
 

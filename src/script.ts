@@ -5,10 +5,8 @@ import * as pegjs from "pegjs"
 import { App } from "./app";
 
 let langInput: HTMLTextAreaElement = document.getElementById("lang-input") as HTMLTextAreaElement;
-let parseButton: HTMLButtonElement = document.getElementById("parse-button") as HTMLButtonElement;
-let loadFunTestButton: HTMLButtonElement = document.getElementById("load-fun-test-button") as HTMLButtonElement
-let loadLangTestButton: HTMLButtonElement = document.getElementById("load-lang-test-button") as HTMLButtonElement
-let languageIndicator = document.getElementById("language-indicator")
+let funButton: HTMLButtonElement = document.getElementById("fun-button") as HTMLButtonElement
+let langButton: HTMLButtonElement = document.getElementById("lang-button") as HTMLButtonElement
 
 import * as lang from "./lang/lang";
 import * as fun from "./fun/fun"
@@ -32,7 +30,6 @@ function selectLang() {
     parser = grammar.Program
     app = new App(languageDefinition);
 
-    languageIndicator.textContent = "Selected Language: lang"
     console.log("Selected lang")
 }
 
@@ -50,11 +47,10 @@ function selectFun() {
     parser = grammar.Program
     app = new App(languageDefinition);
 
-    languageIndicator.textContent = "Selected Language: fun"
     console.log("Selected fun")
 }
 
-parseButton.onclick = (event) => {
+function begin() {
     let input = langInput.value;
     let parsed = parser.parse(input);
     
@@ -65,14 +61,16 @@ parseButton.onclick = (event) => {
     app.renderApp();
 }
 
-loadFunTestButton.onclick = (event) => {
+funButton.onclick = (event) => {
     langInput.value = funTest
     selectFun()
+    begin()
 }
 
-loadLangTestButton.onclick = (event) => {
+langButton.onclick = (event) => {
     langInput.value = langTest
     selectLang()
+    begin()
 }
 
 let langTest = `
