@@ -114,19 +114,11 @@ body {
 
     .expand {
         flex: 1;
-    }
-
-    #vm-div {
-        display: flex;
-    }
-
-    #react-vm-div {
         display: flex;
         flex-direction: column;
     }
 
-    #vm-div > div {
-        flex: 1;
+    #react-vm-div {
         display: flex;
         flex-direction: column;
     }
@@ -166,6 +158,8 @@ body {
 
     .global-label {
         color: white;
+        margin-left: 20px;
+        font-style: italic;
     }
 
     .instruction {
@@ -494,8 +488,8 @@ body {
     font: inherit;
 }
 
-.console {
-    height: 160px;
+.ui-component.console {
+    min-height: 145px;
 
     pre {
         background-color: darkgreen;
@@ -514,6 +508,9 @@ body {
 
 .ast-editor {
     border: 2px solid black;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 
     .editor-toolbar {
         background-color: #222;
@@ -522,6 +519,7 @@ body {
     .editor-content {
         background-color: #333;
         padding: 10px;
+        flex: 1;
     }
 }
 
