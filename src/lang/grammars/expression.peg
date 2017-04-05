@@ -16,9 +16,20 @@ value
   = i:ident { return new lang.ValueExpression(i); }
 
 primary
-  = value
+  = methodCallExpression
+  / value
   / integer
   / "(" w additive:additive w ")" { return additive; }
+
+methodCallExpression
+  = "call" w i:ident w "(" w a:methodCallArgs w ")" w { return new lang.MethodCallExpression(i, a)}
+
+methodCallArgs
+  = list:methodCallArgListElement* w single:expression { return [].concat(list).concat(single).filter(function(s) { return s })}
+  / "" { return []}
+
+methodCallArgListElement
+  = w e:expression w "," w { return e }
 
 integer "integer"
   = digits:[0-9]+ { return new lang.Integer(parseInt(digits.join(""), 10)); }

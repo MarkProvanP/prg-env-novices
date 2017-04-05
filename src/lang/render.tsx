@@ -455,42 +455,42 @@ export class MethodComponent extends ASTNodeComponent<MethodComponentProps, ASTN
     }
 }
 
-export interface MethodCallStatementProps extends ASTComponentProps {
-    methodCallStatement: lang.MethodCallStatement
+export interface MethodCallExpressionProps extends ASTComponentProps {
+    methodCallExpression: lang.MethodCallExpression
 }
 
-export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallStatementProps, ASTNodeComponentState> {
+export class MethodCallExpressionComponent extends ASTNodeComponent<MethodCallExpressionProps, ASTNodeComponentState> {
     getASTNode() {
-        return this.props.methodCallStatement
+        return this.props.methodCallExpression
     }
 
     removeIdent() {
         let newEmptyIdent = new lang.EmptyIdent()
-        this.props.app.replaceElement(this.props.methodCallStatement, "ident", newEmptyIdent)
+        this.props.app.replaceElement(this.props.methodCallExpression, "ident", newEmptyIdent)
     }
     editIdent(replacement) {
-        this.props.app.replaceElement(this.props.methodCallStatement, "ident", replacement)
+        this.props.app.replaceElement(this.props.methodCallExpression, "ident", replacement)
     }
     deleteArg(index) {
         return () => {
-            this.props.app.deleteFromArray(this.props.methodCallStatement, "args", index)
+            this.props.app.deleteFromArray(this.props.methodCallExpression, "args", index)
         }
     }
     editArg(index) {
         return (replacement) => {
-            this.props.app.replaceElementInArray(this.props.methodCallStatement, "args", index, replacement)
+            this.props.app.replaceElementInArray(this.props.methodCallExpression, "args", index, replacement)
         }
     }
     insertArg(index) {
         return () => {
-            let newArg = new lang.EmptyIdent()
-            this.props.app.insertIntoArray(this.props.methodCallStatement, "args", index, newArg)
+            let newArg = new lang.EmptyExpression()
+            this.props.app.insertIntoArray(this.props.methodCallExpression, "args", index, newArg)
         }
     }
 
     getInnerElement() {
         const argElements = []
-        this.props.methodCallStatement.args.forEach((expression, index) => {
+        this.props.methodCallExpression.args.forEach((expression, index) => {
             argElements.push(<ButtonComponent key={index * 3} name='add' text='+' onClick={this.insertArg(index).bind(this)}/>)
             argElements.push(
                 <ExpressionWrapperComponent key={index * 3 + 1} {...this.props}
@@ -499,19 +499,19 @@ export class MethodCallStatementComponent extends ASTNodeComponent<MethodCallSta
                 onNodeEdit={this.editArg(index).bind(this)}
                 />
                 )
-            if (index != this.props.methodCallStatement.args.length - 1) {
+            if (index != this.props.methodCallExpression.args.length - 1) {
                 argElements.push(<SyntaxComponent key={index * 3 + 2} syntax=',' />)
             }
         })
         argElements.push(
             <ButtonComponent key={argElements.length} name='add' text='+'
-            onClick={this.insertArg(this.props.methodCallStatement.args.length).bind(this)}
+            onClick={this.insertArg(this.props.methodCallExpression.args.length).bind(this)}
             />
         )
         return <div className='ast-row'>
             <KeywordComponent keyword='call' />
             <IdentWrapperComponent {...this.props}
-            node={this.props.methodCallStatement.ident}
+            node={this.props.methodCallExpression.ident}
             onNodeDelete={this.removeIdent.bind(this)}
             onNodeEdit={this.editIdent.bind(this)}
             />
