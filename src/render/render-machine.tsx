@@ -108,9 +108,13 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, NoSta
             app={this.props.app}
             />
         })
-        return <div className='instructions'>
-            <h3>Instructions</h3>
-            {instructionComponents}
+        return <div className='instructions ui-component'>
+            <div className='ui-component-title'>
+                Instructions
+            </div>
+            <div className='ui-component-content'>
+                {instructionComponents}
+            </div>
         </div>
     }
 }
@@ -184,6 +188,8 @@ function getComponentForInstruction(instruction: vm.Instruction) {
         return <div className='args machine-set'>{instruction.key}</div>
     } else if (instruction instanceof vm.Get) {
         return <div className='args machine-get'>{instruction.key}</div>
+    } else if (instruction instanceof vm.MethodCall) {
+        return <div className='args machine-method-call'>{instruction.name}</div>
     }
 }
 
@@ -303,11 +309,15 @@ export class EnvElementComponent extends React.Component<EnvElementProps, EnvEle
 
 class VMConsoleComponent extends React.Component<VMStateProps, NoState> {
     render() {
-        return <div className='console'>
-            <h3>Console</h3>
-            <pre>
-                {this.props.app.machine.textConsole.getText()}
-            </pre>
+        return <div className='console ui-component'>
+            <div className='ui-component-title'>
+                Console
+            </div>
+            <div className='ui-component-content'>
+                <pre>
+                    {this.props.app.machine.textConsole.getText()}
+                </pre>
+            </div>
         </div>
     }
 }

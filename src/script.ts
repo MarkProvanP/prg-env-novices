@@ -80,7 +80,8 @@ method main () {
     let x := 3
     while (x) do { let x := x - 1}
     let y := 4
-    call multiply(x, y)
+    let result := call multiply(10, y)
+    call println(result)
 }
 
 method multiply (x, y) {
