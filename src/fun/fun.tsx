@@ -240,7 +240,9 @@ export class Function extends ASTNode {
 
   internalCodegen(machine: vm.Machine) {
     machine.addLabel(Function.labelName(this.name.getName()))
-    machine.addInstruction(new vm.PushStackFrame())
+    if (this.args.length) {
+      machine.addInstruction(new vm.ArgsToEnv(this.args.map(arg => arg.getName())))
+    }
     this.expression.codegen(machine)
     machine.addInstruction(new vm.Return(true))
   }
@@ -259,7 +261,8 @@ export class FunctionCallExpression extends Expression {
   }
 
   internalCodegen(machine: vm.Machine) {
-    machine.addInstruction(new vm.MethodCall(Function.labelName(this.ident.getName())))
+    this.args.forEach(arg => arg.codegen(machine))
+    machine.addInstruction(new vm.MethodCall(Function.labelName(this.ident.getName()), this.args.length))
   }
 
   render(props) {
@@ -275,7 +278,10 @@ export class Program extends ASTNode {
   }
 
   internalCodegen(machine: vm.Machine) {
+    machine.addInstruction(new vm.PushStackFrame())
     this.methods.forEach(method => method.codegen(machine))
+    machine.addLabel(vm.Terminate.LABEL)
+    machine.addInstruction(new vm.Terminate())
   }
 
   render(props) {
