@@ -58,9 +58,15 @@ export class VMStateComponent extends React.Component<VMStateProps, NoState> {
                 <EditorButtonComponent disabled={this.isForwardButtonDisabled()} name='vm-step-forward' text='Forward' onClick={this.onForwardButtonClick} />
             </div>
             <div className='vm-content'>
-                <VMInstructionsComponent app={this.props.app}/>
-                <VMStackComponent app={this.props.app} />
-                <VMGlobalEnvComponent app={this.props.app} />
+                <div className='flex-surround'>
+                    <div className='expand'>
+                        <VMInstructionsComponent app={this.props.app}/>
+                    </div>
+                    <div className='expand vert-fill'>
+                        <VMStackComponent app={this.props.app} />
+                        <VMGlobalEnvComponent app={this.props.app} />
+                    </div>
+                </div>
                 <VMConsoleComponent app={this.props.app}/>
             </div>
         </div>;
@@ -102,6 +108,7 @@ export class VMInstructionsComponent extends React.Component<VMStateProps, NoSta
             />
         })
         return <div className='instructions'>
+            <h3>Instructions</h3>
             {instructionComponents}
         </div>
     }
@@ -205,9 +212,13 @@ export class VMStackComponent extends React.Component<VMStateProps, NoState> {
         const frameComponents = stackFrames.map((frame, index) => {
             return <StackFrameComponent key={index} frame={frame} />
         }).reverse()
-        return <div className='stack'>
-            <h3>Stack</h3>
-            {frameComponents}
+        return <div className='ui-component vm-stack-component'>
+            <div className='ui-component-title'>
+                Stack Frames
+            </div>
+            <div className='ui-component-content stack'>
+                {frameComponents}
+            </div>
         </div>
     }
 }
@@ -221,11 +232,18 @@ export class StackFrameComponent extends React.Component<StackFrameProps, NoStat
         const stackComponents = stackElements.map((element, index) => {
             return <StackElementComponent key={index} element={element} />
         }).reverse()
+        const returnAddress = typeof this.props.frame.returnAddress == 'number'
+        ? [
+            <div className='frame-divider'>Return Address</div>,
+            <div className='return-address'>{this.props.frame.returnAddress}</div>
+        ]
+        : undefined
         return <div className='frame'>
+            <div className='frame-divider'>Stack</div>
             {stackComponents}
-            <h3>Stack Frame</h3>
+            <div className='frame-divider'>Environment</div>
             <EnvElementComponent environment={this.props.frame.stackEnvironment}/>
-            <p>Return Address: {this.props.frame.returnAddress}</p>
+            {returnAddress}
         </div>
     }
 }
@@ -245,9 +263,13 @@ export class StackElementComponent extends React.Component<StackElementProps, St
 
 export class VMGlobalEnvComponent extends React.Component<VMStateProps, NoState> {
     render() {
-        return <div className='global-environment'>
-            <h3>Global Environment</h3>
-            <EnvElementComponent environment={this.props.app.machine.globalEnvironment}/>
+        return <div className='ui-component vm-global-environment-component'>
+            <div className='ui-component-title'>
+                Global Environment
+            </div>
+            <div className='ui-component-content'>
+                <EnvElementComponent environment={this.props.app.machine.globalEnvironment}/>
+            </div>
         </div>
     }
 }
