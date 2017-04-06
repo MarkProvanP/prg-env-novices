@@ -142,22 +142,22 @@ export class Return extends Instruction {
 
     if (lowerFrame) {
       let newIP = lowerFrame.returnAddress + 1
-      var ipChange = newIP - machine.instructionPointer
+      let ipChange = newIP - machine.instructionPointer
+      var change = new MachineChange()
+        .withIpChange(ipChange)
+        .withStackFramePopped(currentFrame)
+      if (this.withExpression) {
+        let stackTop = machine.stack.peek()
+        change = change.withStackPushed([stackTop])
+      }
     } else {
       // No lower frame, therefore go to last instruction for termination
+      console.log('No lower frame, terminating program!')
       let lastInstructionPointer = machine.globalLabelIndexMap.get(Terminate.LABEL)
-      var ipChange = lastInstructionPointer - machine.instructionPointer
+      let ipChange = lastInstructionPointer - machine.instructionPointer
+      var change = new MachineChange()
+        .withIpChange(ipChange)
     }
-
-    let change = new MachineChange()
-    .withIpChange(ipChange)
-    .withStackFramePopped(currentFrame)
-    
-    if (this.withExpression) {
-      let stackTop = machine.stack.peek()
-      change = change.withStackPushed([stackTop])
-    }
-    
     return change
   }
 }
