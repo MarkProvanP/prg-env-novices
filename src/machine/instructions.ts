@@ -19,7 +19,14 @@ export let builtInFunctions = {
   '-': new MachineFunction('subtract', 2, (a, b) => a - b),
   '*': new MachineFunction('multiply', 2, (a, b) => a * b),
   '/': new MachineFunction('divide', 2, (a, b) => a / b),
-  '!': new MachineFunction('not', 1, (a) => !a)
+  '!': new MachineFunction('not', 1, (a) => !a),
+  '==': new MachineFunction('equals', 2, (a, b) => a == b),
+  'and': new MachineFunction('and', 2, (a, b) => a && b),
+  'or': new MachineFunction('or', 2, (a, b) => a || b),
+  '<': new MachineFunction('lessthan', 2, (a, b) => a < b),
+  '<=': new MachineFunction('lessequal', 2, (a, b) => a <= b),
+  '>': new MachineFunction('morethan', 2, (a, b) => a > b),
+  '>=': new MachineFunction('moreequal', 2, (a, b) => a >= b)
 }
 
 export abstract class Instruction {

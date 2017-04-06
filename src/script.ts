@@ -87,7 +87,7 @@ method multiply (x, y) {
 }
 `
 
-let funTest = `
-function fib(num) := if test then 1 else fib(num - 2) + fib(num - 1)
-function fact(num) := if test then 0 else num * fact(num - 1)
+let funTest = `function main() := trace(fact(3), trace(fib(5)))
+function fib(num) := if num + 1 then 1 else fib(num - 2) + fib(num - 1)
+function fact(num) := if num + 1 then 1 else num * fact(num - 1)
 `

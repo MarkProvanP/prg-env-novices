@@ -131,7 +131,7 @@ export class BinaryExpression extends Expression {
     super()
   }
 
-  public static OP_LIST = ["+", "-", "/", "*"]
+  public static OP_LIST = ["+", "-", "/", "*", "==", "or", "and", ">", ">=", "<", "<="]
 
   internalCodegen(machine: vm.Machine) {
     this.left.codegen(machine)

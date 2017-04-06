@@ -225,7 +225,9 @@ export class StackFrame {
 
   peek(n?: number) {
     if (typeof(n) == 'number') {
-      return this.stack.slice(0, n)
+      let length = this.stack.length
+      let start = length - n
+      return this.stack.slice(start, length)
     }
     return this.stack[this.stack.length - 1];
   }  

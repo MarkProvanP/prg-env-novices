@@ -285,6 +285,16 @@ export class FunctionComponent extends ASTNodeComponent<FunctionComponentProps, 
             this.props.app.insertIntoArray(this.props.function, "args", index, newArg)
         }
     }
+
+    deleteExpression() {
+        let newEmptyExpression = new fun.EmptyExpression()
+        this.props.app.replaceElement(this.props.function, "expression", newEmptyExpression)
+    }
+
+    editExpression(replacement) {
+        this.props.app.replaceElement(this.props.function, "expression", replacement)
+    }
+
     getInnerElement() {
         const argElements = []
         this.props.function.args.forEach((ident, index) => {
@@ -315,7 +325,7 @@ export class FunctionComponent extends ASTNodeComponent<FunctionComponentProps, 
                 <SyntaxComponent syntax=':=' />
             </div>
             <div className='ast-row'>
-                {this.props.function.expression.render(this.props)}
+                <ExpressionWrapperComponent app={this.props.app} node={this.props.function.expression} onNodeDelete={this.deleteExpression.bind(this)} onNodeEdit={this.editExpression.bind(this)} />
             </div>
         </div>
     }
@@ -349,7 +359,7 @@ export class FunctionCallExpressionComponent extends ASTNodeComponent<FunctionCa
     }
     insertArg(index) {
         return () => {
-            let newArg = new fun.EmptyIdent()
+            let newArg = new fun.EmptyExpression()
             this.props.app.insertIntoArray(this.props.functionCallExpression, "args", index, newArg)
         }
     }

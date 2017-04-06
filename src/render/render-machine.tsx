@@ -276,7 +276,7 @@ interface StackElementState {}
 export class StackElementComponent extends React.Component<StackElementProps, StackElementState> {
     render() {
         return <div className='element'>
-            {this.props.element}
+            {String(this.props.element)}
         </div>
     }
 }
