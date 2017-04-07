@@ -333,19 +333,19 @@ The mechanism by which the virtual machine executes instructions is the key to f
 
 \subsubsection{Machine}
 
-The machine state $M$ is a tuple $(I, P, T, G, C, L)$ where
+The machine state $M$ is a tuple $\langle I, P, T, G, C, L \rangle$ where
 \begin{itemize}
 \item $I$ is the list of machine instructions
 \item $P$ is the current instruction pointer value
-\item $T$ is a list of stack frames $(F_0, F_1, .., F_n)$
+\item $T$ is a list of stack frames $F_0..F_n$
 \item $G$ is the global environment key-value mapping function $k \mapsto s$
-\item $C$ is the console state $(c_0, c_1, ..., c_n)$, i.e. a list of individual characters that have been printed
+\item $C$ is the console state $c_0...c_n$, i.e. a list of individual characters that have been printed
 \item $L$ is the global labelling function $l \mapsto P$
 \end{itemize}
 
-A stack frame $F$ is a tuple $(S, E, R, A)$ where
+A stack frame $F$ is a tuple $\langle S, E, R, A \rangle$ where
 \begin{itemize}
-\item $S$ is the list of stack elements $(s_0, s_1, ..., s_n)$
+\item $S$ is the list of stack elements $s_0...s_n$
 \item $E$ is the stack environment key-value mapping function $k \mapsto s$
 \item $R$ is the return address value, taken from the current instruction pointer during a method call
 \item $A$ is the arguments list
@@ -357,77 +357,77 @@ The machine state change caused by each instruction is as follows
 
 \subsubsection{PushStackFrame}
 
-\begin{multline}
-(\text{PushStackFrame}; I, p, F_0...F_n, G, C, L) \\ \mapsto (I, p+1, F_0...F_n, (\emptyset, [], null, \emptyset)), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{PushStackFrame}; I, p, F_0...F_n, G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...F_n, \langle \emptyset, [], null, \emptyset\rangle , G, C, L\rangle 
+\end{multline*}
 
 \subsubsection{PopStackFrame}
-\begin{multline}
-(\text{PopStackFrame}; I, p, F_0...F_n, G, C, L) \\ \mapsto (I, p+1, F_0...F_{n-1}, G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{PopStackFrame}; I, p, F_0...F_n, G, C, L\rangle \mapsto \langle I, p+1, F_0...F_{n-1}, G, C, L\rangle 
+\end{multline*}
 \subsubsection{Push}
 
-\begin{multline}
-(\text{Push}\ s; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, p+1, F_0...(s_0...s_n.s, E, R, A)
-\end{multline}
+\begin{multline*}
+\langle \text{Push}\ s; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_n.s, E, R, A\rangle 
+\end{multline*}
 
 \subsubsection{Pop}
-\begin{multline}
-(\text{Pop}; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, p+1, F_0...(s_0...s_{n-1}, E, R,  A), G, C, L
-\end{multline}
+\begin{multline*}
+\langle \text{Pop}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_{n-1}, E, R,  A\rangle , G, C, L
+\end{multline*}
 \subsubsection{Dup}
-\begin{multline}
-(\text{Dup}; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, p+1, F_0...(s_0...s_n.s_n, E, R, A), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{Dup}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_n.s_n, E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{CallFunction}
-\begin{multline}
-(\text{CallFunction}\ (f\ a); I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, p+1, F_0...(s_0...s_{n-a}.f(s_{n-a}...s_n), E, R, A), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{CallFunction}\ \langle f\ a\rangle ; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_{n-a}.f\langle s_{n-a}...s_n\rangle , E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{MethodCall}
-\begin{multline}
-(\text{MethodCall}\ m \ a; I, p, F_0...(s_0...s_n, E, R), T, G, C, L[m=b]) \\ \mapsto (I, b, F_0...(s_0...s_{n-a}, E, p).(\emptyset, [], null, s_{n-a}...s_n), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{MethodCall}\ m \ a; I, p, F_0...\langle s_0...s_n, E, R\rangle , T, G, C, L[m=b]\rangle  \\ \mapsto \langle I, b, F_0...\langle s_0...s_{n-a}, E, p\rangle .\langle \emptyset, [], null, s_{n-a}...s_n\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{Return}
-\begin{multline}
-(\text{Return}\ e; I, p, \emptyset, G, C, L[\text{TERMINATE}=t]) \\ \mapsto (I, t, \emptyset, G, C, L)
-\end{multline}
-\begin{multline}
-(\text{Return}\ {true}; I, p, F_0...(u_0...u_n, E, R, A).(s_0...s_n, E, r), G, C, L) \\ \mapsto (I, r, F_0...F_{n-2}.(u_0..u_n.s_n, E, R, A), G, C, L)
-\end{multline}
-\begin{multline}
-(\text{Return}\ false; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, r, F_0...F_{n-1}.(G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{Return}\ e; I, p, \emptyset, G, C, L[\text{TERMINATE}=t]\rangle \mapsto \langle I, t, \emptyset, G, C, L\rangle 
+\end{multline*}
+\begin{multline*}
+\langle \text{Return}\ {true}; I, p, F_0...\langle u_0...u_n, E, R, A\rangle .\langle s_0...s_n, E, r\rangle , G, C, L\rangle  \\ \mapsto \langle I, r, F_0...F_{n-2}.\langle u_0..u_n.s_n, E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
+\begin{multline*}
+\langle \text{Return}\ false; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, r, F_0...F_{n-1}.\langle G, C, L\rangle 
+\end{multline*}
 \subsubsection{Goto}
-\begin{multline}
-(\text{Goto}\ l; I, p, T, G, C, L[l=a]) \\ \mapsto (I, a, T, G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{Goto}\ l; I, p, T, G, C, L[l=a]\rangle \mapsto \langle I, a, T, G, C, L\rangle 
+\end{multline*}
 \subsubsection{IfGoto}
-\begin{multline}
-(\text{IfGoto}\ l; I, p, F_0...(s_0...s_{n-1}.\text{TRUTHY}, E, R, A), G, C, L[l=a]) \\ \mapsto (I, a, F_0...(s_0...s_{n-1}, E, R, A), G, C, L)
-\end{multline}
-\begin{multline}
-(\text{IfGoto}\ l; I, p, F_0...(s_0...s_{n-1}.\text{FALSY}, E, R, A), G, C, L[l=a]) \\ \mapsto (I, p+1, F_0...(s_0...s_{n-1}, E, R, A), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{IfGoto}\ l; I, p, F_0...\langle s_0...s_{n-1}.\text{TRUTHY}, E, R, A\rangle , G, C, L[l=a]\rangle  \\ \mapsto \langle I, a, F_0...\langle s_0...s_{n-1}, E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
+\begin{multline*}
+\langle \text{IfGoto}\ l; I, p, F_0...\langle s_0...s_{n-1}.\text{FALSY}, E, R, A\rangle , G, C, L[l=a]\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_{n-1}, E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{Set}
-\begin{multline}
-(\text{Set}\ k; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, p+1, F_0...(s_0...s_{n-1}, E[k=s_n], R, A), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{Set}\ k; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_{n-1}, E[k=s_n], R, A\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{Get}
-\begin{multline}
-(\text{Get}\ k; I, p, F_0...(s_0...s_n, E[k=v], R, A), G, C, L) \\ \mapsto (I, p+1, F_0...(s_0...s_n.v, E, R, A), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{Get}\ k; I, p, F_0...\langle s_0...s_n, E[k=v], R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_n.v, E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{ConsoleIn}
-\begin{multline}
-(\text{ConsoleIn}; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, p+1, F_0(s_0...s_n.\text{INPUT}, E, R, A), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{ConsoleIn}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0\langle s_0...s_n.\text{INPUT}, E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{ConsoleOut}
-\begin{multline}
-(\text{ConsoleOut}; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \\ \mapsto (I, p+1, F_0(s_0..s_{n-1}, E, R, A), G, C, L)
-\end{multline}
+\begin{multline*}
+\langle \text{ConsoleOut}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0\langle s_0..s_{n-1}, E, R, A\rangle , G, C, L\rangle 
+\end{multline*}
 \subsubsection{ArgsToEnv}
-\begin{multline}
-\langle \text{ArgsToEnv}\ (k_0, k_1, ..., k_n); I, p, \langle S, E, R, a_0..a_n \rangle, G, C, L \rangle \\ \mapsto \langle I, p+1, \langleS, E[k_n = a_n], R, A\rangle, G, C, L \rangle
-\end{multline}
+\begin{multline*}
+\langle \text{ArgsToEnv}\ \langle k_0, k_1, ..., k_n\rangle ; I, p, \langle S, E, R, a_0..a_n \rangle, G, C, L \rangle \\ \mapsto \langle I, p+1, \langle S, E[k_n = a_n], R, A\rangle , G, C, L \rangle
+\end{multline*}
 \subsection{Code generation, labelling and AST-instruction mapping}
 
 The toy language specification includes the instructions to be generated for each of its AST node types. This generation is done by recursive descent, where parent nodes will call the code generation methods of their child nodes at the appropriate location in the instruction list to implement that language feature.
