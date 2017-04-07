@@ -2,43 +2,141 @@
 
 \section{Web application}
 
+The programming environment is implemented as a web application capable of running within any modern or future web browser. The application is entirely self-contained and has no dependency upon an internet connection or access to servers. However, unlike traditional web development the initial source code is not the final executed product. Instead a series of modern tools, frameworks and technologies are used to transform TypeScript and React framework source code into standards-compliant JavaScript and HTML.
+
+While the final application will be able to run in any backwards-compliant web environment it is possible that the tools and frameworks needed to modify and build it may become obsolete. The rapid pace of web development technology in recent years has seen entire tools developed, used and then replaced by newer and better versions. Rejecting the use of these tools due to their possible future obsolescence would be inappropriate. So far, all technology frameworks used to create programming language education and visualisation tools have ever been deprecated or become less significant with time, even in the case of Java and its 'write-once, run-anywhere' philosophy. While some web tools have become obsolete, they are all open-source technology and so are not dependent upon the good grace of a commercial enterprise to be maintained and kept available. A development tool that targets the universal web platform has a better chance of being kept usable in future than a tool which targets a closed and/or decaying platform. In addition, these tools are all themselves implemented using web technologies of some variety. All of the tools used to create the final compiled application run within the Node.js platform, which is a non-browser implementation of a JavaScript programming environment. Any development effort into the web as a platform also applies to Node.js and vice-versa.
+
+JavaScript is the standard scripting language for use in the web platform. Developed by Brendan Eich in only ten days\cite{6155645}, the language was never designed for the vast range and scale of applications that now run in modern web browsers. With the web having exploded in popularity it has been impossible to replace it in the browser with something inherently more suited for modern web applications. The language is extremely flexible in allowing a wide range of programming styles, from standard sequential programming to object-oriented and functional uses. The standard has developed over time to include more features but without breaking backwards-compatibility. These new features have often consisted of syntactic sugar over complicated existing implementations, such as the new class definition syntax which allows object-oriented code to be written in a style similar to that in Java or other OOP languages. With the underlying compatibility between the new features and existing JavaScript implementations, it has been possible for tools to take in a modern version of JavaScript and then output some older version which will run on a much wider range of current and old browser versions with no change of functionality.
+
+While these new features have assisted programmers in creating large applications, the language remains untyped. Without types, it is hard to statically reason about the correctness of a program such that bugs are found without extremely exhaustive (i.e. expensive) testing, or worse by end-users. TypeScript is a new language developed as open-source by Microsoft to solve this problem. As with the JavaScript version converters, all TypeScript code is translated into standards-compliant JavaScript that may run in any existing implementation. TypeScript is a pure superset of the most modern JavaScript standard with the enhancement that the programmer has the choice to specify types. It is therefore perfectly suited for the role of large-scale web application development, and so I chose to use it for this project.
+
+\section{User interface}
+
 \subsection{React framework}
 
+The user interface for this tool requires dynamic creation of visual elements which possess common visual and behavioural elements. The web platform fundamentally works through the Document Object Model, where elements on a web page are structured in a tree. All elements may define attributes such as their text content or any functions that should be called upon certain events occurring to them. HTML is an efficient method to define these DOM nodes in a static manner, but it cannot generate nodes dynamically based upon programmed behaviour. JavaScript code in the browser may interact with the DOM to insert, delete and modify elements as required by any other parts of the code. Modifications to the DOM may be interspersed at arbitrary locations in the JavaScript code of a web page. Styles can be applied to the DOM nodes using either a static CSS file or dynamically through JavaScript; the browser renders the nodes according to these rules without the underlying representation of the DOM being changed.
+
+The traditional HTML, JavaScript and CSS model is sufficient for basic web pages and applications, but does not scale with increasing application size. Adding additional composable parts of the application requires increasing effort. As with all programming, the more code that needs written, the more chance of things going wrong. To avoid the need to spend significant amounts of time debugging basic rendering code, I decided to use a modern web application framework for the user interface of this application. There are a number of such frameworks available for use, all free and open source for anyone to make use of in their own time despite being largely written by and for the largest of web application companies such as Facebook and Google.
+
+After writing the initial prototypes using raw DOM manipulation, I chose the React framework. While some frameworks such as Angular aim to simplify the creation of the entire application with features such as application routing (where the browser URL updates as the web application is navigated despite no new pages being requested from the web server), React is designed to implement only the visual presentation layer. It implements the view side of the Model-View-Controller concept and is designed around a functional approach to rendering DOM components based upon a given application state\cite{Gackenheimer2015}. Every time the application state is changed, the entire application is re-rendered functionally. However, this rendering is done in a Shadow DOM and only once complete the difference between the old and new forms is calculated and the most minimal changes applied to the real browser DOM to bring it up to date.
+
+The user interface is defined as a series of React components. React components define a \verb+render+ method which return a React-specific representation of the component DOM structure. This representation can either be created using pure JavaScript (or TypeScript)\footnote{The basic functionality of React is the same in both JavaScript and TypeScript. React is aware of TypeScript and provides types for its type checking systems, but otherwise does not provide any extra functionality. I therefore describe React in how it works with JavaScript, despite using it with TypeScript in this project.} using React library methods or in JSX (TSX), which is an extension of the JavaScript language to include XML-style blocks. The JSX representation is simply syntactic sugar for the library function call method and an early step in the compilation process converts JSX code to this form. The JSX form allows for component structures to be defined in a form very similar to HTML, making it ideal for use in the toy language specification as a language designer will not need significant training to produce the visual representation of their language. React rendering of components is done by recursive descent; components may include other full components within them alongside standard DOM nodes and text content.
+
 \subsection{App}
-some text\cite{citation-2-name-here}, some more text
+Implementing the Model-View-Controller framework correctly requires that changes to the model are done through one single mechanism - the controller. The entire state of the program is represented through an App instance, which includes controller methods to change the state in a controlled manner. These changes include:
+\begin{itemize}
+\item Editor undo/redo
+\item Execute forward/backward one step
+\item Replace AST node element
+\item Delete/insert/replace AST node element from/into/in parent node array
+\end{itemize}
+
+Upon one of these changes being requested, the App instance will perform that change and then cause the entire user interface to be re-rendered within the React framework.
+
 \subsection{AST and editor}
+
+In the toy language specification, each AST node type must defined its own \verb+render+ method which returns the React component for that node type. This node type extends from a common base React component, which implements language and structure-agnostic functionality. This includes selecting nodes by clicking (which causes a visual effect and causes the instructions generated from that node to be highlighted) and the visual expansion and display of the node type name that occurs when the user mouses over it.
+
+The concrete implementation of the node component includes the \verb+getInnerElement+ method to generate the node-specific contents of that component. This content can be in any arbitrary design or structure to allow simple visual representation of the AST node. However, keywords and syntax elements (such as brackets and symbols) are displayed using common component types. These components are:
+\begin{itemize}
+\item \textit{ButtonComponent}
+\item \textit{KeywordComponent}
+\item \textit{SyntaxComponent}
+\item \textit{VerticalListComponent}
+\item \textit{HorizontalListComponent}
+\end{itemize}
+These common components allow each language to be displayed and interacted with in a standardised way. Each node type defines how it should be displayed in the UI, using a combination of the generic components. A key visual differentiator between different node types is the use of block colour, and the language specification includes a stylesheet which can apply any arbitrary web styling to the node representation. So far this has only been used for colours but it would be trivial to specify a different border or shape as well.
+
+\paragraph{Child AST node components}
+The child node components are not added directly but instead through a wrapper component type, which is passed the reference to the child node as well as the methods required to modify it. A wrapper exists for each of the basic language types (such as expression and statement in the \textit{lang} toy language). This is necessary for there to be common handling of inserting, deleting and editing child nodes across all instances of that type. If the child AST node does not exist, the wrapper component provides the means to add a valid node of that type such as the keyboard entry and selection menu.
+
+When the user makes a change using this wrapper component, the callback provided in the parent component is used to effect that change. For example, the parent component may generate a JavaScript closure function to include the index of the array in which the element is located for the array editing calls provided by \textit{App}. This flexibility allows for wrapper components to be used regardless of the structure of the parent node. There can arbitrary numbers of same element types within a node, so long as they have some unique reference by name or array name and index.
+
+The program editor itself is a simple wrapper component around the entire AST. With a significant proportion of the editing systems implemented through common components within the AST rendering, this component is itself only responsible for the undo and redo buttons. These buttons call through to equivalent operations on the \textit{App} object as a whole.
 
 \subsection{Instructions and machine state}
 
+The remainder of the user interface is dedicated to represent the state of the virtual machine. Each separable part of the machine state has its own component. User interaction is limited primarily to the Backward and Forward buttons which cause the machine to run one step in that direction. 
+
 \subsubsection{Instructions}
+
+The Instructions component displays a list of all of the instructions loaded into the virtual machine. Each instruction is displayed with its own component, which displays the relevant information for each instruction type as appropriate. The component of the instruction currently being executed is highlighted in the same colour as the corresponding AST node to provide the visual link between the program code and the generated instructions. Each instruction displays a small list of the AST nodes which led to its generation, and these small node reference components can be clicked to highlight that node and its instructions. This small component is also used in the display of local labels on the left hand side of the instruction listing. The global labels of the machine are used as visual dividers between different instruction ranges, while otherwise their appearance remains the same and the numbering remains consistent.
 
 \subsubsection{Stack Frames and Global Environment}
 
+The stack component simply presents a visual metaphor for the state of the stack. Each stack frame is presented in order as its own component, each of which shows its stack elements in order as individual blocks. The return address in that stack frame is shown, if available, and the contents of the key-value \textit{Environment} are displayed visually.
+
+The global environment is shown in a similar manner to the stack frame environment, albeit in a separate component and without being contained within a stack frame.
+
 \subsubsection{Console}
 
-Refer figure \ref{fig:label}.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[scale=0.3]{sta-logo} % e.g. insert ./image for image.png in the working directory, adjust scale as necessary
-\caption{<Caption here>}
-\label{fig:label} % insert suitable label, this is used to refer to a fig from within the text as shown above
-\end{figure}
-
-\section{User interface}
+The console component is relatively simply, in that it only needs to display the text content included in the Console machine part. While output works as normal, input is made difficult by the non-blocking nature of JavaScript. The \textit{ConsoleIn} instruction semantics are blocking but there is no simple way to pause program execution while waiting for the user to enter an input into a complex, JavaScript-implemented text console. As a result, the standard JavaScript \verb+prompt+ method is used to open a browser dialog box. This is blocking and so a result can be obtained without changes to the rest of the programming environment architecture.
 
 \section{Program components}
 
 \subsection{Machine}
 
+The virtual machine is implemented as a TypeScript class. An instance of the VM includes:
+\begin{itemize}
+
+\item an array of Instruction objects
+\item Representations of the stack, global environment and text console
+\item standard key-value mapping objects in both directions between instruction labels and array indices
+\item an array of all previous \textit{MachineChange} objects
+\item a \textit{Map} between AST node instances and their instruction range
+\item an array of currently active AST nodes at each instruction index.
+\end{itemize}
+The Machine class provides a number of different methods which are used within the AST code generation process to add an instruction or label, or to begin and end AST instruction ranges. When called, these methods add the necessary information to the records of instruction range and label mappings as appropriate in a single pass. Other methods are provided for the execution stage:
+
+\begin{itemize}
+\item \verb+applyMachineChange+ applies a given \textit{MachineChange} instance to the current object; it is the only mutative step in the entire execution process.
+\item \verb+oneStepExecute+ and \verb+oneStepBackward+ perform a single round of instruction fetch (from the instruction pointer or from the reversed last performed operation) and execute.
+\item \verb+getExecutingASTNode+ is used by the UI to highlight the current AST node.
+\item \verb+canContinue+ and \verb+canReverse+ are used to enable and disable the Forward and Backward execute buttons.
+\end{itemize}
+
 \paragraph{Stack and StackFrame}
+
+The stack object includes an array of StackFrame objects. Push, pop and get methods are provided for stack frames as well as push, pop and peek methods that act upon the topmost stack frame. In addition to the array of stack elements, a StackFrame also includes
+\begin{itemize}
+\item An Environment key-value mapping which is used to store named variables
+\item A return address instruction pointer number
+\item An array of arguments, used in the method call interface
+\end{itemize}
 
 \paragraph{Global Environment}
 
+The global environment is a single \textit{Environment} instance which is used to store named variables which are shared between all parts of the program.
+
 \paragraph{Console}
+
+The console object is used to store and modify the current textual state of the machine console. This implements operations to add a set of characters to the end of the console text and to delete a set number of characters from the end of this text.
 
 \subsection{MachineChange}
 
+Changes to the machine state are represented as instances of the \textit{MachineChange} class. This class wraps a list of individual \textit{MachineComponentChange} instances alongside the change to the machine instruction pointer. Each type of individual change is represented as a subclass of \textit{MachineComponentChange}, which sets the specification of having an apply method which takes a given machine instance and then causes that change to be applied to it, and a reverse method which will return the inverted form of that change. The different possible changes are:
+
+\begin{itemize}
+\item \textit{StackPushChange}
+\item \textit{StackPopChange}
+\item \textit{StackFramePushChange}
+\item \textit{StackFramePopChange}
+\item \textit{GlobalEnvChange}
+\item \textit{StackFrameEnvChange}
+\item \textit{StackFrameChange}
+\item \textit{ConsoleChange}
+\end{itemize}
+
+Each of these types encapsulates the necessary information for that change to be made and also to be reversed. The 'pop' changes, for example, will record those things that were popped from the stack, while the other changes will record the previous value of any deleted or modified attribute. The reversal methods create a new change object of the correct type with the before-after values swapped so that they may be applied directly to reverse the change. The entire \textit{MachineChange} has a \verb+reverse+ method which also creates a new \textit{MachineChange} object, with a reversed list of each reversed \textit{MachineComponentChange} plus the negation of the instruction pointer change.
+
 \subsection{Instruction}
 
+Each virtual machine instruction is represented as a subclass of the abstract Instruction class, implementing the abstract \verb+machineChange+ method which takes in a while Machine instance and produces a single \textit{MachineChange} object. Each instruction type class includes the operands of that instruction, which are then used during in the \verb+machineChange+ method implementation to calculate the real change to the machine. A \textit{CallFunction} instruction contains a \textit{MachineFunction} instance, which wraps a standard JavaScript function with its name and arity\footnote{The arity of a function is the number of arguments that it takes}. The \verb+machineChange+ method pops the arity number of values off the stack into an array, which is then passed as a set of arguments to the wrapped function using the JavaScript function \verb+apply+ method. The actual computed return value is captured in a singleton array, which then forms the array of elements pushed on the stack in the \textit{MachineChange}.
+
 \section{Parsing}
+
+The \textit{PEG.js} library provides for parsing of textual program representations. This parsing is done on the example code that is loaded along with a language definition, and in the textual new node input system. This library uses its own version of a grammar definition \cite{pegjs}, which is used with a parser generator to create an optimised parser object for that exact grammar. This grammar definition can include JavaScript code to be evaluated and returned upon the match of a grammar type; this is used to create instances of each of the toy language node types. Using a library for this allowed for work to be concentrated on the novel aspects of the project, but came at the cost of it being less than well optimised for this exact use case.
+
+As an example, it is necessary to attach the language definition file to the global \verb+window+ scope so that the grammar JavaScript code can use it. In early development versions of this practical, the language definition code was transformed from TypeScript into JavaScript separately and then inserted into the grammar files before being used. This meant that the browser did not consider grammar-created objects to be of the same class as those created elsewhere.
+
+At this point in time, the parser is not able to perform auto-correct, and can only return an element if the entire input is complete and valid.
