@@ -29,6 +29,9 @@
 \usepackage[bookmarks, colorlinks=false, pdfborder={0 0 0}, pdftitle={A Visual Programming Environment for Novices}, pdfauthor={Mark Provan}, pdfsubject={<subject here>}, pdfkeywords={<keywords here>}]{hyperref} %for creating links in the pdf version and other additional pdf attributes, no effect on the printed document
 %\usepackage[final]{pdfpages} %for embedding another pdf, remove if not required
 
+\setlength\parindent{0pt}
+\setlength{\parskip}{3mm plus2mm minus1.5mm}
+
 \begin{document}
 \renewcommand\bibname{References} %Renames "Bibliography" to "References" on ref page
 
@@ -44,8 +47,8 @@
 \newpage
 \pagenumbering{arabic} %reset numbering to normal for the main content
 
-\input{introduction} %literature survey included in this
-\input{context-survey} %objective changed to problem definition
+\input{introduction}
+\input{context-survey}
 \input{ethics}
 \input{design}
 \input{implementation}

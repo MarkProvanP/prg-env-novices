@@ -64,6 +64,8 @@ Scratch was developed at the MIT Media Lab for use by children \cite{Resnick:200
 \label{fig:scratch} % insert suitable label, this is used to refer to a fig from within the text as shown above
 \end{figure}
 
+Scratch is a useful tool for its target audience but I feel that it is less than suited for many novice programmers, who may want a slightly more sophisticated and open-ended system. While Scratch may still be able to teach these people the basics of programming, its inherently simplistic and toy-like appearance may turn people away. It is quite possible that a novice programmer may be attempting to automate or speed up aspects of their own professional work. A novice programming tool that could include these use-cases therefore may be particularly useful.
+
 \subsection{Lamdu}
 
 Lamdu aims to create a "next-generation live programming environment that radically improves the programming experience" \cite{lamdu}. Lamdu programs can only be edited within the project's graphical code editor, which is implemented as a native application built on Haskell. The language is a purely functional language with similar syntax and semantics as Haskell, but designed specifically for visualisation within the graphical environment. This is the only language supported by the environment. The restriction to a single pure language, with no risk of adverse side-effects, allows the visualisations to include live evaluation of the program code. For example, the expression \verb+sum (1..1000)+ is immediately evaluated and its result (499500) displayed underneath.
@@ -75,9 +77,11 @@ Lamdu aims to create a "next-generation live programming environment that radica
 \label{fig:scratch} % insert suitable label, this is used to refer to a fig from within the text as shown above
 \end{figure}
 
+While Lamdu includes other advanced functional language features of note, it is the visual presentation of the program which inspired me the most. I believe that this approach could be applied to any type of programming language, and that it could be implemented in a system that would be much more accessible than a native application with a complicated installation procedure.
+
 \subsection{Learnable Programming by Brett Victor}
 
-Brett Victor is a former UI designer for Apple Inc. Writing in a non-academic blog setting, he set out reasons why the way that we teach programming to novices is not fit for purpose \cite{BrettVictor}. He argues that the entire way in which we teach programming to novices is wrong, as we force them to use tools which withhold too much information from the programmer while allowing them to become confused about what their code should do. In his opinion, fixing this requires a considerable re-think of the entire programming environment, from the language to the development cycle. Rather than code being something that simply executes on its own, the user should be able to interact with it to see what it does in real time. The recurring feature he describes is a canvas that is drawn by the user's code. The user should be able to scrub through time in both directions to see exactly what the program does. The design principles he outlines are framed as a series of questions:
+Brett Victor is a former UI designer for Apple Inc. Writing in a non-academic blog setting, he set out reasons why the way that we teach programming to novices is not fit for purpose \cite{BrettVictor}. He argues that the entire way in which we teach programming to novices is wrong, as we force them to use tools which withhold too much information from the programmer while allowing them to become confused about what their code should do. In his opinion, fixing this requires a considerable re-think of the entire programming environment, from the language to the development cycle. The design principles he outlines are framed as a series of questions:
 
 Does the environment allow the learner to...
 \begin{itemize}
@@ -94,3 +98,7 @@ Does the language provide...
 \item recomposition? -- Can the programmer put diverse pieces together?
 \item readability? -- Is meaning transparent?
 \end{itemize}
+
+The particular idea which I found most interesting in his essay is that of controlling execution and time. Rather than having the code simply run as fast as the computer will allow, from initialisation through to termination, his idea is that users should be able to scrub back and forth in time and see the state of the program at any point. For example, a program that incrementally draws a flower on the canvas he describes could be slowed down, paused or rewound to show how the computer performs each and every step. Each petal or blade of grass must be drawn individually by the computer, but if the computer runs at full speed the user may not understand this fundamentally sequential nature of computer behaviour. To them, a function in their code which draws a square may be as static as a shape description in an SVG or other graphics file.
+
+This control of time could be applied to any sort of basic computation, not just displaying graphics on a canvas, and I believe that it would assist novices greatly.

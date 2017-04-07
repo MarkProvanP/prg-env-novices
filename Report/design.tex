@@ -418,15 +418,15 @@ The machine state change caused by each instruction is as follows
 \end{multline*}
 \subsubsection{ConsoleIn}
 \begin{multline*}
-\langle \text{ConsoleIn}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0\langle s_0...s_n.\text{INPUT}, E, R, A\rangle , G, C, L\rangle 
+\langle \text{ConsoleIn}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0...s_n.\text{INPUT}, E, R, A\rangle , G, C, L\rangle 
 \end{multline*}
 \subsubsection{ConsoleOut}
 \begin{multline*}
-\langle \text{ConsoleOut}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0\langle s_0..s_{n-1}, E, R, A\rangle , G, C, L\rangle 
+\langle \text{ConsoleOut}; I, p, F_0...\langle s_0...s_n, E, R, A\rangle , G, C, L\rangle  \\ \mapsto \langle I, p+1, F_0...\langle s_0..s_{n-1}, E, R, A\rangle , G, C, L\rangle 
 \end{multline*}
 \subsubsection{ArgsToEnv}
 \begin{multline*}
-\langle \text{ArgsToEnv}\ \langle k_0, k_1, ..., k_n\rangle ; I, p, \langle S, E, R, a_0..a_n \rangle, G, C, L \rangle \\ \mapsto \langle I, p+1, \langle S, E[k_n = a_n], R, A\rangle , G, C, L \rangle
+\langle \text{ArgsToEnv}\ \langle k_0, k_1, ..., k_n\rangle ; I, p, F_0...\langle S, E, R, a_0..a_n \rangle, G, C, L \rangle \\ \mapsto \langle I, p+1, F_0...\langle S, E[k_n = a_n], R, A\rangle , G, C, L \rangle
 \end{multline*}
 \subsection{Code generation, labelling and AST-instruction mapping}
 
