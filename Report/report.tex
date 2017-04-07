@@ -57,4 +57,54 @@
 \input{acknow}
 \input{ref}
 
+\newpage
+\appendix
+\chapter{User Manual}
+
+\section{Dependencies}
+
+Installing and compiling the project requires a recent installation of Node.js and NPM.
+
+Development of the tool was done with the most up-to-date version of Google Chrome (Version 57 at time of submission). It may work in older versions or in other web browsers, but I have done no extra testing.
+
+In addition, a desktop browser with a keyboard and pointing device is recommended. While the tool can run on phones, tablets and other platforms, it has not been tested on these and it is possible that the input methods available are insufficient to use it correctly.
+
+\section{Compilation}
+
+In the main directory of the project, run \verb+npm install+ to install all of the required dependencies for this project. Then run \verb+npm run webpack+ to compile the project code. A number of type errors during compilation are to be expected, but these do not affect the produced program.
+
+\section{Execution}
+
+As described in the main body of the project, the tool is a self-contained web application. The compilation process produces a single \verb+bundle.js+ file which includes all of the compiled code and style information. This file is placed into the \verb+shwww+ folder in the root directory of the project. This, combined with the \verb+index.html+ file in that same folder, is all that is required to run the program. These files may be loaded either over HTTP or through the file system into a modern web browser.
+
+\section{Operation}
+
+Press the Fun or Lang button to load up that language, including its default test program. Press the Forward button to advance execution by one step. Continue pressing this button and see the machine continue through the instruction listing - the current instruction is coloured in green. When there are no more instructions to execute, the Forward button will be disabled. The Backward button will reverse the last execution step all the way to the opening of the program.
+
+Hover over the program code to see the buttons to delete and add new elements. Click on identifiers to rename them, or use the up-down buttons on integer literals to change the values. Notice that the machine instructions are automatically generated whenever a change is made. The text console in the lower right will display any text printed using the standard library output functions. These standard library methods are:
+
+\subsection{Lang}
+
+\begin{itemize}
+\item \verb+print(val)+ - print a value to the console
+\item \verb+println(val)+ - print a value to the console followed by a newline
+\item \verb+input()+ - take a value from the user
+\end{itemize}
+
+
+\subsection{Fun}
+
+
+\begin{itemize}
+\item \verb+trace(val, ret)+ - print a value to the console and then return the second value
+\item \verb+traceln(val, ret)+ - print a value to the console followed by a newline and then return the second value
+\item \verb+input()+ - take a value from the user
+\end{itemize}
+
+\includegraphics[width=\textwidth]{graphics/ui}
+
+\chapter{Summary of testing}
+
+The tool was tested throughout development alongside the language implementations. The test programs included with each language work largely as expected. The only issue is in the \textit{fun} programs, as the language grammar does not support parsing the conditional expressions required for the correct implementation of the Fibonacci and factorial functions. When running these, it is necessary to manually change the binary operator to \verb+<=+. After these changes all test programs perform correctly. The relatively simplistic nature of the languages and the virtual machine means that there is not a large amount of functionality to be tested. The complexity of the entire system is built off of only a small number of individually simple components. As a result, exhaustive testing was not performed any more than how the test programs demonstrate all features of the environment. Further testing would be required for any additional language features implemented on the system, although this would be done by the language designer.
+
 \end{document}
