@@ -333,7 +333,93 @@ The mechanism by which the virtual machine executes instructions is the key to f
 
 \subsubsection{Machine}
 
+The machine state $M$ is a tuple $(I, P, T, G, C, L)$ where
+\begin{itemize}
+\item $I$ is the list of machine instructions
+\item $P$ is the current instruction pointer value
+\item $T$ is a list of stack frames $(F_0, F_1, .., F_n)$
+\item $G$ is the global environment key-value mapping function $k \mapsto s$
+\item $C$ is the console state $(c_0, c_1, ..., c_n)$, i.e. a list of individual characters that have been printed
+\item $L$ is the global labelling function $l \mapsto P$
+\end{itemize}
+
+A stack frame $F$ is a tuple $(S, E, R, A)$ where
+\begin{itemize}
+\item $S$ is the list of stack elements $(s_0, s_1, ..., s_n)$
+\item $E$ is the stack environment key-value mapping function $k \mapsto s$
+\item $R$ is the return address value, taken from the current instruction pointer during a method call
+\item $A$ is the arguments list
+\end{itemize}
+
 \subsubsection{Instruction set}
+
+The machine state change caused by each instruction is as follows
+
+\paragraph{PushStackFrame}
+
+$(PushStackFrame; I, p, F_0...F_n, G, C, L) \mapsto (I, p+1, F_0...F_n, (\emptyset, [], null, \emptyset)), G, C, L)$
+
+\paragraph{PopStackFrame}
+
+$(PopStackFrame; I, p, F_0...F_n, G, C, L) \mapsto (I, p+1, F_0...F_{n-1}, G, C, L)$
+
+\paragraph{Push}
+
+$(Push s; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, p+1, F_0...(s_0...s_n.s, E, R, A)$
+
+\paragraph{Pop}
+
+$(Pop; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, p+1, F_0...(s_0...s_{n-1}, E, R,  A), G, C, L$
+
+\paragraph{Dup}
+
+$(Dup; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, p+1, F_0...(s_0...s_n.s_n, E, R, A), G, C, L)$
+
+\paragraph{CallFunction}
+
+$(CallFunction (f a); I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, p+1, F_0...(s_0...s_{n-a}.f(s_{n-a}...s_n), E, R, A), G, C, L)$
+
+\paragraph{MethodCall}
+
+$(MethodCall m a; I, p, F_0...(s_0...s_n, E, R), T, G, C, L[m=b]) \mapsto (I, b, F_0...(s_0...s_{n-a}, E, p).(\emptyset, [], null, s_{n-a}...s_n), G, C, L)$
+
+\paragraph{Return}
+
+$(Return e; I, p, \emptyset, G, C, L[TERMINATE=t]) \mapsto (I, t, \emptyset, G, C, L)$
+
+$({Return} {true}; I, p, F_0...(u_0...u_n, E, R, A).(s_0...s_n, E, r), G, C, L) \mapsto (I, r, F_0...F_{n-2}.(u_0..u_n.s_n, E, R, A), G, C, L)$
+
+$(Return false; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, r, F_0...F_{n-1}.(G, C, L)$
+
+\paragraph{Goto}
+
+$(Goto l; I, p, T, G, C, L[l=a]) \mapsto (I, a, T, G, C, L)$
+
+\paragraph{IfGoto}
+
+$(IfGoto l; I, p, F_0...(s_0...s_{n-1}.TRUTHY, E, R, A), G, C, L[l=a]) \mapsto (I, a, F_0...(s_0...s_{n-1}, E, R, A), G, C, L)$
+
+$(IfGoto l; I, p, F_0...(s_0...s_{n-1}.FALSY, E, R, A), G, C, L[l=a]) \mapsto (I, p+1, F_0...(s_0...s_{n-1}, E, R, A), G, C, L)$
+
+\paragraph{Set}
+
+$(Set k; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, p+1, F_0...(s_0...s_{n-1}, E[k=s_n], R, A), G, C, L)$
+
+\paragraph{Get}
+
+$(Get k; I, p, F_0...(s_0...s_n, E[k=v], R, A), G, C, L) \mapsto (I, p+1, F_0...(s_0...s_n.v, E, R, A), G, C, L)$
+
+\paragraph{ConsoleIn}
+
+$(ConsoleIn; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, p+1, F_0(s_0...s_n.INPUT, E, R, A), G, C, L)$
+
+\paragraph{ConsoleOut}
+
+$(ConsoleOut; I, p, F_0...(s_0...s_n, E, R, A), G, C, L) \mapsto (I, p+1, F_0(s_0..s_{n-1}, E, R, A), G, C, L)$
+
+\paragraph{ArgsToEnv}
+
+$(ArgsToEnv (k_0, k_1, ..., k_n); I, p, (S, E, R, a_0..a_n), G, C, L) \mapsto (I, p+1, (S, E[k_n = a_n], R, A), G, C, L)$
 
 \subsection{Code generation, labelling and AST-instruction mapping}
 
